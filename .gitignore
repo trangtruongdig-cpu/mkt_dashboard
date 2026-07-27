@@ -16,12 +16,19 @@ venv/
 .pytest_cache/
 *.egg-info/
 
-# Node / Next.js
+# Node / Next.js / NestJS
 node_modules/
+.pnpm-store/
 .next/
 out/
+dist/
+build/
 .turbo/
 npm-debug.log*
+pnpm-debug.log*
+
+# Vercel
+.vercel
 
 # dbt
 dbt/target/

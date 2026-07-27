@@ -1,0 +1,22 @@
+{
+  "name": "ptit-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Dashboard theo dõi hoạt động marketing số và thương hiệu — Học viện Công nghệ Bưu chính Viễn thông",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.6",
+    "turbo": "^2.10.7",
+    "typescript": "^5.9.3"
+  }
+}

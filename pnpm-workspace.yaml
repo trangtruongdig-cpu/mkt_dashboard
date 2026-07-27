@@ -1,0 +1,11 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# pnpm 11: khai báo tường minh package nào được chạy script cài đặt.
+allowBuilds:
+  "@scarf/scarf": false # chỉ là telemetry, không cần chạy
+  "@tailwindcss/oxide": true
+  esbuild: true
+  sharp: true # Next.js dùng để tối ưu ảnh
+  unrs-resolver: true # eslint resolver
