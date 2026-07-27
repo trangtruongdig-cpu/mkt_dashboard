@@ -212,14 +212,30 @@ export default async function TrangChu() {
             }
             icon={IconCode}
             label="Việc kỹ thuật còn lại"
-            unit="đầu việc"
+            // Ô này cũng phải có thanh đo như ba ô trước. Thiếu nó thì đáy ô trống một
+            // khoảng bằng đúng chiều cao thanh đo, và hàng bốn ô mất nhịp ngang.
+            // Màu cảnh báo chứ không phải màu tốt: thanh càng dài nghĩa là càng còn
+            // nhiều việc, đây không phải tiến độ đã hoàn thành.
+            meter={{
+              ratio: pendingWork / total,
+              color: "var(--status-warning)",
+              label: `${pendingWork} trên ${total} chỉ số còn việc kỹ thuật phải làm`,
+            }}
+            unit={`/ ${total}`}
             value={String(pendingWork)}
           />
         </section>
 
-        {/* 2 · Tín hiệu sống + sức khoẻ toàn bộ tập chỉ số. */}
+        {/* 2 · Tín hiệu sống + sức khoẻ toàn bộ tập chỉ số.
+            Khối thị phần chiếm hai cột: nó có biểu đồ đường và bảng xếp hạng, cần bề
+            ngang. Khối sức khoẻ chỉ có hai thanh phân bố nên một cột là đủ. Trước đây
+            cả hai cùng chiếm một cột, bỏ trống hẳn cột thứ ba. */}
         <section className="mb-5 grid gap-3 lg:grid-cols-3">
-          <SearchPanel data={shareOfSearch} kpi={searchKpi} />
+          <SearchPanel
+            className="lg:col-span-2"
+            data={shareOfSearch}
+            kpi={searchKpi}
+          />
 
           <Panel
             bodyClassName="space-y-5 p-4"

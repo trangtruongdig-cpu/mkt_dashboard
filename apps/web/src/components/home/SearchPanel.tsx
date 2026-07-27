@@ -16,6 +16,8 @@ interface SearchPanelProps {
   data: ShareOfSearchResponse;
   /** Chỉ số “Thị phần tìm kiếm” trong cascade — nơi giữ mức cần đạt và trạng thái. */
   kpi: CascadeKpi | undefined;
+  /** Vị trí trong lưới của trang. Bố cục do trang quyết định, không phải khối tự quyết. */
+  className?: string;
 }
 
 /**
@@ -29,7 +31,7 @@ interface SearchPanelProps {
  * Con số lớn, thanh đo so với mục tiêu và biểu đồ đường nói cùng một chuỗi dữ liệu:
  * số trên ô luôn bằng đúng điểm cuối của đường, không chép tay hai lần.
  */
-export function SearchPanel({ data, kpi }: SearchPanelProps) {
+export function SearchPanel({ data, kpi, className }: SearchPanelProps) {
   const us = data.series.find((series) => series.brand.isUs);
   const current = us?.values[us.values.length - 1] ?? null;
   const first = us?.values[0] ?? null;
@@ -41,6 +43,11 @@ export function SearchPanel({ data, kpi }: SearchPanelProps) {
       ? null
       : completionRatio(kpi.value, kpi.target, kpi.higherIsBetter);
   const status = kpi ? STATUS_GLYPH[kpi.status] : null;
+
+  // Hạng trong nhóm đối sánh — cùng nguồn với con số lớn và với đường biểu đồ, nên
+  // đặt cạnh nhau không sinh ra phép so lệch nguồn.
+  const rankIndex = data.latest.findIndex((row) => row.brand.isUs);
+  const rank = rankIndex === -1 ? null : rankIndex + 1;
 
   return (
     <Panel
@@ -62,6 +69,7 @@ export function SearchPanel({ data, kpi }: SearchPanelProps) {
           </p>
         </InfoHint>
       }
+      className={className}
       icon={IconSearch}
       meta={data.period.label}
       title="Thị phần tìm kiếm"
@@ -91,28 +99,52 @@ export function SearchPanel({ data, kpi }: SearchPanelProps) {
           </p>
         )}
 
-        {target !== null && ratio !== null && status !== null ? (
-          <div className="mt-4">
+        {rank === null ? null : (
+          <p className="mt-3 text-xs text-ink-secondary">
+            Hạng{" "}
+            <span className="font-semibold text-ink tabular-nums">{rank}</span>
+            <span className="text-ink-muted">
+              {" "}
+              / {data.latest.length} trường đối sánh
+            </span>
+          </p>
+        )}
+
+        {/* Khối mục tiêu luôn hiện khi đã đặt mức cần đạt. Trước đây nó biến mất hẳn
+            lúc chưa chấm được, để lại một khoảng trống dọc cạnh biểu đồ cao 280px —
+            mà "chưa chấm được" tự nó đã là thông tin người xem cần biết. */}
+        {target === null ? null : (
+          <div className="mt-4 border-t border-hairline pt-3">
             <div className="mb-1.5 flex items-baseline justify-between gap-2 text-[11px]">
               <span className="text-ink-muted">Mục tiêu</span>
               <span className="text-ink tabular-nums">
                 {formatPercent(target, 0)}
               </span>
             </div>
-            <Meter
-              ariaLabel={`Đạt ${Math.round(ratio * 100)}% mục tiêu thị phần tìm kiếm`}
-              color={status.color}
-              ratio={ratio}
-              size="md"
-            />
-            <p
-              className="mt-1.5 text-[11px] font-medium"
-              style={{ color: status.color }}
-            >
-              {status.label} · {Math.round(ratio * 100)}%
-            </p>
+
+            {ratio !== null && status !== null ? (
+              <>
+                <Meter
+                  ariaLabel={`Đạt ${Math.round(ratio * 100)}% mục tiêu thị phần tìm kiếm`}
+                  color={status.color}
+                  ratio={ratio}
+                  size="md"
+                />
+                <p
+                  className="mt-1.5 text-[11px] font-medium"
+                  style={{ color: status.color }}
+                >
+                  {status.label} · {Math.round(ratio * 100)}%
+                </p>
+              </>
+            ) : (
+              <p className="text-[11px] leading-snug text-ink-muted">
+                Chưa chấm được so với mức cần đạt: chỉ số tương ứng trong cây mục tiêu
+                chưa có số liệu chạy được.
+              </p>
+            )}
           </div>
-        ) : null}
+        )}
       </div>
 
       <ShareOfSearchChart data={data} />
