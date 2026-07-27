@@ -223,6 +223,9 @@ export default async function TrangChu() {
 
           <Panel
             bodyClassName="space-y-5 p-4"
+            // Không kéo cao bằng khối biểu đồ bên trái: một thẻ rỗng nửa dưới trông
+            // như phần chưa làm xong. Để nó cao đúng bằng nội dung của chính nó.
+            className="self-start"
             hint={
               <InfoHint label="Về hai thanh phân bố">
                 Thanh trên: {total} chỉ số đang ở trạng thái nào so với mức cần đạt.
