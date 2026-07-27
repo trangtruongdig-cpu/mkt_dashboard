@@ -1,26 +1,91 @@
 @import "tailwindcss";
 
+/*
+ * Bảng màu biểu đồ đã kiểm tra bằng bộ kiểm mù màu (deuteran/protan/tritan) và
+ * tương phản trên nền sáng lẫn nền tối.
+ *
+ * Chỉ dùng 3 khe màu chuỗi dữ liệu. Chuỗi thứ 4 sẽ phá ngưỡng phân biệt màu —
+ * khi cần hơn 3 kênh trên một biểu đồ, tách thành nhiều biểu đồ nhỏ, không thêm màu.
+ *
+ * Không hardcode mã hex trong component; luôn tham chiếu qua biến ở đây.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  --surface: #fcfcfb;
+  --plane: #f9f9f7;
+  --ink: #0b0b0b;
+  --ink-secondary: #52514e;
+  --ink-muted: #898781;
+  --grid: #e1e0d9;
+  --baseline: #c3c2b7;
+  --hairline: rgb(11 11 11 / 0.1);
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+
+  --sentiment-positive: #2a78d6;
+  --sentiment-neutral: #c3c2b7;
+  --sentiment-negative: #e34948;
+
+  --delta-good: #006300;
+  --delta-bad: #d03b3b;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --surface: #1a1a19;
+    --plane: #0d0d0d;
+    --ink: #ffffff;
+    --ink-secondary: #c3c2b7;
+    --ink-muted: #898781;
+    --grid: #2c2c2a;
+    --baseline: #383835;
+    --hairline: rgb(255 255 255 / 0.1);
+
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+
+    --sentiment-positive: #3987e5;
+    --sentiment-neutral: #52514e;
+    --sentiment-negative: #e66767;
+
+    --delta-good: #0ca30c;
+    --delta-bad: #e66767;
   }
 }
 
+@theme inline {
+  --color-surface: var(--surface);
+  --color-plane: var(--plane);
+  --color-ink: var(--ink);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-muted: var(--ink-muted);
+  --color-grid: var(--grid);
+  --color-baseline: var(--baseline);
+  --color-hairline: var(--hairline);
+
+  --color-series-1: var(--series-1);
+  --color-series-2: var(--series-2);
+  --color-series-3: var(--series-3);
+
+  --color-sentiment-positive: var(--sentiment-positive);
+  --color-sentiment-neutral: var(--sentiment-neutral);
+  --color-sentiment-negative: var(--sentiment-negative);
+
+  --color-delta-good: var(--delta-good);
+  --color-delta-bad: var(--delta-bad);
+
+  --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+html {
+  color-scheme: light dark;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--plane);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
 }

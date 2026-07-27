@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "Dashboard theo dõi hoạt động marketing số và thương hiệu — Học viện Công nghệ Bưu chính Viễn thông",
+  "packageManager": "pnpm@11.17.0",
   "engines": {
     "node": ">=22"
   },
