@@ -1,0 +1,30 @@
+# Giữ ngữ cảnh build nhỏ và không bao giờ để bí mật lọt vào ảnh Docker.
+
+**/node_modules
+**/.next
+**/dist
+**/.turbo
+**/.venv
+**/__pycache__
+**/.mypy_cache
+**/.ruff_cache
+**/.pytest_cache
+
+# Bí mật và dữ liệu vận hành — tuyệt đối không đưa vào ảnh.
+.env
+**/.env
+**/.env.local
+.secrets/
+apps/worker/.data/
+
+.git
+.github
+docs/
+*.md
+!README.md
+
+# Tài liệu nhiệm vụ của Học viện.
+*.doc
+*.docx
+*.pdf
+*.xlsx

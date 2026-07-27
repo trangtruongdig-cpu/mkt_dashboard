@@ -1,0 +1,33 @@
+{
+  "_ghi_chu": "Từ khoá nhận diện thương hiệu PTIT. Sửa file này, không sửa mã Python.",
+
+  "search_terms": [
+    "\"Học viện Công nghệ Bưu chính Viễn thông\"",
+    "\"Học viện Bưu chính Viễn thông\"",
+    "\"Học viện Công nghệ Bưu chính Viễn thông\" tuyển sinh",
+    "\"Học viện Công nghệ Bưu chính Viễn thông\" điểm chuẩn",
+    "\"Học viện Công nghệ Bưu chính Viễn thông\" sinh viên",
+    "PTIT tuyển sinh",
+    "ptit.edu.vn"
+  ],
+
+  "_ghi_chu_owned": [
+    "Kênh do chính Học viện vận hành. Google News có đánh chỉ mục các trang này nên chúng",
+    "lọt vào kết quả tìm kiếm — nếu không đánh dấu thì thông cáo tự đăng bị đếm thành",
+    "earned media, làm phồng số liệu độ phủ báo chí.",
+    "Vẫn thu về kho (đây là bảng thô), nhưng gắn cờ is_owned = true để dbt tách hai loại."
+  ],
+  "owned_sources": [
+    "ptit.edu.vn",
+    "portal.ptit.edu.vn",
+    "PTIT"
+  ],
+
+  "match_keywords": [
+    { "text": "Học viện Công nghệ Bưu chính Viễn thông", "mode": "substring" },
+    { "text": "Học viện Bưu chính Viễn thông", "mode": "substring" },
+    { "text": "Học viện Công nghệ BCVT", "mode": "substring" },
+    { "text": "ptit.edu.vn", "mode": "substring" },
+    { "text": "PTIT", "mode": "token" }
+  ]
+}

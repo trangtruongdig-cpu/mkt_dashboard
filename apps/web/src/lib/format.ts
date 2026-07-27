@@ -33,12 +33,43 @@ export function formatCurrency(value: number): string {
   }).format(value);
 }
 
+/**
+ * Tiền ở quy mô ngân sách: `857.000.000.000 ₫` không đọc được trên một ô chỉ số và
+ * cũng không phải cách người ta nói. Rút về `857 tỷ ₫` / `1,15 nghìn tỷ ₫`.
+ */
+export function formatCurrencyCompact(value: number): string {
+  const abs = Math.abs(value);
+  if (abs >= 1_000_000_000_000) {
+    return `${new Intl.NumberFormat(VI, { maximumFractionDigits: 2 }).format(value / 1_000_000_000_000)} nghìn tỷ ₫`;
+  }
+  if (abs >= 1_000_000_000) {
+    return `${new Intl.NumberFormat(VI, { maximumFractionDigits: 1 }).format(value / 1_000_000_000)} tỷ ₫`;
+  }
+  if (abs >= 1_000_000) {
+    return `${new Intl.NumberFormat(VI, { maximumFractionDigits: 1 }).format(value / 1_000_000)} Tr ₫`;
+  }
+  return formatCurrency(value);
+}
+
+/**
+ * Điểm xét tuyển (thang 30). Giữ nguyên phần thập phân, không rút gọn —
+ * chênh 0,05 điểm là chuyện sống còn với thí sinh.
+ */
+export function formatScore(value: number): string {
+  return new Intl.NumberFormat(VI, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
 export function formatMetric(value: number, unit: MetricUnit): string {
   switch (unit) {
     case "percent":
       return formatPercent(value);
     case "currency":
-      return formatCurrency(value);
+      return formatCurrencyCompact(value);
+    case "score":
+      return formatScore(value);
     case "count":
       return formatCompact(value);
   }

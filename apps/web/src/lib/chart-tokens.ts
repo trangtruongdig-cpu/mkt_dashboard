@@ -18,6 +18,7 @@ const TOKEN_NAMES = [
   "--series-1",
   "--series-2",
   "--series-3",
+  "--series-context",
   "--sentiment-positive",
   "--sentiment-neutral",
   "--sentiment-negative",

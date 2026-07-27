@@ -21,8 +21,13 @@ export const PLATFORM_LABELS: Record<Platform, string> = {
   zalo: "Zalo OA",
 };
 
-/** Đơn vị của một chỉ số — quyết định cách frontend định dạng số. */
-export const MetricUnitSchema = z.enum(["count", "percent", "currency"]);
+/**
+ * Đơn vị của một chỉ số — quyết định cách frontend định dạng số.
+ *
+ * `score` dành cho thang điểm xét tuyển (thang 30): giữ nguyên phần thập phân, không
+ * rút gọn, vì chênh 0,05 điểm là chuyện sống còn với thí sinh.
+ */
+export const MetricUnitSchema = z.enum(["count", "percent", "currency", "score"]);
 export type MetricUnit = z.infer<typeof MetricUnitSchema>;
 
 /** Ngày ở dạng `YYYY-MM-DD`. */

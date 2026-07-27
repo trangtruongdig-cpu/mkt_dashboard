@@ -1,0 +1,154 @@
+# Dựng toàn hệ thống bằng một lệnh:
+#
+#     cp .env.example .env      # rồi sửa mật khẩu bên trong
+#     docker compose up -d --build
+#
+# Sau đó: giao diện ở http://localhost:8080, tài liệu API ở http://localhost:8080/api/docs,
+# màn hình quản trị ở http://localhost:8080/quan-tri
+#
+# Airbyte OSS chạy bằng compose riêng của nó và nối vào mạng ngoài `ptit_dashboard_net`.
+
+name: ptit-dashboard
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ptit_dashboard}
+      POSTGRES_USER: ${POSTGRES_USER:-ptit}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Thiếu POSTGRES_PASSWORD trong .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ptit} -d ${POSTGRES_DB:-ptit_dashboard}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks: [ptit_dashboard_net]
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [ptit_dashboard_net]
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      DATA_SOURCE: ${DATA_SOURCE:-demo}
+      DATABASE_URL: postgres://${POSTGRES_USER:-ptit}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-ptit_dashboard}
+      REDIS_URL: redis://redis:6379
+      CORS_ORIGINS: ${PUBLIC_URL:-http://localhost:8080}
+      WEB_URL: ${PUBLIC_URL:-http://localhost:8080}
+      API_PUBLIC_URL: ${PUBLIC_URL:-http://localhost:8080}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Thiếu ADMIN_PASSWORD trong .env}
+      ADMIN_DISPLAY_NAME: ${ADMIN_DISPLAY_NAME:-Quản trị viên}
+      SESSION_TTL_HOURS: ${SESSION_TTL_HOURS:-12}
+      # Bật khi đã có HTTPS thật. Để false thì cookie không gửi được qua http://localhost.
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks: [ptit_dashboard_net]
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+      args:
+        # Trình duyệt gọi API qua cùng tên miền công khai, Caddy định tuyến /api sang api.
+        NEXT_PUBLIC_API_URL: ${PUBLIC_URL:-http://localhost:8080}
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    networks: [ptit_dashboard_net]
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/worker.Dockerfile
+    restart: unless-stopped
+    environment:
+      # Có DATABASE_URL thì worker đọc cấu hình nguồn từ bảng điều khiển, và quản trị
+      # viên bật/tắt được từ giao diện web.
+      DATABASE_URL: postgres://${POSTGRES_USER:-ptit}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-ptit_dashboard}
+      INGEST_CACHE: postgres
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-ptit_dashboard}
+      POSTGRES_USER: ${POSTGRES_USER:-ptit}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      CRAWLER_SCHEMA: news_raw
+      CRAWLER_TIMEZONE: ${CRAWLER_TIMEZONE:-Asia/Ho_Chi_Minh}
+      CRAWLER_USER_AGENT: ${CRAWLER_USER_AGENT:-PTIT-BrandMonitor/0.1 (academic research; +https://ptit.edu.vn)}
+      CRAWLER_DOMAIN_DELAY: ${CRAWLER_DOMAIN_DELAY:-1.5}
+    depends_on:
+      # Chờ api chứ không chỉ chờ postgres: bảng crawler_source do migration của api tạo.
+      api:
+        condition: service_healthy
+    volumes:
+      - hf_models:/home/appuser/.cache/huggingface
+    networks: [ptit_dashboard_net]
+
+  metabase:
+    image: metabase/metabase:v0.56.10
+    restart: unless-stopped
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_HOST: postgres
+      MB_DB_PORT: 5432
+      MB_DB_DBNAME: ${METABASE_DB:-metabase}
+      MB_DB_USER: ${POSTGRES_USER:-ptit}
+      MB_DB_PASS: ${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - metabase_data:/metabase-data
+    networks: [ptit_dashboard_net]
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    # Chỉ service này mở cổng ra ngoài. Các service khác chỉ gọi được trong mạng nội bộ.
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+      - "${HTTPS_PORT:-8443}:443"
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+      - web
+    networks: [ptit_dashboard_net]
+
+volumes:
+  pgdata:
+  redisdata:
+  metabase_data:
+  hf_models:
+  caddy_data:
+  caddy_config:
+
+networks:
+  ptit_dashboard_net:
+    name: ptit_dashboard_net

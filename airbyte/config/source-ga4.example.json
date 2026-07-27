@@ -1,0 +1,31 @@
+{
+  "_ghi_chu": [
+    "Mẫu cấu hình connector source-google-analytics-data-api.",
+    "KHÔNG điền bí mật vào file này và KHÔNG commit file đã điền.",
+    "Giá trị thật đọc từ biến môi trường, xem apps/worker/.env.example.",
+    "",
+    "Dùng được cho cả hai cách chạy:",
+    "  - PyAirbyte (hiện tại, không cần Docker) — apps/worker/ingest/ga4.py tự dựng khối này",
+    "  - Airbyte OSS (sau này, khi đã có Docker) — dán thẳng vào giao diện tạo Source",
+    "",
+    "auth_type 'Client' dùng OAuth của tài khoản người dùng, chỉ cần quyền ĐỌC (viewer)",
+    "trên property. Nếu sau này xin được quyền quản trị thì chuyển sang 'Service' với",
+    "service account, ổn định hơn vì không phụ thuộc tài khoản cá nhân."
+  ],
+
+  "property_ids": ["464491273"],
+
+  "credentials": {
+    "auth_type": "Client",
+    "client_id": "${GA4_CLIENT_ID}",
+    "client_secret": "${GA4_CLIENT_SECRET}",
+    "refresh_token": "${GA4_REFRESH_TOKEN}"
+  },
+
+  "date_ranges_start_date": "2025-07-01",
+  "window_in_days": 30,
+  "lookback_window": 2,
+  "keep_empty_rows": false,
+
+  "custom_reports_array": "<< nạp từ airbyte/config/ga4-custom-reports.json >>"
+}

@@ -1,0 +1,57 @@
+[project]
+name = "ptit-worker"
+version = "0.1.0"
+description = "Worker batch: hút dữ liệu marketing số về kho, chấm sắc thái tiếng Việt"
+requires-python = ">=3.12,<3.13"
+# Giấy phép ghi kèm để phục vụ hồ sơ nghiệm thu — mọi thư viện đều thuộc nhóm cho phép.
+dependencies = [
+    "airbyte>=0.20.0",       # MIT      — PyAirbyte, chạy connector Airbyte không cần Docker
+    "apscheduler>=3.11.3",   # MIT      — lịch chạy nền trong container worker
+    "duckdb>=1.4.3",         # MIT      — kho cục bộ khi chưa dựng PostgreSQL
+    "feedparser>=6.0.12",    # BSD-2    — đọc RSS/Atom của các báo và công cụ tìm kiếm
+    "news-please>=1.6.16",   # Apache-2 — bóc toàn văn bài báo
+    "psycopg[binary]>=3.3.4", # LGPL-3  — trình điều khiển PostgreSQL, dùng qua thư viện
+                              #           không sửa mã nguồn nên LGPL không lan sang dự án
+    "python-dotenv>=1.0.1",  # BSD-3    — nạp biến môi trường từ .env
+    # Google KHÔNG có API chính thức cho Trends; pytrends gọi endpoint nội bộ của trang
+    # web nên có thể hỏng khi Google đổi giao diện. Rủi ro được nhốt gọn trong
+    # ingest/trends_client.py — thay thư viện khác chỉ phải sửa đúng file đó.
+    "pytrends>=4.9.2",       # Apache-2 — chỉ số quan tâm tìm kiếm theo tuần
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.0",
+    "ruff>=0.7.0",
+    "mypy>=1.13.0",
+    # Chỉ dùng cho script lấy refresh token, không cần khi chạy hút dữ liệu.
+    "google-auth-oauthlib>=1.2.1",
+    "pip>=26.1.2",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unused_ignores = false
+
+[[tool.mypy.overrides]]
+module = [
+    "airbyte.*",
+    "google_auth_oauthlib.*",
+    "feedparser.*",
+    "newsplease.*",
+    "pytrends.*",
+    "apscheduler.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

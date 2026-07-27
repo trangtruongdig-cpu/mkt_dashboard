@@ -1,0 +1,37 @@
+# Reverse proxy đứng trước toàn hệ thống. Đây là service duy nhất mở cổng ra ngoài.
+#
+# Web và API chung một tên miền là có chủ đích: cookie phiên đăng nhập khi đó là
+# same-origin, không cần nới lỏng SameSite và không vướng chặn cookie bên thứ ba.
+
+{
+	# Mặc định phục vụ HTTP để chạy được ngay trên máy chưa có tên miền.
+	# Khi triển khai thật, đổi `:80` bên dưới thành tên miền của Học viện là Caddy
+	# tự xin chứng chỉ Let's Encrypt.
+	auto_https off
+}
+
+:80 {
+	encode zstd gzip
+
+	# Tài liệu OpenAPI và toàn bộ endpoint đi về NestJS.
+	handle /api/* {
+		reverse_proxy api:3002
+	}
+
+	# Metabase cho cán bộ tự truy vấn ad-hoc.
+	handle /metabase/* {
+		reverse_proxy metabase:3000
+	}
+
+	# Còn lại là giao diện Next.js.
+	handle {
+		reverse_proxy web:3000
+	}
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}

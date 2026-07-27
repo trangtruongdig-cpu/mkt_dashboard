@@ -1,0 +1,66 @@
+{
+  "_ghi_chu": [
+    "Nhóm trường đối sánh dùng chung cho MỌI chỉ số thị phần (thị phần tìm kiếm,",
+    "thị phần thảo luận, thị phần nhập học). Đổi danh sách ở đây là đổi mẫu số của",
+    "toàn bộ dashboard — số liệu trước và sau khi đổi không so sánh trực tiếp được.",
+    "",
+    "anchor: Google Trends chỉ so sánh tối đa 5 từ khoá một lần. Có 6 thương hiệu nên",
+    "phải chia thành nhiều lượt, và mỗi lượt đều chứa thương hiệu mốc này để quy các",
+    "lượt về cùng một thang. Chọn thương hiệu có lượng tìm kiếm lớn và ổn định nhất.",
+    "",
+    "query: từ khoá gửi cho Google Trends. Đặt ngắn và đúng cách người ta thực sự gõ,",
+    "không đặt tên đầy đủ theo văn bản hành chính.",
+    "",
+    "wikipedia: tên bài trên Wikipedia tiếng Việt, dùng cho chỉ số lượt xem trang.",
+    "PHẢI là tên chuẩn, không phải tên chuyển hướng — API lượt xem không đi theo",
+    "chuyển hướng, tra tên chuyển hướng sẽ ra số liệu của riêng trang chuyển hướng."
+  ],
+  "geo": "VN",
+  "timeframe": "today 12-m",
+  "anchor": "hust",
+  "brands": [
+    {
+      "key": "ptit",
+      "label": "Học viện Công nghệ Bưu chính Viễn thông",
+      "is_us": true,
+      "query": "Học viện Công nghệ Bưu chính Viễn thông",
+      "wikipedia_article": "Học viện Công nghệ Bưu chính Viễn thông"
+    },
+    {
+      "key": "hust",
+      "label": "Đại học Bách khoa Hà Nội",
+      "is_us": false,
+      "query": "Đại học Bách khoa Hà Nội",
+      "wikipedia_article": "Đại học Bách khoa Hà Nội"
+    },
+    {
+      "key": "uet",
+      "label": "Trường ĐH Công nghệ (ĐHQGHN)",
+      "is_us": false,
+      "query": "Đại học Công nghệ ĐHQGHN",
+      "wikipedia_article": "Trường Đại học Công nghệ, Đại học Quốc gia Hà Nội"
+    },
+    {
+      "key": "uit",
+      "label": "Trường ĐH Công nghệ Thông tin (ĐHQG-HCM)",
+      "is_us": false,
+      "query": "Đại học Công nghệ Thông tin",
+      "wikipedia_article": "Trường Đại học Công nghệ Thông tin, Đại học Quốc gia Thành phố Hồ Chí Minh"
+    },
+    {
+      "key": "fpt",
+      "label": "Trường Đại học FPT",
+      "is_us": false,
+      "query": "Đại học FPT",
+      "wikipedia_article": "Trường Đại học FPT"
+    },
+    {
+      "key": "actvn",
+      "label": "Học viện Kỹ thuật Mật mã",
+      "is_us": false,
+      "query": "Học viện Kỹ thuật Mật mã",
+      "wikipedia_article": "Học viện Kỹ thuật Mật mã (Việt Nam)"
+    }
+  ],
+  "wikipedia_project": "vi.wikipedia.org"
+}

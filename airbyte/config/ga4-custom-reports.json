@@ -1,0 +1,49 @@
+[
+  {
+    "name": "ga4_traffic_acquisition_daily",
+    "dimensions": [
+      "date",
+      "sessionSource",
+      "sessionMedium",
+      "sessionDefaultChannelGroup"
+    ],
+    "metrics": [
+      "sessions",
+      "engagedSessions",
+      "totalUsers",
+      "newUsers",
+      "screenPageViews",
+      "averageSessionDuration"
+    ]
+  },
+  {
+    "name": "ga4_pages_daily",
+    "dimensions": ["date", "hostName", "pagePath"],
+    "metrics": [
+      "screenPageViews",
+      "sessions",
+      "totalUsers",
+      "userEngagementDuration"
+    ]
+  },
+  {
+    "name": "ga4_campaigns_daily",
+    "dimensions": [
+      "date",
+      "sessionCampaignName",
+      "sessionSource",
+      "sessionMedium"
+    ],
+    "metrics": ["sessions", "engagedSessions", "totalUsers", "newUsers"]
+  },
+  {
+    "name": "ga4_geo_daily",
+    "dimensions": ["date", "country", "city"],
+    "metrics": ["sessions", "totalUsers", "newUsers"]
+  },
+  {
+    "name": "ga4_tech_daily",
+    "dimensions": ["date", "deviceCategory", "operatingSystem", "browser"],
+    "metrics": ["sessions", "totalUsers", "screenPageViews"]
+  }
+]

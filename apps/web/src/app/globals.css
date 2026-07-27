@@ -9,54 +9,89 @@
  *
  * Không hardcode mã hex trong component; luôn tham chiếu qua biến ở đây.
  */
+
+/*
+ * Nền sáng đi theo lối bảng điều khiển: thẻ trắng đặt trên nền xám trung tính, ranh
+ * giới giữa hai lớp làm bằng chênh lệch độ sáng chứ không phải bằng viền đậm. Nhờ vậy
+ * mắt bám vào con số và biểu đồ, không bám vào khung.
+ */
 :root {
-  --surface: #fcfcfb;
-  --plane: #f9f9f7;
-  --ink: #0b0b0b;
-  --ink-secondary: #52514e;
-  --ink-muted: #898781;
-  --grid: #e1e0d9;
-  --baseline: #c3c2b7;
-  --hairline: rgb(11 11 11 / 0.1);
+  --surface: #ffffff;
+  /* Lớp lõm: đầu bảng, ô chưa có dữ liệu, nền huy hiệu. */
+  --surface-inset: #f6f7f9;
+  --plane: #f1f3f6;
+  --ink: #0f1216;
+  --ink-secondary: #4a5059;
+  --ink-muted: #6c737e;
+  --grid: #e6e8ec;
+  --baseline: #c3c8d0;
+  --hairline: rgb(15 18 22 / 0.1);
 
   --series-1: #2a78d6;
   --series-2: #eb6834;
   --series-3: #1baf7a;
 
+  /*
+   * Đường nền cho biểu đồ nhiều hơn 3 chuỗi. Khi so sánh 6 trường, KHÔNG cấp thêm
+   * màu — làm nổi đúng một đường là Học viện, năm đường còn lại lùi về màu này rồi
+   * trả danh tính lại bằng bảng xếp hạng bên dưới.
+   * Đã kiểm bằng scripts/validate_palette.js: tách biệt với --series-1 ở mức
+   * ΔE 11–16 trên cả ba dạng mù màu, và đạt tương phản ≥ 3:1 với nền ở cả hai chế độ.
+   */
+  --series-context: #6c737e;
+
   --sentiment-positive: #2a78d6;
-  --sentiment-neutral: #c3c2b7;
+  --sentiment-neutral: #c3c8d0;
   --sentiment-negative: #e34948;
 
   --delta-good: #006300;
   --delta-bad: #d03b3b;
+
+  /*
+   * Màu trạng thái KPI — dành riêng, không bao giờ dùng làm màu chuỗi dữ liệu.
+   * Luôn đi kèm ký hiệu hình và nhãn chữ, không bao giờ chỉ dùng màu.
+   * Cả bốn đều đạt WCAG AA cho chữ trên nền tương ứng.
+   */
+  --status-good: #006300;
+  --status-warning: #8f5700;
+  --status-bad: #d03b3b;
+  --status-none: #6c737e;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --surface: #1a1a19;
-    --plane: #0d0d0d;
+    --surface: #17191c;
+    --surface-inset: #212429;
+    --plane: #0e0f11;
     --ink: #ffffff;
-    --ink-secondary: #c3c2b7;
-    --ink-muted: #898781;
-    --grid: #2c2c2a;
-    --baseline: #383835;
+    --ink-secondary: #c2c7cf;
+    --ink-muted: #8b929c;
+    --grid: #292c31;
+    --baseline: #3a3f45;
     --hairline: rgb(255 255 255 / 0.1);
 
     --series-1: #3987e5;
     --series-2: #d95926;
     --series-3: #199e70;
+    --series-context: #8b929c;
 
     --sentiment-positive: #3987e5;
-    --sentiment-neutral: #52514e;
+    --sentiment-neutral: #4a5059;
     --sentiment-negative: #e66767;
 
     --delta-good: #0ca30c;
     --delta-bad: #e66767;
+
+    --status-good: #0ca30c;
+    --status-warning: #e5a33a;
+    --status-bad: #e66767;
+    --status-none: #8b929c;
   }
 }
 
 @theme inline {
   --color-surface: var(--surface);
+  --color-surface-inset: var(--surface-inset);
   --color-plane: var(--plane);
   --color-ink: var(--ink);
   --color-ink-secondary: var(--ink-secondary);
@@ -68,6 +103,12 @@
   --color-series-1: var(--series-1);
   --color-series-2: var(--series-2);
   --color-series-3: var(--series-3);
+  --color-series-context: var(--series-context);
+
+  --color-status-good: var(--status-good);
+  --color-status-warning: var(--status-warning);
+  --color-status-bad: var(--status-bad);
+  --color-status-none: var(--status-none);
 
   --color-sentiment-positive: var(--sentiment-positive);
   --color-sentiment-neutral: var(--sentiment-neutral);
@@ -81,6 +122,20 @@
 
 html {
   color-scheme: light dark;
+}
+
+/*
+ * Mọi phần diễn giải trên bảng điều khiển đều gấp lại sau một nút (i) dựng bằng
+ * <details>. Bỏ tam giác mặc định của trình duyệt ở đây một lần, thay vì lặp lại
+ * biến thể tiện ích ở từng component.
+ */
+summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+summary::-webkit-details-marker {
+  display: none;
 }
 
 body {

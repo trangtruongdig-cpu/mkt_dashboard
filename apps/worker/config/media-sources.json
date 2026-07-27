@@ -1,0 +1,58 @@
+{
+  "_ghi_chu": [
+    "Nguồn earned media công khai — không cần token, không cần quyền sở hữu tài khoản.",
+    "Hai cơ chế khác nhau:",
+    "  search_engines — tìm theo từ khoá, phủ được bài cũ. Đây là nguồn chính.",
+    "  rss_feeds      — chuyên mục của từng báo, chỉ có bài mới nhất (~20-50 bài).",
+    "                   Chạy đều đặn thì tích luỹ dần thành lịch sử.",
+    "Bỏ một nguồn: đặt enabled = false, không xoá dòng — giữ vết cho hồ sơ nghiệm thu."
+  ],
+
+  "search_engines": [
+    {
+      "name": "bing_news",
+      "enabled": true,
+      "pages": 3,
+      "_ghi_chu": "Trả về URL thật của báo nên lấy được toàn văn. Nguồn chính."
+    },
+    {
+      "name": "google_news",
+      "enabled": true,
+      "pages": 1,
+      "_ghi_chu": [
+        "Độ phủ tốt nhất nhưng link là URL chuyển hướng của Google, không giải mã được",
+        "nếu không chạy JavaScript — nên chỉ lấy được tiêu đề + báo + ngày đăng, không có",
+        "toàn văn. Vẫn đủ để đếm lượng tin và chấm sắc thái tiêu đề.",
+        "Điều khoản của Google ghi feed này dành cho mục đích cá nhân, phi thương mại.",
+        "Nếu hội đồng nghiệm thu không chấp nhận, đặt enabled = false — hệ thống vẫn chạy",
+        "bằng bing_news và rss_feeds."
+      ]
+    }
+  ],
+
+  "rss_feeds": [
+    { "name": "vnexpress_giao_duc",    "publisher": "VnExpress",       "url": "https://vnexpress.net/rss/giao-duc.rss" },
+    { "name": "vnexpress_cong_nghe",   "publisher": "VnExpress",       "url": "https://vnexpress.net/rss/khoa-hoc-cong-nghe.rss" },
+    { "name": "tuoitre_giao_duc",      "publisher": "Tuổi Trẻ",        "url": "https://tuoitre.vn/rss/giao-duc.rss" },
+    { "name": "tuoitre_nhip_song_tre", "publisher": "Tuổi Trẻ",        "url": "https://tuoitre.vn/rss/nhip-song-tre.rss" },
+    { "name": "thanhnien_giao_duc",    "publisher": "Thanh Niên",      "url": "https://thanhnien.vn/rss/giao-duc.rss" },
+    { "name": "dantri_giao_duc",       "publisher": "Dân Trí",         "url": "https://dantri.com.vn/rss/giao-duc.rss" },
+    { "name": "dantri_suc_manh_so",    "publisher": "Dân Trí",         "url": "https://dantri.com.vn/rss/suc-manh-so.rss" },
+    { "name": "vietnamnet_giao_duc",   "publisher": "VietNamNet",      "url": "https://vietnamnet.vn/giao-duc.rss" },
+    { "name": "vietnamnet_cong_nghe",  "publisher": "VietNamNet",      "url": "https://vietnamnet.vn/cong-nghe.rss" },
+    { "name": "tienphong_giao_duc",    "publisher": "Tiền Phong",      "url": "https://tienphong.vn/rss/giao-duc-71.rss" },
+    {
+      "name": "vtcnews_giao_duc", "publisher": "VTC News",
+      "url": "https://vtcnews.vn/rss/giao-duc.rss",
+      "enabled": false,
+      "_ghi_chu": "Kiểm tra 27/07/2026: feed hợp lệ nhưng rỗng, không có <item> nào. Bật lại khi báo khôi phục."
+    },
+    {
+      "name": "laodong_giao_duc", "publisher": "Lao Động",
+      "url": "https://laodong.vn/rss/giao-duc-1121.rss",
+      "enabled": false,
+      "_ghi_chu": "Kiểm tra 27/07/2026: trả về trang JavaScript đặt cookie chống bot, không lấy được RSS. Vẫn tiếp cận được Lao Động qua bing_news/google_news."
+    },
+    { "name": "giaoduc_net_vn",        "publisher": "Giáo dục Việt Nam", "url": "https://giaoduc.net.vn/rss/home.rss" }
+  ]
+}

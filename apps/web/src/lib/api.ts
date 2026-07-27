@@ -1,13 +1,19 @@
 import {
+  buildDemoCascade,
   buildDemoDataset,
+  buildDemoShareOfSearch,
   ChannelsResponseSchema,
+  KpiCascadeResponseSchema,
   OverviewResponseSchema,
   ReachResponseSchema,
   SentimentResponseSchema,
+  ShareOfSearchResponseSchema,
   type ChannelsResponse,
+  type KpiCascadeResponse,
   type OverviewResponse,
   type ReachResponse,
   type SentimentResponse,
+  type ShareOfSearchResponse,
 } from "@ptit/shared";
 import type { z } from "zod";
 
@@ -62,6 +68,42 @@ export async function getDashboardData(): Promise<DashboardData> {
   } catch (error) {
     // Không làm sập trang demo vì API chưa lên — nhưng phải nói rõ trên giao diện.
     console.warn("[dashboard] Không gọi được API, quay về dữ liệu giả lập:", error);
+    return { source: "demo", apiUrl: API_URL, ...demo };
+  }
+}
+
+export interface KpiData {
+  source: DataSource;
+  apiUrl: string | null;
+  cascade: KpiCascadeResponse;
+  shareOfSearch: ShareOfSearchResponse;
+}
+
+/**
+ * Dữ liệu cho trang Mục tiêu & KPI.
+ *
+ * `parse` ở đây không chỉ kiểm kiểu: schema cascade kiểm luôn cây mục tiêu có liền
+ * mạch không. Một chỉ số không gắn mục tiêu nào, hay một mục tiêu trỏ sai tầng, sẽ
+ * làm hỏng lời gọi này thay vì lặng lẽ hiện ra màn hình.
+ */
+export async function getKpiData(): Promise<KpiData> {
+  const demo = {
+    cascade: buildDemoCascade(),
+    shareOfSearch: buildDemoShareOfSearch(),
+  };
+
+  if (!API_URL) {
+    return { source: "demo", apiUrl: null, ...demo };
+  }
+
+  try {
+    const [cascade, shareOfSearch] = await Promise.all([
+      fetchJson("/api/v1/kpi-cascade", KpiCascadeResponseSchema),
+      fetchJson("/api/v1/share-of-search", ShareOfSearchResponseSchema),
+    ]);
+    return { source: "api", apiUrl: API_URL, cascade, shareOfSearch };
+  } catch (error) {
+    console.warn("[kpi] Không gọi được API, quay về dữ liệu giả lập:", error);
     return { source: "demo", apiUrl: API_URL, ...demo };
   }
 }
