@@ -44,6 +44,10 @@ USER_AGENT = os.getenv(
 # khi khoảng 26 tuần thì hỏng — giữ ngưỡng này, đừng nới rộng để tiết kiệm số lần gọi.
 CHUNK_DAYS = 56
 
+# Đoạn hỏng được chia đôi tới ngưỡng này rồi mới ghi nhận là thật sự không có dữ liệu.
+# 7 ngày = đúng một tuần, đơn vị nhỏ nhất mà phép tính thị phần quan tâm.
+MIN_SPLIT_DAYS = 7
+
 DELAY_BETWEEN_REQUESTS_SECONDS = 0.5
 REQUEST_TIMEOUT_SECONDS = 30.0
 MAX_RETRIES = 3
@@ -108,6 +112,37 @@ def _fetch_chunk(project: str, article: str, start: date, end: date) -> list[Dai
     ]
 
 
+def _fetch_range(
+    project: str,
+    article: str,
+    start: date,
+    end: date,
+    ngay_hong: list[tuple[date, date]],
+) -> list[DailyViews]:
+    """Lấy một khoảng, chia đôi khi hỏng thay vì bỏ cả khoảng.
+
+    Quan sát thực tế: khoảng [26/01 → 22/03] trả 404 nhưng [01/02 → 26/07] lại trả đủ.
+    Nghĩa là API dở chứng với một số mốc bắt đầu cụ thể chứ không phải thiếu dữ liệu.
+    Bỏ cả đoạn 8 tuần vì một mốc xấu sẽ làm cửa sổ so sánh co lại tuỳ lần chạy — chính
+    là hiện tượng cửa sổ tụt từ 26 tuần xuống 18 tuần giữa hai lần chạy liên tiếp.
+
+    Chia đôi tới `MIN_SPLIT_DAYS` rồi mới chịu ghi nhận là khoảng không có dữ liệu.
+    """
+    ket_qua = _fetch_chunk(project, article, start, end)
+    if ket_qua:
+        return ket_qua
+
+    so_ngay = (end - start).days + 1
+    if so_ngay <= MIN_SPLIT_DAYS:
+        ngay_hong.append((start, end))
+        return []
+
+    giua = start + timedelta(days=so_ngay // 2 - 1)
+    return _fetch_range(project, article, start, giua, ngay_hong) + _fetch_range(
+        project, article, giua + timedelta(days=1), end, ngay_hong
+    )
+
+
 def fetch_daily_views(
     project: str,
     article: str,
@@ -120,17 +155,12 @@ def fetch_daily_views(
     khi vẫn trả đủ dữ liệu cho chính khoảng đó khi hỏi từng đoạn ngắn.
     """
     tat_ca: list[DailyViews] = []
-    doan_rong = 0
-    so_doan = 0
+    ngay_hong: list[tuple[date, date]] = []
 
     moc = start
     while moc <= end:
         het_doan = min(moc + timedelta(days=CHUNK_DAYS - 1), end)
-        so_doan += 1
-        ket_qua = _fetch_chunk(project, article, moc, het_doan)
-        if not ket_qua:
-            doan_rong += 1
-        tat_ca.extend(ket_qua)
+        tat_ca.extend(_fetch_range(project, article, moc, het_doan, ngay_hong))
         moc = het_doan + timedelta(days=1)
 
     if not tat_ca:
@@ -139,12 +169,10 @@ def fetch_daily_views(
             "Kiểm tra tên bài — phải là tên chuẩn, không phải tên chuyển hướng."
         )
 
-    # Không im lặng bỏ qua phần khuyết: thiếu đoạn nào thì các tuần trong đoạn đó sẽ
-    # bị loại khỏi phép so sánh, người chạy job cần biết điều đó.
-    if doan_rong:
-        print(
-            f"  ! {article}: {doan_rong}/{so_doan} đoạn không có dữ liệu, "
-            "các tuần thuộc những đoạn này sẽ bị loại khỏi phép tính."
-        )
+    # Không im lặng bỏ qua phần khuyết: thiếu ngày nào thì tuần chứa nó sẽ bị loại khỏi
+    # phép so sánh, người chạy job cần biết điều đó.
+    if ngay_hong:
+        khoang = ", ".join(f"{a}–{b}" for a, b in ngay_hong)
+        print(f"  ! {article}: không lấy được dữ liệu cho {khoang}.")
 
     return tat_ca
