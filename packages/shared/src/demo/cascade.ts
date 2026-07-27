@@ -11,6 +11,7 @@ import {
   type KpiRequirement,
   type Objective,
   type ObjectiveTier,
+  type TargetRationale,
 } from "../schemas/kpi-cascade";
 import { buildWeekStarts, formatVnDate, hashString, seeded } from "./random";
 
@@ -77,6 +78,23 @@ const SOURCE_ACADEMY_ANNOUNCEMENT: DataProvenance = {
 const SOURCE_TRENDS: DataProvenance = {
   label: "Google Trends — chỉ số quan tâm tìm kiếm, công khai và miễn phí",
   url: "https://trends.google.com/",
+};
+
+/**
+ * Nguồn thay thế cho Google Trends.
+ *
+ * Google không có API chính thức cho Trends và đang chặn truy cập (HTTP 429), nên tầng
+ * "Nhận biết" có nguy cơ không còn chỉ số nào chạy được. Wikimedia thì ngược lại: API
+ * chính thức, có tài liệu, không cần đăng nhập.
+ *
+ * Đánh đổi phải nói rõ: lượt xem Wikipedia KHÔNG tương đương lượt tìm kiếm. Nó đo nhóm
+ * công chúng chịu khó tra cứu — hẹp hơn và thiên về người đã biết tên trường. Bù lại nó
+ * là số đếm tuyệt đối nên so sánh trực tiếp giữa các trường và giữa các năm được.
+ */
+const SOURCE_WIKIPEDIA: DataProvenance = {
+  label:
+    "Wikimedia Pageviews API — lượt xem trang của 6 trường trên Wikipedia tiếng Việt, agent=user (đã loại bot)",
+  url: "https://wikimedia.org/api/rest_v1/",
 };
 
 const SOURCE_NEWS_CRAWLER: DataProvenance = {
@@ -273,6 +291,7 @@ interface KpiSpec {
   cadence: KpiCadence;
   provenance: DataProvenance;
   comparability?: Comparability;
+  targetRationale?: TargetRationale;
   hint?: string;
 }
 
@@ -322,6 +341,11 @@ const KPI_SPECS: readonly KpiSpec[] = [
     higherIsBetter: true,
     cadence: "annual",
     provenance: SOURCE_ACADEMY_ANNOUNCEMENT,
+    comparability: {
+      basis: "admission_cycle",
+      caveat:
+        "So theo năm tuyển sinh, không theo năm dương lịch — chỉ tiêu công bố cho mùa nào thì tính vào mùa đó.",
+    },
     hint: "Doanh số sản lượng. Mốc 2026 là con số công bố, mục tiêu 2027 chờ Học viện phê duyệt.",
   },
   {
@@ -416,14 +440,47 @@ const KPI_SPECS: readonly KpiSpec[] = [
     label: "Thị phần tìm kiếm",
     objectiveKey: "mkt_consideration",
     tier: "marketing",
-    value: 18.6,
+    // Google chặn ở mọi lần thử nên chỉ số này KHÔNG có số liệu, dù mã đã viết xong.
+    // Để nguyên một con số ở đây là đúng cái bẫy mà ràng buộc "có giá trị thì phải có
+    // nguồn chạy được" trong CascadeKpiSchema sinh ra để chặn.
+    value: null,
     unit: "percent",
     target: 22,
-    baseline: 17.1,
+    baseline: null,
     higherIsBetter: true,
     cadence: "weekly",
     provenance: SOURCE_TRENDS,
+    comparability: {
+      basis: "calendar",
+      caveat:
+        "Là tỷ trọng trong nhóm đối sánh nên mùa vụ tác động lên mọi thương hiệu như nhau và triệt tiêu phần lớn.",
+    },
     hint: "Chỉ số chạy được ngay: không cần tài khoản quảng cáo, không cần dữ liệu nội bộ.",
+  },
+  {
+    key: "attention_share",
+    label: "Thị phần chú ý (lượt xem Wikipedia)",
+    objectiveKey: "mkt_consideration",
+    tier: "marketing",
+    // Số liệu đã nằm trong kho (156 dòng, 26 tuần × 6 trường) nhưng chưa có đường dbt
+    // đưa lên API. Thu thập xong không đồng nghĩa với hiển thị được.
+    value: null,
+    unit: "percent",
+    target: 15,
+    baseline: null,
+    higherIsBetter: true,
+    cadence: "weekly",
+    provenance: SOURCE_WIKIPEDIA,
+    comparability: {
+      basis: "calendar",
+      caveat:
+        "Là tỷ trọng trong nhóm đối sánh nên mùa vụ tác động lên mọi trường như nhau và triệt tiêu phần lớn. Chỉ tính các tuần trọn vẹn 7 ngày mà cả sáu trường đều có dữ liệu.",
+    },
+    targetRationale: {
+      basis: "pending_approval",
+      note: "Nhóm đối sánh có 6 trường nên chia đều là 16,7%. Đặt 15% — ngay dưới mức ngang bằng — làm mốc tối thiểu, chờ Học viện chốt lại khi có mùa dữ liệu đầu tiên.",
+    },
+    hint: "Nguồn thay thế cho Google Trends đang bị chặn. Đo nhóm công chúng chịu khó tra cứu — hẹp hơn lượt tìm kiếm nhưng là số đếm tuyệt đối nên so sánh được giữa các năm.",
   },
   {
     key: "share_of_voice",
@@ -498,6 +555,11 @@ const KPI_SPECS: readonly KpiSpec[] = [
     higherIsBetter: true,
     cadence: "weekly",
     provenance: SOURCE_TRENDS,
+    comparability: {
+      basis: "admission_cycle",
+      caveat:
+        "Là chỉ số tuyệt đối nên đỉnh mùa tuyển sinh chi phối hoàn toàn — phải neo vào mốc công bố điểm thi, không so cùng tuần theo lịch.",
+    },
     hint: "Thang 0–100 của Google Trends, không phải số lượt tìm kiếm tuyệt đối.",
   },
   {
@@ -541,6 +603,11 @@ const KPI_SPECS: readonly KpiSpec[] = [
     higherIsBetter: true,
     cadence: "daily",
     provenance: SOURCE_NEWS_CRAWLER,
+    comparability: {
+      basis: "admission_cycle",
+      caveat:
+        "Báo chí đưa tin dồn vào mùa công bố điểm chuẩn — so cùng tuần theo lịch sẽ đọc ra tăng giảm giả.",
+    },
   },
   {
     key: "creative_hold_rate",
@@ -579,6 +646,10 @@ const KPI_SPECS: readonly KpiSpec[] = [
       caveat:
         "Phải neo cửa sổ so sánh vào mốc công bố điểm chuẩn, không so cùng ngày theo lịch: mốc này dịch vài tuần mỗi năm.",
     },
+    targetRationale: {
+      basis: "pending_approval",
+      note: "Đề xuất +15% so với cùng kỳ. Chưa có căn cứ nội tại nào tốt hơn vì chỉ mới có một mùa dữ liệu để đối chiếu.",
+    },
     hint: "Điểm chuẩn, đề án tuyển sinh, phương thức xét tuyển trên tuyensinh.ptit.edu.vn — tín hiệu cân nhắc mạnh nhất đo được.",
   },
   {
@@ -597,6 +668,10 @@ const KPI_SPECS: readonly KpiSpec[] = [
       basis: "calendar",
       caveat:
         "Là tỷ trọng nên ít chịu ảnh hưởng của mùa vụ — so theo lịch dùng được.",
+    },
+    targetRationale: {
+      basis: "trend_continuation",
+      note: "Năm trước 8,7%, năm nay 10,7% — tăng 2 điểm mỗi năm. Giữ nguyên đà thì kỳ tới đạt khoảng 12,7%; lấy tròn 12%.",
     },
     hint: "Zalo đang là nguồn lớn nhất trong nhóm này, không phải Facebook. YouTube và TikTok gần như bằng không.",
   },
@@ -637,6 +712,10 @@ const KPI_SPECS: readonly KpiSpec[] = [
       basis: "calendar",
       caveat: "Là tỷ lệ nên so theo lịch dùng được.",
     },
+    targetRationale: {
+      basis: "internal_benchmark",
+      note: "Tìm kiếm tự nhiên đạt 51,8% trên cùng website — đó là mức trần thực tế. Mục tiêu đặt ở chỗ thu hẹp một nửa khoảng cách: 40,1 + (51,8 − 40,1)/2 ≈ 46, lấy tròn 45%.",
+    },
     hint: "Đo nội dung có kéo được người ở lại không. Luồng quảng cáo trả phí chỉ đạt 6,6% — cần tìm ai đang chạy.",
   },
   {
@@ -648,7 +727,7 @@ const KPI_SPECS: readonly KpiSpec[] = [
     // “giảm 78%” trong khi thực tế đã vượt cả năm ngoái — xem `comparability`.
     value: 36_143,
     unit: "count",
-    target: 42_000,
+    target: 38_000,
     baseline: 34_468,
     higherIsBetter: true,
     cadence: "weekly",
@@ -657,6 +736,10 @@ const KPI_SPECS: readonly KpiSpec[] = [
       basis: "admission_cycle",
       caveat:
         "Chỉ so được theo luỹ kế cả mùa tuyển sinh. Năm 2025 cổng đăng ký mở tháng 7, năm 2026 mở tháng 5–6 — mọi cửa sổ cố định theo lịch đều cho kết luận sai.",
+    },
+    targetRationale: {
+      basis: "trend_continuation",
+      note: "Cả mùa 2025 đạt 34.468, mùa 2026 tới nay 36.143 — tăng 4,9%. Giữ đà đó cho mùa sau ra khoảng 37.900, lấy tròn 38.000.",
     },
     hint: "Chỉ số dẫn dắt gần nhất với hành vi nộp hồ sơ mà đo được khi chưa có key event.",
   },
@@ -667,7 +750,7 @@ const KPI_SPECS: readonly KpiSpec[] = [
     tier: "marketing",
     value: 33.6,
     unit: "percent",
-    target: 36,
+    target: 35.4,
     baseline: 30.9,
     higherIsBetter: true,
     cadence: "daily",
@@ -676,7 +759,59 @@ const KPI_SPECS: readonly KpiSpec[] = [
       basis: "calendar",
       caveat: "Là tỷ lệ nên so theo lịch dùng được.",
     },
+    targetRationale: {
+      basis: "historical_peak",
+      note: "Cả năm 2025 đạt 35,4% — mức cao nhất từng có. Mục tiêu là khôi phục lại chứ chưa đòi vượt, vì năm nay đang tụt.",
+    },
     hint: "Người quay lại nhiều lần là người đang cân nhắc thật, khác với người ghé một lần rồi thôi.",
+  },
+  {
+    key: "program_mix_beyond_core",
+    label: "Tỷ trọng quan tâm dành cho nhóm ngành ngoài lõi viễn thông",
+    objectiveKey: "mkt_new_segments",
+    tier: "marketing",
+    // Số cũ (28,0 / 29,3) tính sai vì chưa gộp trang trùng theo năm và chỉ đếm cụm
+    // truyền thông, bỏ sót nhóm kinh tế – quản trị. Giá trị đúng lấy từ
+    // apps/worker/config/programs.json.
+    value: 40.9,
+    unit: "percent",
+    target: 45,
+    baseline: 42.6,
+    higherIsBetter: true,
+    cadence: "weekly",
+    provenance: SOURCE_GA4,
+    comparability: {
+      basis: "calendar",
+      caveat:
+        "Là tỷ trọng nên so được theo lịch, nhưng phải tính trên luỹ kế cả năm: cửa sổ ngắn bị lệch theo mùa công bố từng nhóm ngành.",
+    },
+    targetRationale: {
+      basis: "pending_approval",
+      note: "Đề xuất 45% — mức nhóm ngoài lõi gần ngang lõi. Không lấy mức cao nhất đã đạt (42,6%) làm đích vì mục tiêu là mở rộng, không phải khôi phục.",
+    },
+    hint: "Truyền thông, đa phương tiện, marketing, báo chí, cùng nhóm kinh tế – quản trị. Sau khi gộp trang trùng, Công nghệ thông tin (45.732 lượt) vẫn dẫn đầu — không phải Công nghệ đa phương tiện như số liệu chưa gộp cho thấy.",
+  },
+  {
+    key: "high_value_program_interest",
+    label: "Tỷ trọng quan tâm dành cho hệ chất lượng cao và liên kết quốc tế",
+    objectiveKey: "mkt_value_mix",
+    tier: "marketing",
+    value: 7.8,
+    unit: "percent",
+    target: 9.8,
+    baseline: 9.8,
+    higherIsBetter: true,
+    cadence: "weekly",
+    provenance: SOURCE_GA4,
+    comparability: {
+      basis: "calendar",
+      caveat: "Tỷ trọng tính trên luỹ kế cả năm, so được theo lịch.",
+    },
+    targetRationale: {
+      basis: "historical_peak",
+      note: "Năm 2025 đạt 9,8%, năm nay còn 7,8%. Đích là khôi phục mức cũ — chưa đặt cao hơn khi chưa rõ vì sao tụt.",
+    },
+    hint: "Ba chương trình: CNTT chất lượng cao, Marketing chất lượng cao, Kế toán chuẩn ACCA. Đo TRƯỚC khi thí sinh nhìn thấy học phí, nên tụt ở đây là lỗi truyền thông giá trị chứ không phải học phí quá cao.",
   },
 ] as const;
 
@@ -748,8 +883,18 @@ const REQUIREMENTS: Record<string, KpiRequirement> = {
       "geo = VN",
       "6 từ khoá thương hiệu, chia lượt tối đa 5 từ khoá",
     ],
-    readiness: "public_ready",
-    todo: "Chạy `uv run python -m ingest trends-sync` theo lịch. Google đang trả HTTP 429 nên phải giãn nhịp gọi",
+    readiness: "needs_access",
+    todo: "Google trả HTTP 429 ở mọi lần thử, cách nhau nhiều giờ — không phải chặn tạm thời. pytrends gọi endpoint nội bộ nên không có đường xin quyền chính thức. Đã dựng nguồn thay thế là Wikimedia Pageviews; giữ mã Trends lại để thử lại định kỳ",
+  },
+  attention_share: {
+    platform: "Wikimedia Pageviews API",
+    fields: [
+      "per-article/vi.wikipedia.org/all-access/user",
+      "lượt xem theo ngày, gộp thành tuần",
+      "6 bài tương ứng 6 trường",
+    ],
+    readiness: "connected",
+    todo: "Dựng model dbt trên bảng raw_brand_pageviews rồi đổi KpiRepository sang đọc PostgreSQL — dữ liệu đã có trong kho, còn thiếu đường lên API",
   },
   share_of_voice: {
     platform: "Crawler tin bài (news-please)",
@@ -865,6 +1010,25 @@ const REQUIREMENTS: Record<string, KpiRequirement> = {
     readiness: "connected",
     todo: null,
   },
+  program_mix_beyond_core: {
+    platform: "Google Analytics 4 — Data API (đã kết nối)",
+    fields: [
+      "ga4_pages_daily.pagePath khớp /chuong-trinh-dao-tao/nganh-*",
+      "screenPageViews luỹ kế theo năm",
+      "phân nhóm ngành theo từ khoá trong đường dẫn",
+    ],
+    readiness: "connected",
+    todo: "Chuyển bảng phân nhóm ngành ra file cấu hình riêng thay vì khớp chuỗi trong truy vấn — mỗi năm mở ngành mới là phải sửa",
+  },
+  high_value_program_interest: {
+    platform: "Google Analytics 4 — Data API (đã kết nối)",
+    fields: [
+      "ga4_pages_daily.pagePath khớp he-clc / chat-luong-cao / lien-ket / quoc-te",
+      "screenPageViews luỹ kế theo năm",
+    ],
+    readiness: "connected",
+    todo: "Đối chiếu danh sách đường dẫn với đề án tuyển sinh để không sót chương trình nào",
+  },
 };
 
 /**
@@ -914,6 +1078,12 @@ const INTERPRETATIONS: Record<string, KpiInterpretation> = {
   share_of_search: {
     positive: "Tăng: Học viện đang chiếm chỗ trong tập cân nhắc trước mùa xét tuyển.",
     negative: "Giảm: sẽ thấy hậu quả ở tỷ lệ nhập học của mùa sau, khi đó sửa đã muộn.",
+  },
+  attention_share: {
+    positive:
+      "Tăng: nhiều người chủ động tra cứu về Học viện hơn so với năm trường còn lại — dấu hiệu sớm của việc được đưa vào tập cân nhắc.",
+    negative:
+      "Giảm: sự chú ý đang dồn sang trường khác. Số liệu thật kỳ 26/01–20/07/2026 cho thấy Học viện mất 3,50 điểm thị phần trong khi Bách khoa Hà Nội tăng 17,56 điểm.",
   },
   share_of_voice: {
     positive: "Tăng: hiện diện trên báo chí nhiều hơn nhóm đối sánh, không tốn ngân sách quảng cáo.",
@@ -988,6 +1158,18 @@ const INTERPRETATIONS: Record<string, KpiInterpretation> = {
     negative:
       "Giảm: lượng truy cập có thể vẫn tăng nhưng phần lớn là ghé một lần rồi đi — tiếp cận rộng mà không tạo được sự gắn bó.",
   },
+  program_mix_beyond_core: {
+    positive:
+      "Tăng: Học viện đang mở được chỗ đứng ngoài lõi viễn thông — nguồn tăng trưởng mới hình thành trước khi lõi cũ bão hoà.",
+    negative:
+      "Giảm: quan tâm co lại về nhóm ngành truyền thống, các ngành mới mở không tự tạo được nhu cầu và sẽ khó lấp đầy chỉ tiêu.",
+  },
+  high_value_program_interest: {
+    positive:
+      "Tăng: thí sinh chủ động tìm hiểu hệ học phí cao — giá trị đã được truyền thông tới nơi, chênh lệch học phí đọc ra là chất lượng.",
+    negative:
+      "Giảm: thí sinh né hệ giá trị cao ngay từ khâu tìm hiểu, tức là chưa nghe được lý do đáng trả thêm; đây là lỗi truyền thông, không phải lỗi định giá.",
+  },
 };
 
 function toKpi(spec: KpiSpec): CascadeKpi {
@@ -1026,26 +1208,15 @@ export function buildDemoCascade(
   const weeks = buildWeekStarts(referenceDate, WEEKS);
   const period = weeklyPeriod(weeks);
 
-  // Ô chỉ số "Thị phần tìm kiếm" phải bằng đúng điểm cuối của biểu đồ cùng tên.
-  // Không chép tay hai lần: một dashboard mà con số trên ô và con số trên biểu đồ
-  // lệch nhau thì người xem mất niềm tin vào toàn bộ phần còn lại.
-  const shareOfSearch = buildDemoShareOfSearch(referenceDate);
-  const usSeries = shareOfSearch.series.find((s) => s.brand.isUs);
-
+  // Trước đây ô "Thị phần tìm kiếm" được gán bằng điểm cuối của biểu đồ cùng tên để
+  // hai chỗ không lệch nhau. Nay Google chặn hoàn toàn nên chỉ số đó không có số liệu,
+  // và việc mượn số từ chuỗi giả lập của biểu đồ chính là kiểu gán số vô căn cứ mà
+  // CascadeKpiSchema từ chối. Biểu đồ vẫn giữ để minh hoạ hình thức trình bày.
   return {
     period,
     updatedAt: new Date(`${weeks[weeks.length - 1]!}T02:00:00Z`).toISOString(),
     objectives: [...OBJECTIVES],
-    kpis: KPI_SPECS.map((spec) => {
-      if (spec.key !== "share_of_search" || !usSeries) {
-        return toKpi(spec);
-      }
-      return toKpi({
-        ...spec,
-        value: usSeries.values[usSeries.values.length - 1] ?? null,
-        baseline: usSeries.values[0] ?? null,
-      });
-    }),
+    kpis: KPI_SPECS.map(toKpi),
   };
 }
 

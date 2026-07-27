@@ -197,6 +197,38 @@ export const COMPARISON_BASIS_LABELS: Record<ComparisonBasis, string> = {
  *
  * Một con số đúng nhưng so sai còn nguy hiểm hơn không có số: nó tạo ra hành động.
  */
+/**
+ * Căn cứ để đặt ra mức cần đạt.
+ *
+ * Mục tiêu không có căn cứ thì không tranh luận được, và cũng không sửa được một
+ * cách có trách nhiệm — người sau chỉ biết con số chứ không biết vì sao là con số đó.
+ */
+export const TargetBasisSchema = z.enum([
+  /** Mức cao nhất Học viện đã từng đạt trong dữ liệu sẵn có. */
+  "historical_peak",
+  /** Mức của phân khúc làm tốt nhất ngay trong nội bộ, dùng làm mốc để đuổi theo. */
+  "internal_benchmark",
+  /** Nền cộng tốc độ thay đổi quan sát được, giả định giữ nguyên đà. */
+  "trend_continuation",
+  /** Mức tạm do người dựng bảng đề xuất, chờ Học viện phê duyệt. */
+  "pending_approval",
+]);
+export type TargetBasis = z.infer<typeof TargetBasisSchema>;
+
+export const TARGET_BASIS_LABELS: Record<TargetBasis, string> = {
+  historical_peak: "Mức cao nhất đã đạt",
+  internal_benchmark: "Mốc nội bộ tốt nhất",
+  trend_continuation: "Giữ nguyên đà hiện tại",
+  pending_approval: "Đề xuất tạm, chờ phê duyệt",
+};
+
+export const TargetRationaleSchema = z.object({
+  basis: TargetBasisSchema,
+  /** Diễn giải cách ra con số, đủ để người khác kiểm lại hoặc phản bác. */
+  note: z.string().min(1),
+});
+export type TargetRationale = z.infer<typeof TargetRationaleSchema>;
+
 export const ComparabilitySchema = z.object({
   basis: ComparisonBasisSchema,
   /** Điều kiện phải thoả để phép so sánh có nghĩa. `null` khi không có ràng buộc nào. */
@@ -244,6 +276,11 @@ export const CascadeKpiSchema = z
      * là chỗ sinh ra kết luận ngược — xem ghi chú ở `ComparabilitySchema`.
      */
     comparability: ComparabilitySchema.optional(),
+    /**
+     * Bắt buộc với chỉ số có `target`. Một mức cần đạt không nêu được căn cứ thì
+     * không ai dám sửa, mà cũng không ai dám tin.
+     */
+    targetRationale: TargetRationaleSchema.optional(),
     hint: z.string().optional(),
   })
   .superRefine((kpi, ctx) => {
@@ -281,6 +318,20 @@ export const CascadeKpiSchema = z
         code: "custom",
         path: ["comparability"],
         message: `KPI ${kpi.key}: có mốc so sánh nhưng chưa khai căn cứ so sánh. Xem ComparabilitySchema.`,
+      });
+    }
+
+    // Chỉ siết với chỉ số đã có dữ liệu thật. Chỉ số còn chờ nguồn thì mức cần đạt
+    // vẫn đang là dự kiến, chưa đến lúc đòi căn cứ.
+    if (
+      kpi.requirement.readiness === "connected" &&
+      kpi.target !== null &&
+      !kpi.targetRationale
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["targetRationale"],
+        message: `KPI ${kpi.key}: đã có dữ liệu thật và có mức cần đạt, nhưng chưa nêu căn cứ đặt mức đó.`,
       });
     }
   });
