@@ -1,0 +1,63 @@
+{
+  "_ghi_chu": [
+    "Danh mục ngành đào tạo, rút ra từ chính đường dẫn trong GA4 chứ không chép tay.",
+    "",
+    "Hai điều bắt buộc phải xử lý, nếu bỏ qua là ra số sai:",
+    "",
+    "1. GỘP TRANG TRÙNG. Mỗi mùa tuyển sinh Học viện tạo một trang mới cho cùng một",
+    "   ngành, hậu tố năm: `nganh-cong-nghe-thong-tin/` và `nganh-cong-nghe-thong-tin-2025/`.",
+    "   Không gộp thì Công nghệ thông tin bị chia đôi và tụt xuống dưới Công nghệ đa",
+    "   phương tiện — đảo ngược thứ hạng thật. Quy tắc gộp ở `normalize_rules`.",
+    "",
+    "2. PHÂN NHÓM PHẢI RỜI NHAU. Mỗi ngành thuộc đúng một nhóm, nếu không tổng tỷ",
+    "   trọng vượt 100%. Hệ chất lượng cao là chiều CẮT NGANG, không phải nhóm thứ tư.",
+    "",
+    "Mỗi năm Học viện mở ngành mới thì bổ sung vào đây, không sửa mã truy vấn."
+  ],
+
+  "normalize_rules": {
+    "strip_year_suffix": "-20\\d\\d/?$",
+    "strip_trailing_slash": true,
+    "path_prefix": "/chuong-trinh-dao-tao/nganh-"
+  },
+
+  "groups": {
+    "ict_core": {
+      "label": "Công nghệ thông tin & Viễn thông (lõi)",
+      "is_core": true
+    },
+    "media_creative": {
+      "label": "Truyền thông, Đa phương tiện & Marketing",
+      "is_core": false
+    },
+    "business_econ": {
+      "label": "Kinh tế, Quản trị & Tài chính số",
+      "is_core": false
+    }
+  },
+
+  "programs": [
+    { "key": "cong-nghe-thong-tin", "label": "Công nghệ thông tin", "group": "ict_core", "high_value": false },
+    { "key": "cong-nghe-thong-tin-he-clc", "label": "Công nghệ thông tin (chất lượng cao)", "group": "ict_core", "high_value": true },
+    { "key": "ky-thuat-dien-tu-vien-thong", "label": "Kỹ thuật điện tử viễn thông", "group": "ict_core", "high_value": false },
+    { "key": "cong-nghe-ky-thuat-dien-dien-tu", "label": "Công nghệ kỹ thuật điện, điện tử", "group": "ict_core", "high_value": false },
+    { "key": "an-toan-thong-tin", "label": "An toàn thông tin", "group": "ict_core", "high_value": false },
+    { "key": "khoa-hoc-may-tinh", "label": "Khoa học máy tính", "group": "ict_core", "high_value": false },
+    { "key": "khoa-hoc-may-tinh-dinh-huong-kh-du-lieu-cung-cap-nha", "label": "Khoa học máy tính (định hướng khoa học dữ liệu)", "group": "ict_core", "high_value": false },
+    { "key": "ky-thuat-dieu-khien-va-tu-dong-hoa", "label": "Kỹ thuật điều khiển và tự động hoá", "group": "ict_core", "high_value": false },
+    { "key": "cong-nghe-internet-van-vat-iot", "label": "Công nghệ Internet vạn vật (IoT)", "group": "ict_core", "high_value": false },
+
+    { "key": "cong-nghe-da-phuong-tien", "label": "Công nghệ đa phương tiện", "group": "media_creative", "high_value": false },
+    { "key": "truyen-thong-da-phuong-tien", "label": "Truyền thông đa phương tiện", "group": "media_creative", "high_value": false },
+    { "key": "truyen-thong-da-phuong-tien-vi-sao-duoc-xem-la-nganh", "label": "Truyền thông đa phương tiện (bài giới thiệu)", "group": "media_creative", "high_value": false },
+    { "key": "bao-chi-journalism", "label": "Báo chí", "group": "media_creative", "high_value": false },
+    { "key": "marketing", "label": "Marketing", "group": "media_creative", "high_value": false },
+    { "key": "marketing-he-clc", "label": "Marketing (chất lượng cao)", "group": "media_creative", "high_value": true },
+
+    { "key": "cong-nghe-tai-chinh-fintech", "label": "Công nghệ tài chính (Fintech)", "group": "business_econ", "high_value": false },
+    { "key": "thuong-mai-dien-tu", "label": "Thương mại điện tử", "group": "business_econ", "high_value": false },
+    { "key": "quan-tri-kinh-doanh", "label": "Quản trị kinh doanh", "group": "business_econ", "high_value": false },
+    { "key": "ke-toan", "label": "Kế toán", "group": "business_econ", "high_value": false },
+    { "key": "ke-toan-chat-luong-cao-chuan-quoc-te-acca", "label": "Kế toán (chất lượng cao, chuẩn quốc tế ACCA)", "group": "business_econ", "high_value": true }
+  ]
+}

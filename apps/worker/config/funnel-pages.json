@@ -1,0 +1,52 @@
+{
+  "_ghi_chu": [
+    "Phễu tuyển sinh đo bằng trang web, xác định bằng dữ liệu chứ không bằng phỏng đoán.",
+    "",
+    "Vì sao phải làm thế này: Học viện KHÔNG có cổng nộp hồ sơ riêng — thí sinh nộp",
+    "nguyện vọng trên hệ thống của Bộ, nằm ngoài tầm đo của GA4. Nên bậc sâu nhất mà",
+    "đo được là các trang thông báo và hướng dẫn về việc đăng ký, nhập học.",
+    "",
+    "Cách chọn trang: so lượt xem trong ĐỈNH MÙA (7-8/2025 và 5-6/2026) với NGOÀI MÙA",
+    "(10/2025-2/2026). Trang nào tỷ lệ càng cao thì càng thuần ý định, càng ít nhiễu nền.",
+    "Số đo được ghi ở `peak_ratio` — đo trên dữ liệu thật, không phải ước lượng.",
+    "",
+    "Khi xin được quyền Editor trên GA4, thay các trang này bằng key event thật:",
+    "sự kiện nhấp chuột ra ngoài (outbound click) sang hệ thống của Bộ là chính xác nhất."
+  ],
+
+  "host": "tuyensinh.ptit.edu.vn",
+
+  "peak_windows": [
+    { "from": "2025-07-01", "to": "2025-08-31", "note": "công bố điểm thi và điểm chuẩn 2025" },
+    { "from": "2026-05-01", "to": "2026-06-30", "note": "mở cổng đăng ký 2026 — sớm hơn năm trước 2 tháng" }
+  ],
+  "offpeak_window": { "from": "2025-10-01", "to": "2026-02-28" },
+
+  "stages": [
+    {
+      "key": "consideration",
+      "label": "Cân nhắc chọn trường",
+      "note": "Đọc điểm chuẩn, đề án, phương thức xét tuyển. Nhiễu nền cao vì có người tra cứu quanh năm.",
+      "patterns": ["%diem-chuan%", "%diem-trung-tuyen%", "%de-an-tuyen-sinh%", "%phuong-thuc%"]
+    },
+    {
+      "key": "registration_intent",
+      "label": "Ý định đăng ký xét tuyển",
+      "note": "Bậc then chốt. Ngoài mùa gần như bằng 0 nên hầu như không có nhiễu.",
+      "patterns": [
+        "%mo-he-thong-dang-ky%",
+        "%dang-ky-nguyen-vong%",
+        "%huong-dan-dkxt%",
+        "%dieu-chinh-thoi-gian-dang-ky%"
+      ],
+      "peak_ratio": ">= 13x, có trang tới 173x và có trang bằng vô cực"
+    },
+    {
+      "key": "enrolment_intent",
+      "label": "Ý định nhập học",
+      "note": "Bậc sâu nhất đo được. Người xem trang này đã trúng tuyển và đang tìm cách nhập học — gần với kết quả kinh doanh nhất trong toàn bộ dữ liệu.",
+      "patterns": ["%nhap-hoc%"],
+      "peak_ratio": "36x (28.355 lượt trong đỉnh mùa, 787 ngoài mùa)"
+    }
+  ]
+}
