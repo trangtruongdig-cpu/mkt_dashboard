@@ -1,0 +1,167 @@
+version: 2
+
+models:
+  - name: mart__channel_performance
+    description: >
+      Hiệu quả từng kênh theo ngày. Hợp đồng dữ liệu với backend cho các chỉ số
+      thuộc tầng truyền thông.
+    columns:
+      - name: ngay
+        description: Ngày báo cáo.
+        tests: [not_null]
+      - name: nhom_kenh
+        description: Nhóm kênh mặc định của GA4.
+        tests: [not_null]
+      - name: la_direct
+        description: >
+          Phiên không quy được về kênh nào. Tỷ trọng cột này chính là mức thất thoát
+          quy kết — càng cao thì UTM càng thiếu.
+        tests: [not_null]
+      - name: so_phien
+        tests: [not_null]
+      - name: ty_le_gan_ket_pct
+        description: Phiên gắn kết trên tổng phiên, đơn vị %.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ngay, nhom_kenh]
+
+  - name: mart__admission_funnel
+    description: >
+      Phễu tuyển sinh ba bậc, đo bằng lượt xem trang. Bậc sâu nhất là ý định nhập học —
+      gần kết quả kinh doanh nhất trong toàn bộ dữ liệu đo được.
+    columns:
+      - name: ngay
+        tests: [not_null]
+      - name: bac
+        description: Mã bậc phễu.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [can_nhac, y_dinh_dang_ky, nhap_hoc]
+      - name: thu_tu_bac
+        description: 1 → 3, dùng để sắp xếp khi vẽ phễu.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3]
+                quote: false
+      - name: so_luot_xem
+        tests: [not_null]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ngay, bac]
+
+  - name: mart__program_demand
+    description: >
+      Nhu cầu theo ngành đào tạo. Trả lời được hai mục tiêu marketing mà trước đây
+      phải chờ đề án tuyển sinh công bố hằng năm: cơ cấu nhóm ngành và tỷ trọng hệ
+      giá trị cao — nay đo được hằng tuần.
+    columns:
+      - name: ngay
+        tests: [not_null]
+      - name: khoa_nganh
+        description: Khoá ngành, khớp với seed nhom_nganh_dao_tao.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('nhom_nganh_dao_tao')
+                field: khoa_nganh
+      - name: nhom
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [ict_core, media_creative, business_econ]
+      - name: thuoc_loi
+        description: Ngành có thuộc lõi công nghệ thông tin – viễn thông hay không.
+        tests: [not_null]
+      - name: he_gia_tri_cao
+        description: Chương trình chất lượng cao, liên kết quốc tế hoặc chuẩn quốc tế.
+        tests: [not_null]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ngay, khoa_nganh]
+
+seeds:
+  - name: nhom_nganh_dao_tao
+    description: >
+      Danh mục ngành và cách phân nhóm. Sinh từ apps/worker/config/programs.json để
+      worker và dbt dùng chung một cách phân loại. Mở ngành mới thì sửa file JSON đó
+      rồi sinh lại seed, đừng sửa CSV bằng tay.
+    columns:
+      - name: khoa_nganh
+        tests: [unique, not_null]
+      - name: nhom
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [ict_core, media_creative, business_econ]
+
+  - name: mart__brand_attention
+    description: >
+      Thị phần chú ý theo tuần, đo bằng lượt xem trang Wikipedia của nhóm sáu trường
+      đối sánh. Nguồn công khai hoàn toàn, thay cho Google Trends đang chặn truy cập.
+      Đây là tín hiệu SỚM: biến động theo tuần, trong khi kết quả tuyển sinh mỗi năm
+      mới công bố một lần.
+    columns:
+      - name: tuan
+        description: Ngày thứ Hai của tuần báo cáo. Chỉ có tuần trọn vẹn 7 ngày.
+        tests: [not_null]
+      - name: ma_truong
+        description: Mã trường trong nhóm đối sánh.
+        tests: [not_null]
+      - name: so_luot_xem
+        description: Số đếm tuyệt đối, đã loại lượt truy cập của bot (agent=user).
+        tests: [not_null]
+      - name: thi_phan_pct
+        description: >
+          Tỷ trọng trong tổng lượt xem của cả nhóm trong chính tuần đó. Đổi danh sách
+          trường đối sánh là đổi mẫu số — số trước và sau khi đổi không so trực tiếp được.
+      - name: la_hoc_vien
+        description: Đánh dấu dòng của Học viện để giao diện làm nổi đúng một đường.
+        tests: [not_null]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [tuan, ma_truong]
+
+  - name: mart__disclosure_benchmark
+    description: >
+      Số liệu đào tạo của nhóm đối sánh, bóc từ Biểu mẫu 18 mà mọi cơ sở giáo dục đại
+      học buộc phải công khai theo Thông tư 09/2024/TT-BGDĐT. Giữ đúng một bản cho mỗi
+      cặp (trường, năm), ưu tiên bản bóc sạch và đầy đủ nhất.
+    columns:
+      - name: ma_truong
+        tests: [not_null]
+      - name: nam
+        description: Năm học được báo cáo, lấy năm đầu của cụm "năm học 2022-2023".
+        tests: [not_null]
+      - name: quy_mo_dao_tao
+        description: Tổng người học mọi trình độ. Rỗng khi biểu mẫu đổi bố cục cột.
+      - name: so_tot_nghiep
+        description: Số sinh viên tốt nghiệp trong năm học.
+      - name: ty_le_viec_lam_pct
+        description: Tỷ lệ có việc làm trong 12 tháng sau tốt nghiệp, đơn vị %.
+      - name: boc_sach
+        description: >
+          Đúng khi bóc không phát sinh cảnh báo nào. Sai nghĩa là có nghi ngờ về bố cục
+          biểu mẫu — đọc cột `canh_bao` trước khi dùng con số để so sánh.
+        tests: [not_null]
+      - name: canh_bao
+        description: Mọi chỗ đáng ngờ ghi nhận trong lúc bóc, ngăn cách bằng dấu " | ".
+      - name: duong_dan_tai_lieu
+        description: >
+          Đường dẫn tài liệu gốc. Hội đồng nghiệm thu phải lần được từ con số trên màn
+          hình về đúng tệp PDF đã sinh ra nó.
+        tests: [not_null]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ma_truong, nam]

@@ -1,0 +1,119 @@
+{
+  "_ghi_chu": [
+    "Trang công khai bắt buộc của nhóm trường đối sánh.",
+    "",
+    "Vì sao nguồn này quan trọng nhất: Thông tư 09/2024/TT-BGDĐT buộc MỌI cơ sở giáo dục",
+    "đại học công khai quy mô đào tạo, số nhập học mới, số tốt nghiệp, tỷ lệ nhập học so",
+    "với kế hoạch, tỷ lệ thôi học và tỷ lệ có việc làm 12 tháng sau tốt nghiệp. Thông tư",
+    "08/2022/TT-BGDĐT Điều 11 buộc công khai kết quả tuyển sinh 2 năm gần nhất trong đề án.",
+    "Nghĩa là chính những con số tưởng phải xin từ nội bộ đều đang nằm công khai — của",
+    "Học viện lẫn của toàn bộ nhóm đối sánh.",
+    "",
+    "seeds rỗng KHÔNG phải thiếu sót bị bỏ quên: đó là trường chưa dò ra trang công khai.",
+    "Ô trống này chạy thẳng lên cột 'nền tảng và kỹ thuật' của bảng điều khiển như một",
+    "việc còn phải làm, thay vì bị giấu đi.",
+    "",
+    "kind của seed chỉ là gợi ý ban đầu; loại thật của từng tài liệu do bước phân loại",
+    "trong edu_docs.py quyết định dựa trên tên tệp và nhan đề liên kết."
+  ],
+  "max_followed_pages_per_seed": 25,
+  "schools": [
+    {
+      "key": "ptit",
+      "label": "Học viện Công nghệ Bưu chính Viễn thông",
+      "seeds": [
+        {
+          "kind": "ba_cong_khai",
+          "url": "https://ptit.edu.vn/category/ba-cong-khai",
+          "note": "Trang danh mục — tệp PDF nằm trong từng bài, phải đi sâu thêm một tầng."
+        },
+        {
+          "kind": "ba_cong_khai",
+          "url": "https://tuyensinh.ptit.edu.vn/gioi-thieu/ba-cong-khai/",
+          "note": "Trang mục lục công khai ĐẦY ĐỦ NHẤT của Học viện: dẫn tới đề án tuyển sinh của từng năm từ 2019 tới nay. Ba trang công khai kia mỗi trang chỉ có một mảng (ptit.edu.vn: tài chính; tracuu: biểu mẫu học thuật)."
+        },
+        {
+          "kind": "de_an_tuyen_sinh",
+          "url": "https://tuyensinh.ptit.edu.vn/de-an-tuyen-sinh/",
+          "note": ""
+        },
+        {
+          "kind": "de_an_tuyen_sinh",
+          "url": "https://tracuu.ptit.edu.vn/deantuyensinh",
+          "note": ""
+        },
+        {
+          "kind": "ba_cong_khai",
+          "url": "https://tracuu.ptit.edu.vn/bacongkhai",
+          "note": "Nguồn CHÍNH cho biểu mẫu học thuật 17/18/19. Trang ptit.edu.vn/category/ba-cong-khai chỉ có tài liệu tài chính — thiếu trang này thì Học viện là trường duy nhất trong nhóm đối sánh không có số liệu đào tạo."
+        },
+        {
+          "kind": "ba_cong_khai",
+          "url": "https://tuyensinh.ptit.edu.vn/cong-khai-thong-tin-dao-tao-nam-hoc-2021-2022/",
+          "note": "Bản công khai của năm học cũ, giữ lại để có chuỗi nhiều năm."
+        }
+      ]
+    },
+    {
+      "key": "hust",
+      "label": "Đại học Bách khoa Hà Nội",
+      "seeds": [
+        {
+          "kind": "ba_cong_khai",
+          "url": "https://hust.edu.vn/ba-cong-khai",
+          "note": "Liệt kê PDF trực tiếp, đặt tên theo biểu mẫu (bm17/bm18/bm19) và có năm trong đường dẫn."
+        }
+      ]
+    },
+    {
+      "key": "uit",
+      "label": "Trường ĐH Công nghệ Thông tin (ĐHQG-HCM)",
+      "seeds": [
+        {
+          "kind": "ba_cong_khai",
+          "url": "https://www.uit.edu.vn/cong-bo-ba-cong-khai",
+          "note": "Trang tổng — nội dung công khai nằm sâu hơn một tầng."
+        }
+      ]
+    },
+    {
+      "key": "uet",
+      "label": "Trường ĐH Công nghệ (ĐHQGHN)",
+      "seeds": [
+        {
+          "kind": "ba_cong_khai",
+          "url": "https://uet.vnu.edu.vn/category/dam-bao-chat-luong/ba-cong-khai/",
+          "note": "Nằm trong chuyên mục Đảm bảo chất lượng, không phải ở trang chủ."
+        },
+        {
+          "kind": "ba_cong_khai",
+          "url": "https://qac.uet.vnu.edu.vn/bai-viet/cong-khai-csgd",
+          "note": "Trang riêng của Phòng Đảm bảo chất lượng."
+        }
+      ]
+    },
+    {
+      "key": "fpt",
+      "label": "Trường Đại học FPT",
+      "seeds": [],
+      "note": "Không dò ra trang công khai chuyên biệt trên daihoc.fpt.edu.vn. Trường tư thục vẫn thuộc diện bắt buộc công khai theo Thông tư 09/2024 — cần liên hệ trực tiếp hoặc tra cứu qua cổng của Bộ GD&ĐT."
+    },
+    {
+      "key": "actvn",
+      "label": "Học viện Kỹ thuật Mật mã",
+      "seeds": [
+        {
+          "kind": "de_an_tuyen_sinh",
+          "url": "https://tuyensinh.actvn.edu.vn/",
+          "note": "Học viện không có trang Ba công khai riêng; đề án tuyển sinh đăng dưới dạng bài viết kèm tệp đính kèm nên phải đi sâu một tầng từ trang chủ tuyển sinh."
+        },
+        {
+          "kind": "de_an_tuyen_sinh",
+          "url": "https://tuyensinh.actvn.edu.vn/hoc-vien-ky-thuat-mat-ma-cong-bo-de-an-tuyen-sinh-nam-2025/",
+          "note": "Bài công bố đề án 2025, đã xác minh có tệp PDF."
+        }
+      ],
+      "note": "Thư mục SharePoint dùng chung (actvneduvn-my.sharepoint.com) cần đăng nhập nên không lấy được. Là trường thuộc Ban Cơ yếu Chính phủ nên mức công khai có thể bị hạn chế vì lý do an ninh."
+    }
+  ]
+}

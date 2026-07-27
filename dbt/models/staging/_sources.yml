@@ -1,0 +1,31 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    description: >
+      Dữ liệu thô do worker Python hút về từ Google Analytics 4 Data API.
+      Không ai được sửa tay ở đây; mọi biến đổi làm ở tầng staging trở đi.
+    tables:
+      - name: ga4_traffic_acquisition_daily
+        description: Phiên truy cập theo ngày, chia theo nguồn và nhóm kênh.
+      - name: ga4_pages_daily
+        description: Lượt xem theo ngày, chia theo tên máy chủ và đường dẫn.
+      - name: ga4_campaigns_daily
+        description: Phiên theo ngày, chia theo tên chiến dịch UTM.
+      - name: ga4_geo_daily
+        description: Phiên theo ngày, chia theo quốc gia và thành phố.
+      - name: ga4_tech_daily
+        description: Phiên theo ngày, chia theo thiết bị, hệ điều hành, trình duyệt.
+      - name: raw_brand_pageviews
+        description: >
+          Lượt xem trang Wikipedia theo tuần của nhóm trường đối sánh. Nguồn công khai
+          (Wikimedia Pageviews API), thay cho Google Trends đang chặn truy cập.
+      - name: raw_disclosure_document
+        description: >
+          Danh mục tài liệu Ba công khai và đề án tuyển sinh do crawler phát hiện, kèm
+          cờ `has_text_layer` cho biết tài liệu máy đọc được hay là bản scan.
+      - name: raw_disclosure_figure
+        description: >
+          Số liệu bóc từ Biểu mẫu 18 của từng trường. Cột `warnings` ghi mọi chỗ đáng
+          ngờ trong lúc bóc — phải đọc trước khi so sánh chéo giữa các trường.

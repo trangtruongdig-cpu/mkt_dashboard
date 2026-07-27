@@ -86,7 +86,21 @@ export interface KpiData {
  * mạch không. Một chỉ số không gắn mục tiêu nào, hay một mục tiêu trỏ sai tầng, sẽ
  * làm hỏng lời gọi này thay vì lặng lẽ hiện ra màn hình.
  */
+/**
+ * Chồng các mức cần đạt đã sửa từ giao diện lên cascade gốc.
+ *
+ * Đặt ở đây để mọi trang đọc cascade đều thấy cùng một con số. `applyTargetOverrides`
+ * tự tính lại trạng thái đúng/chệch hướng nên không nơi nào phải nhớ làm việc đó.
+ */
 export async function getKpiData(): Promise<KpiData> {
+  const { applyTargetOverrides } = await import("@ptit/shared");
+  const { docTatCa } = await import("./kpi-targets-store");
+
+  const du_lieu = await napKpiData();
+  return { ...du_lieu, cascade: applyTargetOverrides(du_lieu.cascade, docTatCa()) };
+}
+
+async function napKpiData(): Promise<KpiData> {
   const demo = {
     cascade: buildDemoCascade(),
     shareOfSearch: buildDemoShareOfSearch(),

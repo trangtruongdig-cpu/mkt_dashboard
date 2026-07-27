@@ -1,0 +1,24 @@
+name: ptit_dashboard
+version: "0.1.0"
+config-version: 2
+
+profile: ptit_dashboard
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+
+target-path: target
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  ptit_dashboard:
+    # Tầng chuẩn hoá: view cho nhẹ, không nhân bản dữ liệu thô.
+    staging:
+      +schema: stg
+      +materialized: view
+    # Tầng phục vụ dashboard: bảng thật, vì backend đọc trực tiếp và cần nhanh.
+    marts:
+      +schema: mart
+      +materialized: table

@@ -1,0 +1,18 @@
+# Chỉ dùng khi phát triển trên máy cá nhân. Compose tự nạp file này.
+#
+# Mở cổng ra localhost để dbt, DBeaver, worker Python và trình duyệt truy cập được.
+# Bản triển khai thật KHÔNG dùng file này — mọi thứ đi qua mạng nội bộ và reverse proxy.
+
+services:
+  postgres:
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  redis:
+    ports:
+      - "127.0.0.1:6379:6379"
+
+  metabase:
+    # 3000, 3001, 3002 đã có Next.js, dự án khác và API chiếm.
+    ports:
+      - "127.0.0.1:3003:3000"

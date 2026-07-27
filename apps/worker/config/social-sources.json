@@ -1,0 +1,121 @@
+{
+  "_ghi_chu": [
+    "Nguồn mạng xã hội — 'người khác nói gì về Học viện'.",
+    "Khác với media-sources.json (báo chí viết về Học viện), file này thu ý kiến của",
+    "người dùng thường: bình luận YouTube, bài đăng Reddit, chủ đề trên diễn đàn.",
+    "",
+    "Từ khoá lấy từ brand-keywords.json — dùng chung với crawler báo chí. Một thương hiệu",
+    "chỉ có một bộ từ khoá; tách làm hai file là mở đường cho hai file lệch nhau.",
+    "",
+    "Bỏ một nguồn: đặt enabled = false, không xoá dòng — giữ vết cho hồ sơ nghiệm thu."
+  ],
+
+  "_ghi_chu_rieng_tu": [
+    "Bình luận mạng xã hội gắn với người thật. an_danh_tac_gia = true thì kho chỉ lưu mã",
+    "băm của tài khoản (anon:xxxx), không lưu tên hiển thị.",
+    "Băm ổn định nên vẫn phát hiện được một tài khoản đăng nhiều lần — thứ cần cho việc",
+    "nhận diện chiến dịch bôi nhọ có tổ chức — mà không giữ dữ liệu định danh cá nhân.",
+    "Chỉ đặt false khi có căn cứ pháp lý rõ ràng cho việc lưu tên tài khoản."
+  ],
+  "an_danh_tac_gia": true,
+
+  "youtube": {
+    "enabled": true,
+    "_ghi_chu": [
+      "Nguồn duy nhất có API chính thức, miễn phí, phủ được TOÀN nền tảng chứ không chỉ",
+      "kênh của Học viện. Cần YOUTUBE_API_KEY — tạo miễn phí trong Google Cloud Console,",
+      "bật 'YouTube Data API v3'. Dùng được chung project đã tạo cho GA4.",
+      "",
+      "Hạn mức miễn phí 10.000 đơn vị/ngày. Giá từng lệnh gọi:",
+      "  search.list         100 đơn vị  — tìm video theo từ khoá (đắt nhất)",
+      "  videos.list           1 đơn vị  — lấy chi tiết tối đa 50 video một lần",
+      "  commentThreads.list   1 đơn vị  — lấy tối đa 100 bình luận một lần",
+      "Với 7 từ khoá: 700 đơn vị cho bước tìm, phần còn lại thoải mái cho bình luận."
+    ],
+    "so_video_moi_tu_khoa": 25,
+    "so_binh_luan_moi_video": 200,
+    "so_ngay_nhin_lai": 365,
+    "han_muc_don_vi_moi_lan_chay": 9000,
+
+    "_ghi_chu_kenh_rieng": [
+      "Kênh YouTube do chính Học viện vận hành — video của các kênh này gắn cờ is_owned",
+      "= true để dbt tách owned media khỏi thảo luận của người ngoài. Chưa khai thì video",
+      "Học viện tự đăng bị đếm thành 'người ngoài nói', làm phồng số liệu độ phủ.",
+      "",
+      "Nhận cả id kênh (UCxxxxxxxx trong URL kênh — ổn định, nên dùng khi có) lẫn tên kênh",
+      "(so khớp sau khi chuẩn hoá dấu và hoa/thường).",
+      "",
+      "Xem danh sách kênh đang nói về Học viện: uv run python -m social kenh",
+      "",
+      "CẦN XÁC NHẬN — hai kênh dưới đây chưa rõ do Học viện vận hành hay do đơn vị tuyển",
+      "sinh bên ngoài lập, nên tạm để ngoài danh sách. Nếu là kênh của Học viện thì thêm vào:",
+      "  · \"HVCN Bưu Chính Viễn Thông - Đại Học Từ Xa PTIT\"  (4 bản ghi)",
+      "  · \"P Channel\"                                        (13 bản ghi)"
+    ],
+    "kenh_cua_hoc_vien": [
+      "Học viện Công nghệ Bưu chính Viễn thông",
+      "CIE PTIT",
+      "Tuyển Sinh PTIT HCM"
+    ]
+  },
+
+  "reddit": {
+    "enabled": true,
+    "_ghi_chu": [
+      "Không cần token: search.rss là feed công khai. Lượng thảo luận về PTIT ít hơn",
+      "diễn đàn Việt nhưng chất lượng cao — người viết ẩn danh nên nói thẳng.",
+      "",
+      "Chỉ lấy được BÀI ĐĂNG, không lấy bình luận trong bài: feed bình luận của Reddit",
+      "trả 429 ngay lần gọi thứ hai. Muốn lấy bình luận phải đăng ký ứng dụng OAuth",
+      "(Reddit Data API) — chưa làm ở phiên bản này.",
+      "",
+      "Phát hiện khi chạy thật: r/vozforums là cộng đồng voz trên Reddit, và mẻ đầu tiên",
+      "thu được nhiều bài hỏi review về Học viện từ đây. Đây là đường vòng hợp pháp để",
+      "nghe được tiếng nói của cộng đồng voz trong khi voz.vn bị Cloudflare chặn."
+    ],
+    "so_bai_moi_tu_khoa": 100,
+    "_ghi_chu_subreddit": [
+      "Để rỗng = tìm toàn Reddit, và nên để rỗng: thu hẹp vào vài subreddit sẽ bỏ sót",
+      "những nơi bất ngờ (mẻ đầu tiên tìm thấy bài về Học viện cả trong r/ccna).",
+      "Muốn thu hẹp thì điền tên không có tiền tố r/, ví dụ: [\"vozforums\", \"VietNam\"]."
+    ],
+    "subreddits": []
+  },
+
+  "_ghi_chu_dien_dan": [
+    "Diễn đàn Việt là nơi thảo luận thật nhất về điểm chuẩn, chất lượng đào tạo, cơ hội",
+    "việc làm — thứ không xuất hiện trên báo và cũng không có trên fanpage.",
+    "",
+    "Cơ chế hai bước: hỏi Google Programmable Search chủ đề nào trên tên miền đó có nhắc",
+    "đến thương hiệu, rồi tải chính trang chủ đề về bóc nội dung (có kiểm tra robots.txt).",
+    "Cần GOOGLE_CSE_KEY + GOOGLE_CSE_CX. Miễn phí 100 truy vấn/ngày, không cần thẻ.",
+    "",
+    "Đã thử và loại hai đường không cần khoá:",
+    "  · Bing RSS (bing.com/search?format=RSS) bỏ qua toán tử site: lẫn dấu ngoặc kép —",
+    "    hỏi 'site:tinhte.vn PTIT' thì trả về trang chủ ptit.edu.vn và vnpt.com.vn.",
+    "  · RSS của chính diễn đàn: tinhte.vn trả 403, webtretho.vn là Next.js không có RSS.",
+    "",
+    "voz.vn: robots.txt cho phép (Allow: /) nhưng Cloudflare chặn ở tầng biên, trả 403",
+    "cho mọi client không phải trình duyệt thật. Giả mạo trình duyệt để vượt qua là hành vi",
+    "lách kiểm soát truy cập — không làm. Muốn có dữ liệu voz thì phải xin phép ban quản trị",
+    "diễn đàn. Giữ enabled = false để ghi nhận đã cân nhắc nguồn này.",
+    "",
+    "pages: mỗi trang là 10 kết quả và tốn 1 truy vấn trong hạn mức 100/ngày."
+  ],
+  "_ghi_chu_dang_tam_tat": [
+    "TẠM TẮT ngày 28/07/2026 — chưa có khoá dùng được cho Custom Search API.",
+    "Khoá đang cấu hình bị giới hạn trong danh sách API không bao gồm Custom Search, nên",
+    "mọi truy vấn trả 403. Để bật thì cần một khoá được cấp quyền Custom Search API, điền",
+    "vào GOOGLE_CSE_KEY trong .env (tách riêng khỏi YOUTUBE_API_KEY được).",
+    "",
+    "Kiểm tra khoá trước khi bật lại: uv run python -m social kiem-tra-khoa",
+    "Bật lại: đổi enabled thành true ở các dòng dưới.",
+    "",
+    "Không xoá các dòng này — giữ vết cho hồ sơ nghiệm thu là đã cân nhắc nguồn diễn đàn."
+  ],
+  "dien_dan": [
+    { "name": "tinhte",     "domain": "tinhte.vn",      "enabled": false, "pages": 2 },
+    { "name": "webtretho",  "domain": "webtretho.vn",   "enabled": false, "pages": 2 },
+    { "name": "voz",        "domain": "voz.vn",         "enabled": false, "pages": 2 }
+  ]
+}

@@ -1,0 +1,21 @@
+khoa_nganh,ten_nganh,nhom,ten_nhom,thuoc_loi,he_gia_tri_cao
+cong-nghe-thong-tin,Công nghệ thông tin,ict_core,Công nghệ thông tin & Viễn thông (lõi),true,false
+cong-nghe-thong-tin-he-clc,Công nghệ thông tin (chất lượng cao),ict_core,Công nghệ thông tin & Viễn thông (lõi),true,true
+ky-thuat-dien-tu-vien-thong,Kỹ thuật điện tử viễn thông,ict_core,Công nghệ thông tin & Viễn thông (lõi),true,false
+cong-nghe-ky-thuat-dien-dien-tu,"Công nghệ kỹ thuật điện, điện tử",ict_core,Công nghệ thông tin & Viễn thông (lõi),true,false
+an-toan-thong-tin,An toàn thông tin,ict_core,Công nghệ thông tin & Viễn thông (lõi),true,false
+khoa-hoc-may-tinh,Khoa học máy tính,ict_core,Công nghệ thông tin & Viễn thông (lõi),true,false
+khoa-hoc-may-tinh-dinh-huong-kh-du-lieu-cung-cap-nha,Khoa học máy tính (định hướng khoa học dữ liệu),ict_core,Công nghệ thông tin & Viễn thông (lõi),true,false
+ky-thuat-dieu-khien-va-tu-dong-hoa,Kỹ thuật điều khiển và tự động hoá,ict_core,Công nghệ thông tin & Viễn thông (lõi),true,false
+cong-nghe-internet-van-vat-iot,Công nghệ Internet vạn vật (IoT),ict_core,Công nghệ thông tin & Viễn thông (lõi),true,false
+cong-nghe-da-phuong-tien,Công nghệ đa phương tiện,media_creative,"Truyền thông, Đa phương tiện & Marketing",false,false
+truyen-thong-da-phuong-tien,Truyền thông đa phương tiện,media_creative,"Truyền thông, Đa phương tiện & Marketing",false,false
+truyen-thong-da-phuong-tien-vi-sao-duoc-xem-la-nganh,Truyền thông đa phương tiện (bài giới thiệu),media_creative,"Truyền thông, Đa phương tiện & Marketing",false,false
+bao-chi-journalism,Báo chí,media_creative,"Truyền thông, Đa phương tiện & Marketing",false,false
+marketing,Marketing,media_creative,"Truyền thông, Đa phương tiện & Marketing",false,false
+marketing-he-clc,Marketing (chất lượng cao),media_creative,"Truyền thông, Đa phương tiện & Marketing",false,true
+cong-nghe-tai-chinh-fintech,Công nghệ tài chính (Fintech),business_econ,"Kinh tế, Quản trị & Tài chính số",false,false
+thuong-mai-dien-tu,Thương mại điện tử,business_econ,"Kinh tế, Quản trị & Tài chính số",false,false
+quan-tri-kinh-doanh,Quản trị kinh doanh,business_econ,"Kinh tế, Quản trị & Tài chính số",false,false
+ke-toan,Kế toán,business_econ,"Kinh tế, Quản trị & Tài chính số",false,false
+ke-toan-chat-luong-cao-chuan-quoc-te-acca,"Kế toán (chất lượng cao, chuẩn quốc tế ACCA)",business_econ,"Kinh tế, Quản trị & Tài chính số",false,true

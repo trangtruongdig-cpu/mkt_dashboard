@@ -11,7 +11,9 @@
     "lint": "eslint \"src/**/*.ts\"",
     "clean": "rm -rf dist .turbo"
   },
+  "_giay_phep": "drizzle-orm Apache-2.0 · fastify MIT · @fastify/cookie MIT · postgres Unlicense · drizzle-kit MIT — đều thuộc nhóm cho phép",
   "dependencies": {
+    "@fastify/cookie": "^11.1.2",
     "@fastify/static": "^10.1.2",
     "@nestjs/common": "^11.1.28",
     "@nestjs/config": "^4.0.4",
@@ -19,6 +21,9 @@
     "@nestjs/platform-fastify": "^11.1.28",
     "@nestjs/swagger": "^11.4.6",
     "@ptit/shared": "workspace:*",
+    "drizzle-orm": "^0.45.2",
+    "fastify": "^5.10.0",
+    "postgres": "^3.4.9",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "zod": "^4.4.3"
@@ -27,6 +32,7 @@
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@types/node": "^22.10.0",
+    "drizzle-kit": "^0.31.10",
     "typescript": "^5.9.0"
   }
 }

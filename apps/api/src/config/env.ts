@@ -16,6 +16,22 @@ export const EnvSchema = z.object({
    * `postgres` — đọc các bảng `mart__*` do dbt sinh ra.
    */
   DATA_SOURCE: z.enum(["demo", "postgres"]).default("demo"),
+
+  /** Chuỗi kết nối PostgreSQL. Bắt buộc khi DATA_SOURCE=postgres. */
+  DATABASE_URL: z.string().optional(),
+
+  WEB_URL: z.string().default("http://localhost:3000"),
+  /** Phải trùng KHÍT với URI chuyển hướng đã khai trên Google Cloud. */
+  API_PUBLIC_URL: z.string().default("http://localhost:3002"),
+
+  ADMIN_USERNAME: z.string().min(1).default("admin"),
+  ADMIN_PASSWORD: z.string().min(12, "Mật khẩu quản trị phải từ 12 ký tự").optional(),
+  ADMIN_DISPLAY_NAME: z.string().default("Quản trị viên"),
+  SESSION_TTL_HOURS: z.coerce.number().int().positive().max(720).default(12),
+  SESSION_COOKIE_SECURE: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

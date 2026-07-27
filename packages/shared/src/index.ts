@@ -8,5 +8,8 @@ export * from "./schemas/auth";
 export * from "./schemas/crawler-admin";
 export * from "./schemas/kpi-cascade";
 export * from "./schemas/brand-share";
+export * from "./schemas/kpi-target-override";
+export * from "./schemas/utm";
+export * from "./schemas/kpi-value-override";
 export * from "./demo/dataset";
 export * from "./demo/cascade";

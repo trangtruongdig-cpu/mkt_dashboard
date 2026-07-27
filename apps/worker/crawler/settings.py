@@ -78,7 +78,7 @@ class BrandKeywords:
 
     @classmethod
     def load(cls, path: Path | None = None) -> BrandKeywords:
-        du_lieu = _read_json(path or KEYWORDS_PATH)
+        du_lieu = read_json(path or KEYWORDS_PATH)
 
         search_terms = [str(t).strip() for t in du_lieu.get("search_terms", []) if str(t).strip()]
         if not search_terms:
@@ -129,7 +129,7 @@ class MediaSources:
 
     @classmethod
     def load(cls, path: Path | None = None) -> MediaSources:
-        du_lieu = _read_json(path or SOURCES_PATH)
+        du_lieu = read_json(path or SOURCES_PATH)
 
         engines = [
             SearchEngine(
@@ -208,7 +208,7 @@ class StoreSettings:
         )
 
 
-def _read_json(path: Path) -> dict[str, Any]:
+def read_json(path: Path) -> dict[str, Any]:
     if not path.exists():
         raise CrawlerError(f"Không tìm thấy {path}")
     try:

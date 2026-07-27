@@ -1,0 +1,5 @@
+packages:
+  # Apache-2.0. Dùng cho test unique_combination_of_columns — bộ test sẵn của dbt
+  # không kiểm được khoá gồm nhiều cột.
+  - package: dbt-labs/dbt_utils
+    version: [">=1.3.0", "<2.0.0"]

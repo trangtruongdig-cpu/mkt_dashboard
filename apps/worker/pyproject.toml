@@ -17,6 +17,16 @@ dependencies = [
     # web nên có thể hỏng khi Google đổi giao diện. Rủi ro được nhốt gọn trong
     # ingest/trends_client.py — thay thư viện khác chỉ phải sửa đúng file đó.
     "pytrends>=4.9.2",       # Apache-2 — chỉ số quan tâm tìm kiếm theo tuần
+    # --- Chấm sắc thái tiếng Việt ---
+    # Chạy trên CPU. Không cài bản CUDA: máy chủ Học viện không có GPU, và kết quả phải
+    # tái lập được — cùng một câu, chạy ở đâu cũng phải ra cùng một điểm.
+    "torch>=2.13.0",         # BSD-3    — chỉ dùng để suy luận, không huấn luyện
+    # KHÔNG nâng lên nhánh 5.x. transformers 5.14 làm hỏng tokenizer XLM-R của ViSoBERT:
+    # `Tokenizer(Unigram(vocab=dict))` ném TypeError vì đổi kiểu tham số. Model ViSoBERT
+    # không kèm sẵn tokenizer.json nên buộc phải đi đường chuyển đổi từ sentencepiece —
+    # đúng đường đã hỏng. Kiểm chứng lại trước khi gỡ trần này.
+    "transformers>=4.44,<5", # Apache-2 — nạp và chạy model sắc thái
+    "sentencepiece>=0.2.2",  # Apache-2 — bộ tách từ con của XLM-R, ViSoBERT cần
 ]
 
 [dependency-groups]

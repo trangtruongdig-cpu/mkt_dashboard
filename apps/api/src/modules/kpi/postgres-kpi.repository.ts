@@ -1,0 +1,359 @@
+import { Inject, Injectable, Logger } from "@nestjs/common";
+import {
+  applyMeasuredValues,
+  BENCHMARK_BRANDS,
+  buildDemoCascade,
+  buildDemoShareOfSearch,
+  type KpiCascadeResponse,
+  type KpiMeasuredValue,
+  type ShareOfSearchResponse,
+} from "@ptit/shared";
+import { sql } from "drizzle-orm";
+import { DB, type Database } from "../../db/db.module";
+import { KpiRepository } from "./kpi.repository";
+
+/**
+ * Đọc giá trị thật của chỉ số từ các bảng `mart__*` do dbt sinh ra.
+ *
+ * Cấu trúc cascade vẫn lấy từ `@ptit/shared` — mục tiêu, diễn giải, mức cần đạt là
+ * quyết định của con người, không phải thứ tính ra từ dữ liệu. Repository này chỉ
+ * thay `value` và `baseline`, rồi `applyMeasuredValues` tính lại trạng thái.
+ *
+ * Không khai bảng mart thành Drizzle schema: chúng do dbt sở hữu. Khai vào đây là mở
+ * đường cho drizzle-kit sinh migration đòi xoá chúng.
+ */
+@Injectable()
+export class PostgresKpiRepository extends KpiRepository {
+  private readonly logger = new Logger(PostgresKpiRepository.name);
+
+  constructor(@Inject(DB) private readonly db: Database) {
+    super();
+  }
+
+  async getCascade(): Promise<KpiCascadeResponse> {
+    const goc = buildDemoCascade();
+
+    try {
+      // Ba nguồn đọc riêng, mỗi nguồn tự chịu lỗi của mình: dữ liệu công khai và
+      // Wikipedia được nạp bằng job khác GA4 nên có thể chưa có, và khi đó không được
+      // kéo sập luôn các chỉ số đã đọc được.
+      const [tu_ga4, tu_cong_khai, tu_chu_y] = await Promise.all([
+        this.docAnToan("GA4", () => this.docGiaTri()),
+        this.docAnToan("tài liệu công khai", () => this.docGiaTriCongKhai()),
+        this.docAnToan("thị phần chú ý", () => this.docGiaTriChuY()),
+      ]);
+
+      const do_duoc = [...tu_ga4, ...tu_cong_khai, ...tu_chu_y];
+      this.logger.log(`Đã đọc ${do_duoc.length} chỉ số từ bảng mart.`);
+
+      // Bộ số liệu giả lập gắn nhãn kỳ "12 tuần gần nhất". Giữ nguyên nhãn đó khi đã
+      // đọc dữ liệu thật là nói sai với người xem: cascade gộp chỉ số hằng ngày, hằng
+      // tuần và hằng năm nên không tồn tại MỘT kỳ chung cho cả bảng.
+      return {
+        ...applyMeasuredValues(goc, do_duoc),
+        period: {
+          ...goc.period,
+          label: "Số liệu mới nhất của từng nguồn — mỗi chỉ số theo nhịp riêng",
+        },
+        updatedAt: new Date().toISOString(),
+      };
+    } catch (loi) {
+      // Kho chưa dựng xong hoặc dbt chưa chạy — hiện cấu trúc với giá trị mặc định
+      // còn hơn làm sập cả bảng điều khiển. Nhưng phải ghi log để không ai tưởng là số thật.
+      this.logger.error(
+        `Không đọc được bảng mart, quay về giá trị mặc định trong mã nguồn: ${
+          loi instanceof Error ? loi.message : String(loi)
+        }`,
+      );
+      return goc;
+    }
+  }
+
+  /**
+   * Chạy một phép đọc, nuốt lỗi và ghi log thay vì ném ra ngoài.
+   *
+   * Từng nguồn dữ liệu do một job khác nhau nạp về, và chúng lên kho ở những thời điểm
+   * khác nhau. Một nguồn chưa có không được làm mất luôn các chỉ số đã đọc được.
+   */
+  private async docAnToan(
+    ten_nguon: string,
+    doc: () => Promise<KpiMeasuredValue[]>,
+  ): Promise<KpiMeasuredValue[]> {
+    try {
+      return await doc();
+    } catch (loi) {
+      this.logger.warn(
+        `Không đọc được nhóm chỉ số ${ten_nguon}: ${
+          loi instanceof Error ? loi.message : String(loi)
+        }`,
+      );
+      return [];
+    }
+  }
+
+  async getShareOfSearch(): Promise<ShareOfSearchResponse> {
+    try {
+      return await this.docThiPhanChuY();
+    } catch (loi) {
+      this.logger.warn(
+        `Không đọc được mart__brand_attention, quay về chuỗi giả lập: ${
+          loi instanceof Error ? loi.message : String(loi)
+        }`,
+      );
+      return buildDemoShareOfSearch();
+    }
+  }
+
+  /**
+   * Chuỗi thị phần chú ý theo tuần, đo bằng lượt xem trang Wikipedia.
+   *
+   * Nhãn thương hiệu lấy từ `BENCHMARK_BRANDS` của `@ptit/shared` chứ không lưu trong
+   * kho: bảng mart chỉ giữ mã trường, còn tên hiển thị là chuyện của tầng trình bày.
+   * Thương hiệu có trong kho mà không có trong danh sách thì bỏ qua kèm cảnh báo — giữ
+   * lại sẽ làm tổng tỷ trọng vượt 100% và schema từ chối cả gói dữ liệu.
+   */
+  private async docThiPhanChuY(): Promise<ShareOfSearchResponse> {
+    const dong = await this.db.execute<{
+      tuan: string;
+      ma_truong: string;
+      thi_phan_pct: string | number | null;
+    }>(sql`
+      select to_char(tuan, 'YYYY-MM-DD') as tuan, ma_truong, thi_phan_pct
+      from mart.mart__brand_attention
+      order by tuan, ma_truong
+    `);
+
+    const ban_ghi = Array.isArray(dong) ? dong : [];
+    if (ban_ghi.length === 0) {
+      throw new Error("mart__brand_attention chưa có dòng nào");
+    }
+
+    const weeks = [...new Set(ban_ghi.map((r) => r.tuan))].sort();
+    const theo_tuan = new Map(weeks.map((w, i) => [w, i]));
+
+    const la_lieu = new Set(BENCHMARK_BRANDS.map((b) => b.key));
+    const thua = [...new Set(ban_ghi.map((r) => r.ma_truong))].filter(
+      (k) => !la_lieu.has(k),
+    );
+    if (thua.length > 0) {
+      this.logger.warn(
+        `Kho có thương hiệu không khai trong BENCHMARK_BRANDS, đã bỏ qua: ${thua.join(", ")}`,
+      );
+    }
+
+    const series = BENCHMARK_BRANDS.map((brand) => {
+      const values = new Array<number>(weeks.length).fill(0);
+      for (const r of ban_ghi) {
+        if (r.ma_truong !== brand.key) continue;
+        const i = theo_tuan.get(r.tuan);
+        if (i !== undefined) values[i] = Number(r.thi_phan_pct ?? 0);
+      }
+      return { brand, values };
+    });
+
+    const cuoi = weeks.length - 1;
+    const latest = series
+      .map((s) => ({
+        brand: s.brand,
+        sharePct: s.values[cuoi] ?? 0,
+        deltaPoints: Number(((s.values[cuoi] ?? 0) - (s.values[0] ?? 0)).toFixed(2)),
+      }))
+      .sort((a, b) => b.sharePct - a.sharePct);
+
+    return {
+      period: {
+        from: weeks[0]!,
+        to: weeks[cuoi]!,
+        label: `${weeks.length} tuần gần nhất`,
+      },
+      updatedAt: new Date().toISOString(),
+      weeks,
+      series,
+      latest,
+      provenance: {
+        label:
+          "Wikimedia Pageviews API — lượt xem trang của nhóm trường đối sánh trên Wikipedia tiếng Việt, agent=user",
+        url: "https://wikimedia.org/api/rest_v1/",
+      },
+    };
+  }
+
+  /**
+   * Một lần gọi lấy hết mọi chỉ số.
+   *
+   * Hai kiểu cửa sổ so sánh, đúng như khai trong `comparability` của từng chỉ số:
+   *   - `calendar`        — 30 ngày gần nhất so với đúng 30 ngày đó của năm trước
+   *   - `admission_cycle` — luỹ kế từ đầu năm tới cùng mốc ngày/tháng của năm trước
+   *
+   * Chốt mốc theo ngày lớn nhất có trong dữ liệu chứ không theo `now()`: job hút dữ
+   * liệu chạy theo lịch nên hôm nay có thể chưa có số, lấy `now()` sẽ ra một cửa sổ
+   * thiếu ngày cuối và mọi so sánh lệch theo.
+   */
+  private async docGiaTri(): Promise<KpiMeasuredValue[]> {
+    const ket_qua = await this.db.execute<{
+      kpi_key: string;
+      value: string | number | null;
+      baseline: string | number | null;
+    }>(sql`
+      with moc as (
+        select max(ngay) as het from mart.mart__channel_performance
+      ),
+      ky as (
+        select
+          het,
+          het - interval '29 days'                          as nay_tu,
+          (het - interval '1 year')::date                   as truoc_den,
+          (het - interval '1 year' - interval '29 days')::date as truoc_tu,
+          date_trunc('year', het)::date                     as nam_nay_tu,
+          date_trunc('year', het - interval '1 year')::date as nam_truoc_tu,
+          to_char(het, 'MMDD')                              as moc_ngay_thang
+        from moc
+      ),
+
+      -- ── Tầng truyền thông: nhóm kênh, cửa sổ 30 ngày ────────────────────────
+      kenh as (
+        select
+          sum(c.so_phien)      filter (where c.ngay between k.nay_tu and k.het)   as phien_nay,
+          sum(c.so_phien)      filter (where c.ngay between k.truoc_tu and k.truoc_den) as phien_truoc,
+          sum(c.so_phien)      filter (where c.nhom_kenh = 'Organic Social' and c.ngay between k.nay_tu and k.het)   as xh_nay,
+          sum(c.so_phien)      filter (where c.nhom_kenh = 'Organic Social' and c.ngay between k.truoc_tu and k.truoc_den) as xh_truoc,
+          sum(c.so_phien_gan_ket) filter (where c.nhom_kenh = 'Organic Social' and c.ngay between k.nay_tu and k.het)   as xh_gk_nay,
+          sum(c.so_phien_gan_ket) filter (where c.nhom_kenh = 'Organic Social' and c.ngay between k.truoc_tu and k.truoc_den) as xh_gk_truoc,
+          sum(c.so_phien)      filter (where c.nhom_kenh = 'AI Assistant' and c.ngay between k.nay_tu and k.het)   as ai_nay,
+          sum(c.so_phien)      filter (where c.nhom_kenh = 'AI Assistant' and c.ngay between k.truoc_tu and k.truoc_den) as ai_truoc,
+          sum(c.so_nguoi_dung) filter (where c.ngay between k.nay_tu and k.het)   as nd_nay,
+          sum(c.so_nguoi_dung) filter (where c.ngay between k.truoc_tu and k.truoc_den) as nd_truoc,
+          sum(c.so_nguoi_dung_moi) filter (where c.ngay between k.nay_tu and k.het)   as ndm_nay,
+          sum(c.so_nguoi_dung_moi) filter (where c.ngay between k.truoc_tu and k.truoc_den) as ndm_truoc
+        from mart.mart__channel_performance c cross join ky k
+      ),
+
+      -- ── Phễu tuyển sinh ─────────────────────────────────────────────────────
+      pheu as (
+        select
+          sum(f.so_luot_xem) filter (where f.bac = 'can_nhac' and f.ngay between k.nay_tu and k.het)   as cn_nay,
+          sum(f.so_luot_xem) filter (where f.bac = 'can_nhac' and f.ngay between k.truoc_tu and k.truoc_den) as cn_truoc,
+          sum(f.so_luot_xem) filter (where f.bac = 'y_dinh_dang_ky' and f.ngay >= k.nam_nay_tu)         as dk_nay,
+          sum(f.so_luot_xem) filter (where f.bac = 'y_dinh_dang_ky' and f.ngay >= k.nam_truoc_tu
+                                       and f.ngay < k.nam_nay_tu)                                      as dk_truoc
+        from mart.mart__admission_funnel f cross join ky k
+      ),
+
+      -- ── Nhu cầu theo ngành: luỹ kế từ đầu năm tới cùng mốc ngày/tháng ───────
+      nganh as (
+        select
+          sum(p.so_luot_xem) filter (where p.ngay >= k.nam_nay_tu)                                as tong_nay,
+          sum(p.so_luot_xem) filter (where p.ngay >= k.nam_truoc_tu and p.ngay < k.nam_nay_tu)    as tong_truoc,
+          sum(p.so_luot_xem) filter (where not p.thuoc_loi and p.ngay >= k.nam_nay_tu)            as ngoai_loi_nay,
+          sum(p.so_luot_xem) filter (where not p.thuoc_loi and p.ngay >= k.nam_truoc_tu and p.ngay < k.nam_nay_tu) as ngoai_loi_truoc,
+          sum(p.so_luot_xem) filter (where p.he_gia_tri_cao and p.ngay >= k.nam_nay_tu)           as clc_nay,
+          sum(p.so_luot_xem) filter (where p.he_gia_tri_cao and p.ngay >= k.nam_truoc_tu and p.ngay < k.nam_nay_tu) as clc_truoc
+        from mart.mart__program_demand p cross join ky k
+        where to_char(p.ngay, 'MMDD') <= (select moc_ngay_thang from ky)
+      )
+
+      select 'social_traffic_share' as kpi_key,
+             round(100.0 * xh_nay / nullif(phien_nay, 0), 1) as value,
+             round(100.0 * xh_truoc / nullif(phien_truoc, 0), 1) as baseline from kenh
+      union all
+      select 'social_engagement_rate',
+             round(100.0 * xh_gk_nay / nullif(xh_nay, 0), 1),
+             round(100.0 * xh_gk_truoc / nullif(xh_truoc, 0), 1) from kenh
+      union all
+      select 'ai_assistant_sessions', ai_nay, ai_truoc from kenh
+      union all
+      select 'returning_user_share',
+             round(100.0 * (nd_nay - ndm_nay) / nullif(nd_nay, 0), 1),
+             round(100.0 * (nd_truoc - ndm_truoc) / nullif(nd_truoc, 0), 1) from kenh
+      union all
+      select 'admission_consideration_views', cn_nay, cn_truoc from pheu
+      union all
+      select 'application_intent_views', dk_nay, dk_truoc from pheu
+      union all
+      select 'program_mix_beyond_core',
+             round(100.0 * ngoai_loi_nay / nullif(tong_nay, 0), 1),
+             round(100.0 * ngoai_loi_truoc / nullif(tong_truoc, 0), 1) from nganh
+      union all
+      select 'high_value_program_interest',
+             round(100.0 * clc_nay / nullif(tong_nay, 0), 1),
+             round(100.0 * clc_truoc / nullif(tong_truoc, 0), 1) from nganh
+    `);
+
+    return this.thanhChiSo(ket_qua);
+  }
+
+  /**
+   * Chỉ số lấy từ Biểu mẫu 18 mà mọi trường buộc phải công khai.
+   *
+   * Kỳ so sánh ở đây là NĂM HỌC, không phải cửa sổ ngày: tài liệu công khai mỗi năm ra
+   * một lần. Lấy hai năm gần nhất CÓ SỐ — không lấy hai năm liền kề theo lịch, vì có
+   * năm trường bỏ trống ô đó và khi ấy so với năm trống là so với `null`.
+   *
+   * Chỉ đọc dòng của Học viện. Số của nhóm đối sánh nằm cùng bảng và dùng cho biểu đồ
+   * so sánh, nhưng KPI trên cascade là cam kết của riêng Học viện.
+   */
+  private async docGiaTriCongKhai(): Promise<KpiMeasuredValue[]> {
+    const ket_qua = await this.db.execute<{
+      kpi_key: string;
+      value: string | number | null;
+      baseline: string | number | null;
+    }>(sql`
+      with ptit as (
+        select nam, quy_mo_dao_tao, ty_le_viec_lam_pct
+        from mart.mart__disclosure_benchmark
+        where ma_truong = 'ptit'
+      ),
+      viec_lam as (
+        select
+          (array_agg(ty_le_viec_lam_pct order by nam desc))[1] as nay,
+          (array_agg(ty_le_viec_lam_pct order by nam desc))[2] as truoc
+        from ptit where ty_le_viec_lam_pct is not null
+      )
+      select 'employment_rate' as kpi_key, nay as value, truoc as baseline from viec_lam
+    `);
+
+    return this.thanhChiSo(ket_qua);
+  }
+
+  /**
+   * Thị phần chú ý của Học viện, lấy tuần gần nhất so với tuần đầu kỳ.
+   *
+   * Mốc gốc là tuần ĐẦU của chuỗi chứ không phải tuần liền trước: chỉ số này dao động
+   * mạnh theo tin tức tuần, so với tuần liền trước chỉ đo được nhiễu.
+   */
+  private async docGiaTriChuY(): Promise<KpiMeasuredValue[]> {
+    const ket_qua = await this.db.execute<{
+      kpi_key: string;
+      value: string | number | null;
+      baseline: string | number | null;
+    }>(sql`
+      with moc as (
+        select min(tuan) as dau, max(tuan) as cuoi from mart.mart__brand_attention
+      )
+      select
+        'attention_share' as kpi_key,
+        max(a.thi_phan_pct) filter (where a.tuan = m.cuoi) as value,
+        max(a.thi_phan_pct) filter (where a.tuan = m.dau)  as baseline
+      from mart.mart__brand_attention a cross join moc m
+      where a.ma_truong = 'ptit'
+    `);
+
+    return this.thanhChiSo(ket_qua);
+  }
+
+  private thanhChiSo(ket_qua: unknown): KpiMeasuredValue[] {
+    const dong = Array.isArray(ket_qua)
+      ? (ket_qua as {
+          kpi_key: string;
+          value: string | number | null;
+          baseline: string | number | null;
+        }[])
+      : [];
+
+    return dong.map((r) => ({
+      kpiKey: r.kpi_key,
+      value: r.value === null ? null : Number(r.value),
+      baseline: r.baseline === null ? null : Number(r.baseline),
+    }));
+  }
+}

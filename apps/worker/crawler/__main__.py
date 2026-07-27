@@ -134,6 +134,27 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("thong-ke", help="Thống kê dữ liệu đã có trong kho")
     sub.add_parser("seed", help="Nạp nguồn từ file JSON vào PostgreSQL để quản trị trên web")
 
+    # Nhánh tài liệu công khai bắt buộc (Thông tư 09/2024 và 08/2022). Chạy theo thứ tự:
+    # cong-khai → cong-khai-do → cong-khai-boc-so.
+    sub.add_parser(
+        "cong-khai",
+        help="Quét tài liệu Ba công khai / đề án tuyển sinh của nhóm trường đối sánh",
+    )
+    sub.add_parser("cong-khai-thong-ke", help="Thống kê danh mục tài liệu công khai đã thu")
+    p_do = sub.add_parser(
+        "cong-khai-do",
+        help="Dò xem tài liệu nào có lớp chữ đọc được, tài liệu nào là bản scan",
+    )
+    p_do.add_argument("--gioi-han", type=int, default=None, metavar="N", help="Chỉ dò N tài liệu")
+    sub.add_parser(
+        "cong-khai-ke-hoach",
+        help="In việc cần làm: tài liệu nào bóc bằng máy được, tài liệu nào phải nhập tay",
+    )
+    sub.add_parser(
+        "cong-khai-boc-so",
+        help="Bóc số liệu từ các bản Biểu 18 đọc được bằng máy",
+    )
+
     p_thu = sub.add_parser("thu-thap", help="Tìm bài và ghi vào kho")
     p_thu.add_argument(
         "--nhanh",
@@ -157,6 +178,26 @@ def main(argv: list[str] | None = None) -> int:
             _in_thong_ke()
         elif args.lenh == "seed":
             _seed()
+        elif args.lenh == "cong-khai":
+            from . import edu_docs_job
+
+            edu_docs_job.run()
+        elif args.lenh == "cong-khai-thong-ke":
+            from . import edu_docs_job
+
+            edu_docs_job.in_thong_ke()
+        elif args.lenh == "cong-khai-do":
+            from . import edu_docs_probe
+
+            edu_docs_probe.run(gioi_han=args.gioi_han)
+        elif args.lenh == "cong-khai-ke-hoach":
+            from . import edu_docs_probe
+
+            edu_docs_probe.in_ke_hoach()
+        elif args.lenh == "cong-khai-boc-so":
+            from . import bm18_job
+
+            bm18_job.run()
         elif args.lenh == "thu-thap":
             from . import collect
 

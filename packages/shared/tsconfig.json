@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022"],
+    // DOM chỉ để lấy kiểu `URL` và `URLSearchParams` — có sẵn ở cả Node lẫn trình
+    // duyệt. Gói này chạy hai phía nên KHÔNG được dùng document/window.
+    "lib": ["ES2022", "DOM"],
     "module": "CommonJS",
     "moduleResolution": "Node",
     "declaration": true,
