@@ -1,0 +1,50 @@
+# Bí mật & cấu hình môi trường — TUYỆT ĐỐI không commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+airbyte/**/secrets*.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+*.egg-info/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+.turbo/
+npm-debug.log*
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+
+# Tài liệu nhiệm vụ nội bộ — repo đang public, không đưa lên
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.pdf
+
+# Dữ liệu & log cục bộ
+*.log
+data/
+pgdata/
+
+# Cấu hình riêng từng máy
+.claude/settings.local.json
+
+# Hệ điều hành & IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
