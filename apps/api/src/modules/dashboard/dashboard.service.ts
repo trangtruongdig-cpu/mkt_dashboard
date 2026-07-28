@@ -4,10 +4,13 @@ import {
   OverviewResponseSchema,
   ReachResponseSchema,
   SentimentResponseSchema,
+  SocialMentionsResponseSchema,
   type ChannelsResponse,
   type OverviewResponse,
   type ReachResponse,
   type SentimentResponse,
+  type SocialMentionsQuery,
+  type SocialMentionsResponse,
 } from "@ptit/shared";
 import { DashboardRepository } from "./dashboard.repository";
 
@@ -36,5 +39,13 @@ export class DashboardService {
 
   async getSentiment(): Promise<SentimentResponse> {
     return SentimentResponseSchema.parse(await this.repository.getSentiment());
+  }
+
+  async getSocialMentions(
+    query: SocialMentionsQuery,
+  ): Promise<SocialMentionsResponse> {
+    return SocialMentionsResponseSchema.parse(
+      await this.repository.getSocialMentions(query),
+    );
   }
 }

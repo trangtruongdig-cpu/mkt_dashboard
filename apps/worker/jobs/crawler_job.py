@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 import traceback
 
-from crawler import collect
+from crawler import brand_tag_job, collect
 from crawler.control import ControlPlane, RunHandle, RunOutcome
 from crawler.settings import CONTROL_DATABASE_URL
 
@@ -29,6 +29,19 @@ def chay_mot_luot(
     try:
         sources = control.load_sources(only_name=handle.source_name)
         stats = collect.run(lay_toan_van=lay_toan_van, sources=sources)
+
+        # Gán nhãn thương hiệu ngay sau khi thu thập, trong CÙNG một lượt.
+        #
+        # Bài mới không có nhãn thì bị loại khỏi `mart__share_of_voice`, và thị phần
+        # thảo luận lặng lẽ tính trên tập thiếu — không có lỗi nào hiện ra, chỉ có con
+        # số sai. Ghép vào đây thay vì để người vận hành nhớ chạy tay: mọi đường dẫn
+        # tới thu thập, dù theo lịch hay do bấm "Chạy ngay", đều đi qua hàm này.
+        #
+        # Gán nhãn không gọi mạng và chạy trên toàn kho, nên chạy lại luôn an toàn.
+        try:
+            brand_tag_job.run()
+        except Exception:  # noqa: BLE001 — gán nhãn hỏng không được huỷ mẻ đã thu được
+            log.exception("Gán nhãn thương hiệu thất bại sau lượt #%s", handle.id)
 
         control.finish_run(
             handle,

@@ -4,6 +4,7 @@ import {
   BENCHMARK_BRANDS,
   buildDemoCascade,
   buildDemoShareOfSearch,
+  MIN_MONTHLY_SAMPLE,
   type KpiCascadeResponse,
   type KpiMeasuredValue,
   type ShareOfSearchResponse,
@@ -11,15 +12,6 @@ import {
 import { sql } from "drizzle-orm";
 import { DB, type Database } from "../../db/db.module";
 import { KpiRepository } from "./kpi.repository";
-
-/**
- * Số bản ghi tối thiểu để tỷ lệ sắc thái của một tháng được coi là đọc được.
- *
- * Phải khớp với `minSampleForTrend` mà `PostgresDashboardRepository` trả cho giao diện:
- * hai nơi đặt hai ngưỡng khác nhau thì biểu đồ làm mờ một tháng trong khi cascade vẫn
- * lấy chính tháng đó làm mốc so sánh.
- */
-const MAU_TOI_THIEU_THANG = 10;
 
 /**
  * Đọc giá trị thật của chỉ số từ các bảng `mart__*` do dbt sinh ra.
@@ -388,7 +380,7 @@ export class PostgresKpiRepository extends KpiRepository {
    * Lấy TOÀN KỲ chứ không lấy tháng gần nhất: mỗi tháng chỉ vài chục bản ghi, và tháng
    * đang chạy thì luôn dở dang.
    *
-   * Mốc so sánh chỉ lấy từ tháng ĐẠT TỐI THIỂU {@link MAU_TOI_THIEU_THANG} bản ghi.
+   * Mốc so sánh chỉ lấy từ tháng ĐẠT TỐI THIỂU {@link MIN_MONTHLY_SAMPLE} bản ghi.
    * Bản đầu tiên không có ràng buộc này và cho ra baseline 100% cho mạng xã hội — lấy
    * từ một tháng năm 2018 có đúng MỘT thảo luận. Bảng khi đó hiện "giảm từ 100% xuống
    * 80%", nghe như dư luận đang xấu đi, trong khi thực chất là so với ý kiến của một
@@ -405,14 +397,14 @@ export class PostgresKpiRepository extends KpiRepository {
         select
           round(100.0 * sum(so_tich_cuc) / nullif(sum(so_tin_bai), 0), 1) as toan_ky,
           (array_agg(ty_le_tich_cuc_pct order by thang)
-            filter (where so_tin_bai >= ${MAU_TOI_THIEU_THANG}))[1]       as thang_dau
+            filter (where so_tin_bai >= ${MIN_MONTHLY_SAMPLE}))[1]       as thang_dau
         from mart.mart__news_sentiment
       ),
       mang_xa_hoi as (
         select
           round(100.0 * sum(so_tich_cuc) / nullif(sum(so_thao_luan), 0), 1) as toan_ky,
           (array_agg(ty_le_tich_cuc_pct order by thang)
-            filter (where so_thao_luan >= ${MAU_TOI_THIEU_THANG}))[1]       as thang_dau
+            filter (where so_thao_luan >= ${MIN_MONTHLY_SAMPLE}))[1]       as thang_dau
         from mart.mart__social_sentiment
       )
       select 'positive_sentiment_share' as kpi_key,

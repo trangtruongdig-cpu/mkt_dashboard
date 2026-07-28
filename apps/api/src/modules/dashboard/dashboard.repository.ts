@@ -1,10 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import {
   buildDemoDataset,
+  MIN_CONFIDENCE,
   type ChannelsResponse,
   type OverviewResponse,
   type ReachResponse,
   type SentimentResponse,
+  type SocialMentionsQuery,
+  type SocialMentionsResponse,
 } from "@ptit/shared";
 
 /**
@@ -19,6 +22,9 @@ export abstract class DashboardRepository {
   abstract getReach(): Promise<ReachResponse>;
   abstract getChannels(): Promise<ChannelsResponse>;
   abstract getSentiment(): Promise<SentimentResponse>;
+  abstract getSocialMentions(
+    query: SocialMentionsQuery,
+  ): Promise<SocialMentionsResponse>;
 }
 
 /** Nguồn dữ liệu GIẢ LẬP cho giai đoạn demo giao diện. */
@@ -38,5 +44,27 @@ export class DemoDashboardRepository extends DashboardRepository {
 
   async getSentiment(): Promise<SentimentResponse> {
     return buildDemoDataset().sentiment;
+  }
+
+  /**
+   * Danh sách ý kiến KHÔNG có bản giả lập.
+   *
+   * Ba khối kia bịa được vì chúng là con số tổng hợp — người xem đọc chúng như xu hướng,
+   * và bảng đã ghi rõ "Nguồn: số liệu giả lập". Nhưng bịa ra những câu như thể có người
+   * thật đã viết chúng về Học viện thì khác hẳn: đó là dựng lời cho người không nói.
+   * Không có kho thì trả danh sách rỗng, và giao diện nói rõ vì sao rỗng.
+   */
+  async getSocialMentions(
+    _query: SocialMentionsQuery,
+  ): Promise<SocialMentionsResponse> {
+    const { period } = buildDemoDataset().sentiment;
+    return {
+      period,
+      modelVersion: "chưa có kho dữ liệu",
+      totalMatching: 0,
+      counts: { positive: 0, neutral: 0, negative: 0 },
+      mentions: [],
+      confidenceThreshold: MIN_CONFIDENCE,
+    };
   }
 }

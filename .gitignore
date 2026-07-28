@@ -47,6 +47,18 @@ dbt/logs/
 data/
 pgdata/
 
+# Kho dữ liệu cục bộ của worker — DỮ LIỆU VẬN HÀNH THẬT, repo đang public.
+#
+# Mẫu `data/` ở trên KHÔNG khớp `.data/` vì có dấu chấm đầu, và vì kẽ hở đó mà bốn file
+# DuckDB chứa tin bài đã thu thập, số liệu GA4 của ptit.edu.vn và danh mục tài liệu công
+# khai đã lọt vào repo. Mục 9 CLAUDE.md cấm đưa dữ liệu vận hành của Học viện ra ngoài.
+#
+# Dựng lại kho bằng các job thu thập, không cần commit:
+#   uv run python -m ingest sync · wiki-sync
+#   uv run python -m crawler thu-thap · gan-nhan · cong-khai · diem-chuan
+.data/
+*.duckdb
+
 # Cấu hình riêng từng máy
 .claude/settings.local.json
 

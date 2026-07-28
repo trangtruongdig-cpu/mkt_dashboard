@@ -993,7 +993,7 @@ const REQUIREMENTS: Record<string, KpiRequirement> = {
       "is_owned — tách bài trên kênh của Học viện",
     ],
     readiness: "connected",
-    todo: "Chạy `crawler gan-nhan` sau mỗi lần thu thập, nếu không bài mới không có nhãn và mẫu số thiếu",
+    todo: null,
   },
   new_program_share: {
     platform: "Crawler tin bài (news-please)",
@@ -1117,7 +1117,10 @@ const REQUIREMENTS: Record<string, KpiRequirement> = {
       "phân nhóm ngành theo từ khoá trong đường dẫn",
     ],
     readiness: "connected",
-    todo: "Chuyển bảng phân nhóm ngành ra file cấu hình riêng thay vì khớp chuỗi trong truy vấn — mỗi năm mở ngành mới là phải sửa",
+    // Đã xong: phân nhóm nằm ở seed `dbt/seeds/nhom_nganh_dao_tao.csv` (20 ngành),
+    // model `mart__program_demand` join vào seed đó chứ không khớp chuỗi trong truy vấn.
+    // Mở ngành mới chỉ cần thêm một dòng CSV.
+    todo: null,
   },
   high_value_program_interest: {
     platform: "Google Analytics 4 — Data API (đã kết nối)",
@@ -1126,7 +1129,11 @@ const REQUIREMENTS: Record<string, KpiRequirement> = {
       "screenPageViews luỹ kế theo năm",
     ],
     readiness: "connected",
-    todo: "Đối chiếu danh sách đường dẫn với đề án tuyển sinh để không sót chương trình nào",
+    // Đã đối chiếu bằng chính dữ liệu GA4 thay vì chờ đề án (đề án của Học viện là
+    // bản scan). Phát hiện mart chỉ lọc đường dẫn dạng `/nganh-*` nên bỏ 27,4%
+    // lượt xem — gồm đúng các chương trình cần đo. Đã sửa bộ lọc và bổ sung 17
+    // chương trình vào seed; tỷ trọng hệ giá trị cao từ 8,94% lên 10,99%.
+    todo: null,
   },
 };
 

@@ -3,6 +3,7 @@ export * from "./schemas/overview";
 export * from "./schemas/reach";
 export * from "./schemas/channels";
 export * from "./schemas/sentiment";
+export * from "./schemas/social-listening";
 export * from "./schemas/integrations";
 export * from "./schemas/auth";
 export * from "./schemas/crawler-admin";

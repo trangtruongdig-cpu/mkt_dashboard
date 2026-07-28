@@ -5,12 +5,10 @@ ky-thuat-dien-tu-vien-thong,Kỹ thuật điện tử viễn thông,ict_core,Cô
 cong-nghe-ky-thuat-dien-dien-tu,"Công nghệ kỹ thuật điện, điện tử",ict_core,Công nghệ thông tin & Viễn thông (lõi),true,false
 an-toan-thong-tin,An toàn thông tin,ict_core,Công nghệ thông tin & Viễn thông (lõi),true,false
 khoa-hoc-may-tinh,Khoa học máy tính,ict_core,Công nghệ thông tin & Viễn thông (lõi),true,false
-khoa-hoc-may-tinh-dinh-huong-kh-du-lieu-cung-cap-nha,Khoa học máy tính (định hướng khoa học dữ liệu),ict_core,Công nghệ thông tin & Viễn thông (lõi),true,false
 ky-thuat-dieu-khien-va-tu-dong-hoa,Kỹ thuật điều khiển và tự động hoá,ict_core,Công nghệ thông tin & Viễn thông (lõi),true,false
 cong-nghe-internet-van-vat-iot,Công nghệ Internet vạn vật (IoT),ict_core,Công nghệ thông tin & Viễn thông (lõi),true,false
 cong-nghe-da-phuong-tien,Công nghệ đa phương tiện,media_creative,"Truyền thông, Đa phương tiện & Marketing",false,false
 truyen-thong-da-phuong-tien,Truyền thông đa phương tiện,media_creative,"Truyền thông, Đa phương tiện & Marketing",false,false
-truyen-thong-da-phuong-tien-vi-sao-duoc-xem-la-nganh,Truyền thông đa phương tiện (bài giới thiệu),media_creative,"Truyền thông, Đa phương tiện & Marketing",false,false
 bao-chi-journalism,Báo chí,media_creative,"Truyền thông, Đa phương tiện & Marketing",false,false
 marketing,Marketing,media_creative,"Truyền thông, Đa phương tiện & Marketing",false,false
 marketing-he-clc,Marketing (chất lượng cao),media_creative,"Truyền thông, Đa phương tiện & Marketing",false,true
@@ -19,3 +17,20 @@ thuong-mai-dien-tu,Thương mại điện tử,business_econ,"Kinh tế, Quản 
 quan-tri-kinh-doanh,Quản trị kinh doanh,business_econ,"Kinh tế, Quản trị & Tài chính số",false,false
 ke-toan,Kế toán,business_econ,"Kinh tế, Quản trị & Tài chính số",false,false
 ke-toan-chat-luong-cao-chuan-quoc-te-acca,"Kế toán (chất lượng cao, chuẩn quốc tế ACCA)",business_econ,"Kinh tế, Quản trị & Tài chính số",false,true
+cong-nghe-thong-tin-dinh-huong-ung-dung,Công nghệ thông tin (định hướng ứng dụng),ict_core,Công nghệ thông tin & Viễn thông (lõi),true,false
+thiet-ke-va-phat-trien-game,Thiết kế và phát triển game,media_creative,"Truyền thông, Đa phương tiện & Marketing",false,false
+tri-tue-nhan-tao,Trí tuệ nhân tạo,ict_core,Công nghệ thông tin & Viễn thông (lõi),true,false
+tri-tue-nhan-tao-van-vat-aiot,Trí tuệ nhân tạo vạn vật (AIoT),ict_core,Công nghệ thông tin & Viễn thông (lõi),true,false
+ky-thuat-du-lieu-nganh-mang-may-tinh-va-truyen-thong-du-lieu,Kỹ thuật dữ liệu,ict_core,Công nghệ thông tin & Viễn thông (lõi),true,false
+cong-nghe-thong-tin-viet-nhat,Công nghệ thông tin Việt – Nhật,ict_core,Công nghệ thông tin & Viễn thông (lõi),true,true
+an-toan-thong-tin-chat-luong-cao,An toàn thông tin (chất lượng cao),ict_core,Công nghệ thông tin & Viễn thông (lõi),true,true
+logistics-va-quan-tri-chuoi-cung-ung,Logistics và quản trị chuỗi cung ứng,business_econ,"Kinh tế, Quản trị & Tài chính số",false,false
+quan-he-cong-chung-nganh-marketing,Quan hệ công chúng,media_creative,"Truyền thông, Đa phương tiện & Marketing",false,false
+cong-nghe-vi-mach-ban-dan,Công nghệ vi mạch bán dẫn,ict_core,Công nghệ thông tin & Viễn thông (lõi),true,false
+phan-tich-du-lieu-trong-tai-chinh-kinh-doanh,Phân tích dữ liệu trong tài chính kinh doanh,business_econ,"Kinh tế, Quản trị & Tài chính số",false,false
+thiet-ke-do-hoa-game,Thiết kế đồ hoạ game,media_creative,"Truyền thông, Đa phương tiện & Marketing",false,false
+uav-va-robot-di-dong-tu-hanh,UAV và robot di động tự hành,ict_core,Công nghệ thông tin & Viễn thông (lõi),true,false
+truyen-thong-da-phuong-tien-chat-luong-cao,Truyền thông đa phương tiện (chất lượng cao),media_creative,"Truyền thông, Đa phương tiện & Marketing",false,true
+cong-nghe-cong-nghiep-van-hoa-dinh-huong-dien-anh-so,Công nghệ công nghiệp văn hoá (điện ảnh số),media_creative,"Truyền thông, Đa phương tiện & Marketing",false,false
+ky-thuat-truyen-thong-hang-khong-vu-tru,Kỹ thuật truyền thông hàng không vũ trụ,ict_core,Công nghệ thông tin & Viễn thông (lõi),true,false
+logistics-trong-kinh-te-tam-thap,Logistics trong kinh tế tầm thấp,business_econ,"Kinh tế, Quản trị & Tài chính số",false,false

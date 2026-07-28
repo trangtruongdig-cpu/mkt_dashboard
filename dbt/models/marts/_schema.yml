@@ -312,3 +312,63 @@ seeds:
       - dbt_utils.unique_combination_of_columns:
           arguments:
             combination_of_columns: [ma_truong, nam]
+
+  - name: mart__social_mention
+    description: >
+      Từng ý kiến của người ngoài về Học viện, một dòng một ý kiến, kèm sắc thái.
+      Hợp đồng dữ liệu cho trang "Lắng nghe".
+
+      Bên cạnh mart__social_sentiment (tỷ lệ) chứ không thay thế nó: tỷ lệ trả lời "dư
+      luận tốt hay xấu", mart này trả lời "họ nói GÌ". Con số 6% tiêu cực không cho ai
+      biết phải sửa cái gì; sáu câu tiêu cực đọc được thì có.
+
+      Tác giả đã ẩn danh từ lúc thu thập nên không có cột nào chứa danh tính.
+    columns:
+      - name: ma_thao_luan
+        description: Khoá tự nhiên, băm của (nền tảng, định danh gốc).
+        tests: [not_null, unique]
+      - name: nen_tang
+        description: Nền tảng nguồn.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [youtube, reddit, forum]
+      - name: ten_nguon
+        description: Kênh YouTube, subreddit hoặc tên miền diễn đàn.
+        tests: [not_null]
+      - name: hat_du_lieu
+        description: >
+          Loại nội dung. Chỉ có ba giá trị mang ý kiến — `video` đã bị loại từ tầng
+          intermediate vì tiêu đề video là lời giới thiệu, không phải nhận xét.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [comment, post, thread]
+      - name: duong_dan
+        description: >
+          Link về đúng bình luận gốc. Người xem phải kiểm chứng được mọi câu hiển thị
+          trên dashboard — không có link thì con số không tra ngược được.
+      - name: noi_dung
+        description: Nguyên văn, không cắt. Việc cắt là của tầng trình bày.
+        tests: [not_null]
+      - name: sac_thai
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [positive, neutral, negative]
+      - name: do_chac_chan
+        description: >
+          Mức chắc chắn của model, thang 0–1. Dưới 0,6 thì nên đọc câu gốc trước khi tin
+          nhãn — đó là lý do cột này lên tới tận giao diện.
+        tests: [not_null]
+      - name: thu_tu_uu_tien
+        description: >
+          0 tiêu cực · 1 trung tính · 2 tích cực. Sắp theo cột này trước rồi mới tới lượt
+          thích: dashboard sắp theo thời gian sẽ chôn lời phàn nàn quan trọng nhất xuống
+          dưới mười lời khen đăng sau nó.
+        tests: [not_null]
+      - name: da_bi_cat
+        description: Nội dung dài quá giới hạn token, điểm chỉ tính trên phần đầu.

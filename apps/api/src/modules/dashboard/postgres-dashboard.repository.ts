@@ -1,13 +1,18 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import {
   buildDemoDataset,
+  MIN_CONFIDENCE,
+  MIN_MONTHLY_SAMPLE,
   type ChannelsResponse,
   type OverviewResponse,
   type ReachResponse,
   type SentimentByMonth,
   type SentimentResponse,
+  type SocialMention,
+  type SocialMentionsQuery,
+  type SocialMentionsResponse,
 } from "@ptit/shared";
-import { sql } from "drizzle-orm";
+import { sql, type SQL } from "drizzle-orm";
 import { DB, type Database } from "../../db/db.module";
 import { DashboardRepository } from "./dashboard.repository";
 
@@ -105,9 +110,9 @@ export class PostgresDashboardRepository extends DashboardRepository {
           negative: cong((m) => m.negative),
         },
         byMonth,
-        // Dưới 10 thảo luận thì tỷ lệ của tháng đó chỉ phản ánh vài người. Ngưỡng này đi
-        // theo dữ liệu để giao diện không tự đặt một ngưỡng khác.
-        minSampleForTrend: 10,
+        // Ngưỡng dùng chung ở @ptit/shared — cùng một con số với KPI repository và với
+        // biểu đồ. Xem MIN_MONTHLY_SAMPLE để biết vì sao là 10.
+        minSampleForTrend: MIN_MONTHLY_SAMPLE,
       };
     } catch (loi) {
       this.logger.warn(
@@ -117,5 +122,115 @@ export class PostgresDashboardRepository extends DashboardRepository {
       );
       return buildDemoDataset().sentiment;
     }
+  }
+
+  /**
+   * Danh sách ý kiến đọc được, từ `mart__social_mention`.
+   *
+   * Sắp theo `thu_tu_uu_tien` trước rồi mới tới lượt thích và thời gian: sắp theo thời
+   * gian sẽ chôn lời phàn nàn quan trọng nhất xuống dưới mười lời khen đăng sau nó, và
+   * người mở dashboard trong năm phút sẽ không bao giờ cuộn tới chỗ đó.
+   *
+   * `counts` đếm trên TOÀN BỘ phần khớp bộ lọc, không phải trên phần đã cắt theo `limit`.
+   * Trả về số đếm của trang hiện tại là cách nhanh nhất để "3 tiêu cực" trên thẻ tóm tắt
+   * mâu thuẫn với 12 dòng tiêu cực ngay bên dưới.
+   *
+   * KHÔNG có bản giả lập dự phòng: kho hỏng thì ném lỗi để tầng trên biết. Bịa ra những
+   * câu như thể có người thật viết chúng về Học viện là dựng lời cho người không nói.
+   */
+  async getSocialMentions(
+    query: SocialMentionsQuery,
+  ): Promise<SocialMentionsResponse> {
+    const dieu_kien: SQL[] = [];
+    if (query.sentiment) {
+      dieu_kien.push(sql`sac_thai = ${query.sentiment}`);
+    }
+    if (query.platform) {
+      dieu_kien.push(sql`nen_tang = ${query.platform}`);
+    }
+    // `sql.join` tham số hoá từng mảnh, không nối chuỗi — giá trị lọc đến từ người dùng.
+    const loc =
+      dieu_kien.length > 0
+        ? sql`where ${sql.join(dieu_kien, sql` and `)}`
+        : sql``;
+
+    const dong = await this.db.execute<{
+      ma_thao_luan: string;
+      nen_tang: string;
+      ten_nguon: string;
+      hat_du_lieu: string;
+      duong_dan: string | null;
+      noi_dung: string;
+      thoi_diem: string;
+      thoi_diem_la_uoc_luong: boolean;
+      so_luot_thich: string | number;
+      phien_ban_model: string;
+      sac_thai: string;
+      do_chac_chan: string | number;
+      da_bi_cat: boolean;
+    }>(sql`
+      select ma_thao_luan, nen_tang, ten_nguon, hat_du_lieu, duong_dan, noi_dung,
+             thoi_diem, thoi_diem_la_uoc_luong, so_luot_thich, phien_ban_model,
+             sac_thai, do_chac_chan, da_bi_cat
+      from mart.mart__social_mention
+      ${loc}
+      order by thu_tu_uu_tien, so_luot_thich desc, thoi_diem desc
+      limit ${query.limit}
+    `);
+
+    const tong = await this.db.execute<{
+      sac_thai: string;
+      so: string | number;
+    }>(sql`
+      select sac_thai, count(*) as so
+      from mart.mart__social_mention
+      ${loc}
+      group by sac_thai
+    `);
+
+    const rows = Array.from(dong as Iterable<(typeof dong)[number]>);
+    const dem = Array.from(tong as Iterable<(typeof tong)[number]>);
+
+    const counts = { positive: 0, neutral: 0, negative: 0 };
+    for (const r of dem) {
+      if (r.sac_thai in counts) {
+        counts[r.sac_thai as keyof typeof counts] = Number(r.so);
+      }
+    }
+    const totalMatching = counts.positive + counts.neutral + counts.negative;
+
+    const mentions: SocialMention[] = rows.map((r) => ({
+      key: r.ma_thao_luan,
+      platform: r.nen_tang as SocialMention["platform"],
+      sourceName: r.ten_nguon,
+      contentType: r.hat_du_lieu as SocialMention["contentType"],
+      url: r.duong_dan,
+      text: r.noi_dung,
+      occurredAt: new Date(r.thoi_diem).toISOString(),
+      occurredAtEstimated: r.thoi_diem_la_uoc_luong,
+      likeCount: Number(r.so_luot_thich),
+      sentiment: r.sac_thai as SocialMention["sentiment"],
+      confidence: Number(r.do_chac_chan),
+      truncated: r.da_bi_cat,
+    }));
+
+    const moc = rows.map((r) => new Date(r.thoi_diem).getTime());
+
+    return {
+      period: {
+        from: moc.length
+          ? new Date(Math.min(...moc)).toISOString().slice(0, 10)
+          : new Date().toISOString().slice(0, 10),
+        to: moc.length
+          ? new Date(Math.max(...moc)).toISOString().slice(0, 10)
+          : new Date().toISOString().slice(0, 10),
+        label: `${totalMatching} ý kiến khớp bộ lọc`,
+      },
+      modelVersion: rows[0]?.phien_ban_model ?? "chưa có bản ghi nào",
+      totalMatching,
+      counts,
+      mentions,
+      confidenceThreshold: MIN_CONFIDENCE,
+    };
   }
 }
