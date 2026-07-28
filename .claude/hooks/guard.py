@@ -107,15 +107,55 @@ CAM_THU_VIEN = re.compile(
 )
 
 
+def loc_bo_van_ban(lenh: str) -> str:
+    """Bỏ phần THÂN VĂN BẢN ra khỏi lệnh trước khi dò mẫu cấm.
+
+    Vì sao bắt buộc: `git commit -F - <<'EOF' ... git stash ... EOF` là một lệnh
+    commit hoàn toàn vô hại, nhưng thân heredoc có chuỗi `git stash` nên bị chặn.
+    Chính commit giới thiệu bộ gác này đã dính. Mọi commit message, tài liệu, hay
+    chuỗi `echo` nhắc tới tên lệnh nguy hiểm đều sẽ dính y như vậy.
+
+    Bỏ thân heredoc và nội dung trong nháy đơn. KHÔNG bỏ nháy kép vì shell vẫn khai
+    triển biến bên trong đó, nên nó còn có thể sinh ra lệnh thật.
+    """
+    khong_heredoc = re.sub(
+        r"<<-?\s*(['\"]?)(\w+)\1.*?^\s*\2\s*$",
+        " <<heredoc> ",
+        lenh,
+        flags=re.DOTALL | re.MULTILINE,
+    )
+    # Heredoc chưa đóng (lệnh bị cắt) — bỏ từ dấu << tới hết.
+    khong_heredoc = re.sub(r"<<-?\s*['\"]?\w+['\"]?.*", " <<heredoc> ", khong_heredoc, flags=re.DOTALL)
+    return re.sub(r"'[^']*'", " '…' ", khong_heredoc)
+
+
 def ham_rm_an_toan(lenh: str) -> bool:
-    """rm -rf chỉ được duyệt khi mọi đích đến đều là thứ dựng lại được."""
-    dich = re.findall(r"rm\s+(?:-[a-zA-Z]+\s+)*(.+)", lenh)
-    if not dich:
-        return False
-    duong_dan = dich[0].split()
-    if not duong_dan:
-        return False
-    return all(any(an_toan in d for an_toan in XOA_DUOC) for d in duong_dan)
+    """Chỉ chặn `rm` ĐỆ QUY vào đích không dựng lại được.
+
+    Hai điều phải cẩn thận, cả hai đều đã bắt hụt ở bản đầu:
+
+    1. Phải cắt lệnh ghép trước. `rm -f /tmp/x.txt; jq -r '...'` mà đọc cả chuỗi thì
+       `jq` và `-r` bị tính thành đích xoá, và lệnh dọn dẹp vô hại bị chặn oan.
+       Phiên chạy đêm gặp cái này sẽ loay hoay tới sáng.
+    2. `rm` không có -r chỉ xoá được từng file lẻ; file đã theo dõi thì git lấy lại
+       được. Không đáng chặn — chặn rộng quá thì người ta tắt cả bộ gác.
+    """
+    for doan in re.split(r"[;|&\n]+", lenh):
+        m = re.search(r"\brm\b((?:\s+-[a-zA-Z]+)*)\s+(.+)", doan)
+        if not m:
+            continue
+
+        co_de_quy = "r" in m.group(1).lower().replace("-", "")
+        if not co_de_quy:
+            continue
+
+        dich = [d for d in m.group(2).split() if not d.startswith("-")]
+        if not dich:
+            return False
+        if not all(any(an_toan in d for an_toan in XOA_DUOC) for d in dich):
+            return False
+
+    return True
 
 
 def tra_loi(quyet_dinh: str, ly_do: str, tom_tat: str) -> None:
@@ -175,8 +215,11 @@ def main() -> None:
 
     # ── Lệnh shell ──────────────────────────────────────────────────────────
     if ten == "Bash":
-        lenh = str(dau_vao.get("command", ""))
-        tom_tat = lenh if len(lenh) <= 110 else lenh[:107] + "..."
+        lenh_goc = str(dau_vao.get("command", ""))
+        tom_tat = lenh_goc if len(lenh_goc) <= 110 else lenh_goc[:107] + "..."
+
+        # Dò trên bản đã bỏ thân văn bản, không dò trên lệnh gốc.
+        lenh = loc_bo_van_ban(lenh_goc)
 
         if CAM_THU_VIEN.search(lenh):
             tra_loi("deny", "Cài thư viện nằm trong danh sách cấm ở CLAUDE.md mục 2. "
