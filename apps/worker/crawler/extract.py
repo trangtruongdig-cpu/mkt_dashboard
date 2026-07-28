@@ -60,9 +60,35 @@ def _robots(url: str) -> RobotFileParser | None:
     return parser
 
 
-def duoc_phep_tai(url: str) -> bool:
+# Tên tác nhân mà news-please tự xưng. Phải kiểm robots.txt theo CẢ tên này, không chỉ
+# theo user-agent của dự án.
+#
+# VnExpress cấm đích danh trong https://vnexpress.net/robots.txt (dòng 36–37):
+#
+#     User-agent: news-please
+#     Disallow: /
+#
+# trong khi `User-agent: *` của cùng file lại `Allow: /`. Chỉ kiểm bằng user-agent của
+# dự án thì phép kiểm luôn nói "được phép", rồi news-please vẫn đi lấy bài — đúng thứ
+# toà soạn đã nói rõ là không muốn. Ai là người đi lấy mới là điều quan trọng, không
+# phải chuỗi ký tự mình khai.
+NEWSPLEASE_AGENT = "news-please"
+
+
+def duoc_phep_tai(url: str, agent: str = USER_AGENT) -> bool:
+    """Robots.txt có cho phép `agent` lấy đường dẫn này không."""
     parser = _robots(url)
-    return True if parser is None else parser.can_fetch(USER_AGENT, url)
+    return True if parser is None else parser.can_fetch(agent, url)
+
+
+def duoc_phep_boc_toan_van(url: str) -> bool:
+    """Có được dùng news-please bóc toàn văn bài này không.
+
+    Phải thoả CẢ HAI: user-agent của dự án được phép, và news-please cũng được phép.
+    Đổi chuỗi user-agent để lách một lệnh cấm nêu đích danh công cụ là lách luật chứ
+    không phải tuân thủ — và đây là hồ sơ nghiệm thu nhà nước.
+    """
+    return duoc_phep_tai(url) and duoc_phep_tai(url, NEWSPLEASE_AGENT)
 
 
 def _ngay_dang(gia_tri: Any) -> datetime | None:
@@ -76,7 +102,7 @@ def fetch_article(url: str) -> Article:
 
     Một bài hỏng không được làm dừng cả mẻ đang chạy.
     """
-    if not duoc_phep_tai(url):
+    if not duoc_phep_boc_toan_van(url):
         return Article("", None, None, "robots_disallowed")
 
     try:
