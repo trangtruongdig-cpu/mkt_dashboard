@@ -13,6 +13,15 @@ import { DB, type Database } from "../../db/db.module";
 import { KpiRepository } from "./kpi.repository";
 
 /**
+ * Số bản ghi tối thiểu để tỷ lệ sắc thái của một tháng được coi là đọc được.
+ *
+ * Phải khớp với `minSampleForTrend` mà `PostgresDashboardRepository` trả cho giao diện:
+ * hai nơi đặt hai ngưỡng khác nhau thì biểu đồ làm mờ một tháng trong khi cascade vẫn
+ * lấy chính tháng đó làm mốc so sánh.
+ */
+const MAU_TOI_THIEU_THANG = 10;
+
+/**
  * Đọc giá trị thật của chỉ số từ các bảng `mart__*` do dbt sinh ra.
  *
  * Cấu trúc cascade vẫn lấy từ `@ptit/shared` — mục tiêu, diễn giải, mức cần đạt là
@@ -37,14 +46,24 @@ export class PostgresKpiRepository extends KpiRepository {
       // Ba nguồn đọc riêng, mỗi nguồn tự chịu lỗi của mình: dữ liệu công khai và
       // Wikipedia được nạp bằng job khác GA4 nên có thể chưa có, và khi đó không được
       // kéo sập luôn các chỉ số đã đọc được.
-      const [tu_ga4, tu_cong_khai, tu_chu_y, tu_bao_chi] = await Promise.all([
-        this.docAnToan("GA4", () => this.docGiaTri()),
-        this.docAnToan("tài liệu công khai", () => this.docGiaTriCongKhai()),
-        this.docAnToan("thị phần chú ý", () => this.docGiaTriChuY()),
-        this.docAnToan("thị phần thảo luận", () => this.docGiaTriThaoLuan()),
-      ]);
+      const [tu_ga4, tu_cong_khai, tu_chu_y, tu_bao_chi, tu_sac_thai, tu_diem] =
+        await Promise.all([
+          this.docAnToan("GA4", () => this.docGiaTri()),
+          this.docAnToan("tài liệu công khai", () => this.docGiaTriCongKhai()),
+          this.docAnToan("thị phần chú ý", () => this.docGiaTriChuY()),
+          this.docAnToan("thị phần thảo luận", () => this.docGiaTriThaoLuan()),
+          this.docAnToan("sắc thái", () => this.docGiaTriSacThai()),
+          this.docAnToan("điểm chuẩn", () => this.docGiaTriDiemChuan()),
+        ]);
 
-      const do_duoc = [...tu_ga4, ...tu_cong_khai, ...tu_chu_y, ...tu_bao_chi];
+      const do_duoc = [
+        ...tu_ga4,
+        ...tu_cong_khai,
+        ...tu_chu_y,
+        ...tu_bao_chi,
+        ...tu_sac_thai,
+        ...tu_diem,
+      ];
       this.logger.log(`Đã đọc ${do_duoc.length} chỉ số từ bảng mart.`);
 
       // Bộ số liệu giả lập gắn nhãn kỳ "12 tuần gần nhất". Giữ nguyên nhãn đó khi đã
@@ -311,6 +330,98 @@ export class PostgresKpiRepository extends KpiRepository {
         from ptit where ty_le_viec_lam_pct is not null
       )
       select 'employment_rate' as kpi_key, nay as value, truoc as baseline from viec_lam
+    `);
+
+    return this.thanhChiSo(ket_qua);
+  }
+
+  /**
+   * Chênh lệch điểm chuẩn của Học viện so với nhóm đối sánh, cùng năm.
+   *
+   * Dương nghĩa là thí sinh chấp nhận đánh đổi điểm cao hơn để vào Học viện. Đây là
+   * thước đo LỰA CHỌN mạnh nhất quan sát được từ bên ngoài, vì nó là hành vi thật.
+   *
+   * Chỉ tính trên trường có từ 10 ngành trở lên (`du_nganh`): bình quân của một trường
+   * chỉ công bố vài ngành không đại diện cho trường đó. Và vì cơ cấu ngành mỗi trường
+   * một khác, con số này đọc theo XU HƯỚNG qua các năm chứ không đọc như một mức tuyệt đối.
+   */
+  private async docGiaTriDiemChuan(): Promise<KpiMeasuredValue[]> {
+    const ket_qua = await this.db.execute<{
+      kpi_key: string;
+      value: string | number | null;
+      baseline: string | number | null;
+    }>(sql`
+      with du_dieu_kien as (
+        select * from mart.mart__admission_score_benchmark where du_nganh
+      ),
+      theo_nam as (
+        select
+          nam,
+          max(diem_binh_quan) filter (where la_hoc_vien)          as hoc_vien,
+          avg(diem_binh_quan) filter (where not la_hoc_vien)      as doi_sanh
+        from du_dieu_kien
+        group by nam
+      ),
+      chenh_lech as (
+        select nam, round(hoc_vien - doi_sanh, 2) as chenh
+        from theo_nam
+        where hoc_vien is not null and doi_sanh is not null
+      )
+      select
+        'score_premium' as kpi_key,
+        (array_agg(chenh order by nam desc))[1] as value,
+        (array_agg(chenh order by nam desc))[2] as baseline
+      from chenh_lech
+    `);
+
+    return this.thanhChiSo(ket_qua);
+  }
+
+  /**
+   * Sắc thái báo chí và sắc thái dư luận — HAI chỉ số riêng, không gộp.
+   *
+   * Đo trên dữ liệu thật, hai nguồn cho ra 56,9% và 80,0% tích cực: báo chí đưa tin
+   * điểm chuẩn và thông báo nên trung tính hơn hẳn, còn dư luận thì ấm hơn. Gộp lại
+   * thành một tỷ lệ là xoá mất đúng cái khác biệt cần thấy, và mẫu số của hai bên cũng
+   * chênh nhau gần ba lần nên trung bình cộng sẽ nghiêng hẳn về phía báo chí.
+   *
+   * Lấy TOÀN KỲ chứ không lấy tháng gần nhất: mỗi tháng chỉ vài chục bản ghi, và tháng
+   * đang chạy thì luôn dở dang.
+   *
+   * Mốc so sánh chỉ lấy từ tháng ĐẠT TỐI THIỂU {@link MAU_TOI_THIEU_THANG} bản ghi.
+   * Bản đầu tiên không có ràng buộc này và cho ra baseline 100% cho mạng xã hội — lấy
+   * từ một tháng năm 2018 có đúng MỘT thảo luận. Bảng khi đó hiện "giảm từ 100% xuống
+   * 80%", nghe như dư luận đang xấu đi, trong khi thực chất là so với ý kiến của một
+   * người. Không tháng nào đủ mẫu thì trả `null`: thà không có mốc so sánh còn hơn có
+   * một mốc sai.
+   */
+  private async docGiaTriSacThai(): Promise<KpiMeasuredValue[]> {
+    const ket_qua = await this.db.execute<{
+      kpi_key: string;
+      value: string | number | null;
+      baseline: string | number | null;
+    }>(sql`
+      with bao_chi as (
+        select
+          round(100.0 * sum(so_tich_cuc) / nullif(sum(so_tin_bai), 0), 1) as toan_ky,
+          (array_agg(ty_le_tich_cuc_pct order by thang)
+            filter (where so_tin_bai >= ${MAU_TOI_THIEU_THANG}))[1]       as thang_dau
+        from mart.mart__news_sentiment
+      ),
+      mang_xa_hoi as (
+        select
+          round(100.0 * sum(so_tich_cuc) / nullif(sum(so_thao_luan), 0), 1) as toan_ky,
+          (array_agg(ty_le_tich_cuc_pct order by thang)
+            filter (where so_thao_luan >= ${MAU_TOI_THIEU_THANG}))[1]       as thang_dau
+        from mart.mart__social_sentiment
+      )
+      select 'positive_sentiment_share' as kpi_key,
+             toan_ky as value, thang_dau as baseline
+      from bao_chi
+      union all
+      select 'social_positive_sentiment_share' as kpi_key,
+             toan_ky as value, thang_dau as baseline
+      from mang_xa_hoi
     `);
 
     return this.thanhChiSo(ket_qua);

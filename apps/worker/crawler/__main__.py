@@ -154,6 +154,9 @@ def main(argv: list[str] | None = None) -> int:
         "cong-khai-ke-hoach",
         help="In việc cần làm: tài liệu nào bóc bằng máy được, tài liệu nào phải nhập tay",
     )
+    sub.add_parser("diem-chuan", help="Bóc điểm chuẩn trúng tuyển của nhóm trường đối sánh")
+    sub.add_parser("diem-chuan-thong-ke", help="Thống kê điểm chuẩn đã bóc được")
+
     sub.add_parser(
         "cong-khai-boc-so",
         help="Bóc số liệu từ các bản Biểu 18 đọc được bằng máy",
@@ -202,6 +205,14 @@ def main(argv: list[str] | None = None) -> int:
             from . import edu_docs_probe
 
             edu_docs_probe.in_ke_hoach()
+        elif args.lenh == "diem-chuan":
+            from . import scores_job
+
+            scores_job.run()
+        elif args.lenh == "diem-chuan-thong-ke":
+            from . import scores_job
+
+            scores_job.in_thong_ke()
         elif args.lenh == "cong-khai-boc-so":
             from . import bm18_job
 

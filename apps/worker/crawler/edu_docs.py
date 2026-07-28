@@ -85,7 +85,24 @@ _KIND_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ),
     ("bm17_cam_ket_chat_luong", ("bm17", "bm_17", "biểu 17", "biểu mẫu 17", "cam kết chất lượng")),
     ("bm19_co_so_vat_chat", ("bm19", "bm_19", "biểu 19", "biểu mẫu 19", "cơ sở vật chất", "csvc")),
-    ("de_an_tuyen_sinh", ("đề án tuyển sinh", "de an tuyen sinh", "de-an-tuyen-sinh", "dats")),
+    (
+        "de_an_tuyen_sinh",
+        # Tên tệp thật rút gọn đủ kiểu: `qd_545_noi_dung_de_an_ts__h_2024.pdf` của Học
+        # viện và `KMA_De-an-TS-2025.pdf` của Kỹ thuật Mật mã. Chỉ khớp cụm đầy đủ
+        # "đề án tuyển sinh" là bỏ sót cả hai — và đó đúng là chuyện đã xảy ra.
+        (
+            "đề án tuyển sinh",
+            "de an tuyen sinh",
+            "de-an-tuyen-sinh",
+            "de_an_tuyen_sinh",
+            "de-an-ts",
+            "de_an_ts",
+            "de an ts",
+            "noi dung de an",
+            "noi_dung_de_an",
+            "dats",
+        ),
+    ),
     ("bao_cao_thuong_nien", ("thường niên", "thuong nien", "thuong-nien")),
     ("quyet_toan_ngan_sach", ("quyết toán", "quyet toan", "quyet-toan")),
     ("du_toan_ngan_sach", ("dự toán", "du toan", "du-toan")),

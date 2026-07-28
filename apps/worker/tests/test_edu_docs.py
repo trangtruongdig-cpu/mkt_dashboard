@@ -141,3 +141,15 @@ def test_nhan_dien_pdf_co_lop_chu() -> None:
     assert detect_text_layer(b"%PDF-1.7\n<< /Type /Page /Resources << /Font << >> >> >>")
     assert not detect_text_layer(b"%PDF-1.7\n<< /Type /XObject /Subtype /Image >>")
     assert not detect_text_layer(b""), "Tệp rỗng không được coi là có chữ"
+
+
+def test_nhan_dien_de_an_viet_tat() -> None:
+    """Tên tệp thật rút gọn đủ kiểu; chỉ khớp cụm đầy đủ là bỏ sót cả PTIT lẫn ACTVN."""
+    assert classify_kind("/f/qd_545_noi_dung_de_an_ts__h_2024.pdf", "") == "de_an_tuyen_sinh"
+    assert classify_kind("/KMA_De-an-TS-2025-24.02.25.pdf", "") == "de_an_tuyen_sinh"
+    assert classify_kind("/de-an-tuyen-sinh-2026.pdf", "") == "de_an_tuyen_sinh"
+    assert classify_kind("/f.pdf", "Đề án tuyển sinh năm 2024") == "de_an_tuyen_sinh"
+
+
+def test_khong_nhan_nham_quyet_dinh_thuong_thanh_de_an() -> None:
+    assert classify_kind("/QD-1240.pdf", "File đính kèm: QD 1240") == "khac"

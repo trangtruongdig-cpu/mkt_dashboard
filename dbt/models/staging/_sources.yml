@@ -29,6 +29,10 @@ sources:
         description: >
           Số liệu bóc từ Biểu mẫu 18 của từng trường. Cột `warnings` ghi mọi chỗ đáng
           ngờ trong lúc bóc — phải đọc trước khi so sánh chéo giữa các trường.
+      - name: raw_admission_score
+        description: >
+          Điểm chuẩn trúng tuyển từng ngành, bóc từ trang công bố của mỗi trường. Chỉ
+          chứa điểm thang 30; điểm SAT và đánh giá năng lực bị loại ngay ở bước bóc.
       - name: raw_news_mention
         description: >
           Tin bài công khai có nhắc tới nhóm sáu trường đối sánh. Cột `brands` là danh

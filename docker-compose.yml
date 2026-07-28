@@ -76,6 +76,17 @@ services:
         # Trình duyệt gọi API qua cùng tên miền công khai, Caddy định tuyến /api sang api.
         NEXT_PUBLIC_API_URL: ${PUBLIC_URL:-http://localhost:8080}
     restart: unless-stopped
+    environment:
+      # Hai địa chỉ khác nhau cho hai phía, và đây là chỗ rất dễ nhầm:
+      #
+      #   NEXT_PUBLIC_API_URL (build arg ở trên) — TRÌNH DUYỆT dùng, phải là tên miền
+      #     công khai vì máy người xem không thấy được mạng nội bộ của Docker.
+      #   API_URL (biến môi trường này)          — SERVER COMPONENT dùng, chạy bên trong
+      #     container nên phải gọi thẳng tên service. Đưa localhost:8080 vào đây thì
+      #     Next.js gọi vào chính nó, fetch hỏng, và trang lặng lẽ rơi về dữ liệu giả lập.
+      #
+      # `src/lib/api.ts` ưu tiên API_URL trước, đúng thứ tự này.
+      API_URL: http://api:3002
     depends_on:
       api:
         condition: service_healthy

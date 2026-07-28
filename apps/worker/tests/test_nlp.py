@@ -15,8 +15,8 @@ import pytest
 
 from crawler.settings import StoreSettings
 from nlp.model import NEGATIVE, NEUTRAL, POSITIVE, doc_bang_nhan
-from nlp.settings import MODELS, NlpError, model_theo_ma
-from nlp.storage import TABLE, DiemSacThai, DuckDbStore
+from nlp.settings import CORPUS, MODELS, SOCIAL, NlpError, corpus_theo_ma, model_theo_ma
+from nlp.storage import DiemSacThai, DuckDbStore
 
 THOI_DIEM = datetime(2026, 7, 28, 6, 0, tzinfo=UTC)
 SAU_MOT_THANG = THOI_DIEM + timedelta(days=30)
@@ -68,6 +68,24 @@ def test_hai_model_cho_hai_loai_van_ban() -> None:
     assert MODELS["visobert-social"].repo != MODELS["phobert-news"].repo
 
 
+def test_moi_kho_ghep_cung_voi_dung_model() -> None:
+    """Ghép cứng kho với model để không ai lỡ tay chấm bình luận YouTube bằng PhoBERT:
+    chọn nhầm không báo lỗi, chỉ cho ra điểm sai một cách im lặng."""
+    assert CORPUS["social"].model.ma == "visobert-social"
+    assert CORPUS["news"].model.ma == "phobert-news"
+
+
+def test_hai_kho_ghi_vao_hai_bang_khac_nhau() -> None:
+    """Chung bảng thì điểm của hai model đè lên nhau qua khoá (mention_key, model_version)
+    chỉ khi trùng mention_key — mà hai kho dùng hai không gian khoá khác nhau."""
+    assert CORPUS["social"].bang_diem != CORPUS["news"].bang_diem
+
+
+def test_kho_la_thi_bao_loi_ro_rang() -> None:
+    with pytest.raises(NlpError, match="Hiện có"):
+        corpus_theo_ma("khong-co-kho-nay")
+
+
 def test_ma_model_la_thi_bao_loi_ro_rang() -> None:
     with pytest.raises(NlpError, match="Hiện có"):
         model_theo_ma("khong-co-model-nay")
@@ -88,7 +106,7 @@ def store(tmp_path: Path) -> Iterator[DuckDbStore]:
         postgres_password="",
         schema_name="social_raw",
     )
-    kho = DuckDbStore(settings)
+    kho = DuckDbStore(settings, SOCIAL)
     yield kho
     kho.close()
 
@@ -131,7 +149,7 @@ def test_cham_lai_cung_phien_ban_thi_ghi_de(store: DuckDbStore) -> None:
     store.upsert([diem(confidence=0.97, scored_at=SAU_MOT_THANG)])
 
     assert store.count() == 1
-    kq = store._con.execute(f"SELECT confidence, scored_at FROM {TABLE}").fetchone()
+    kq = store._con.execute(f"SELECT confidence, scored_at FROM {SOCIAL.bang_diem}").fetchone()
     assert kq is not None
     assert kq[0] == pytest.approx(0.97)
     assert kq[1] == SAU_MOT_THANG
@@ -142,7 +160,7 @@ def test_giu_du_ba_diem_chu_khong_chi_nhan_thang(store: DuckDbStore) -> None:
     đều ra 'tích cực', nhưng mức độ chắc chắn khác hẳn nhau."""
     store.upsert([diem(score_positive=0.34, score_neutral=0.33, score_negative=0.33)])
     kq = store._con.execute(
-        f"SELECT score_positive, score_neutral, score_negative FROM {TABLE}"
+        f"SELECT score_positive, score_neutral, score_negative FROM {SOCIAL.bang_diem}"
     ).fetchone()
     assert kq is not None
     assert sum(kq) == pytest.approx(1.0)
@@ -152,7 +170,7 @@ def test_danh_dau_ban_ghi_bi_cat(store: DuckDbStore) -> None:
     """`truncation=True` cắt lặng lẽ. Không đánh dấu thì về sau không biết điểm của một bài
     dài là chấm trên toàn bài hay chỉ trên đoạn đầu."""
     store.upsert([diem(truncated=True, text_chars=4200)])
-    kq = store._con.execute(f"SELECT truncated, text_chars FROM {TABLE}").fetchone()
+    kq = store._con.execute(f"SELECT truncated, text_chars FROM {SOCIAL.bang_diem}").fetchone()
     assert kq == (True, 4200)
 
 

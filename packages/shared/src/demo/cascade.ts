@@ -101,6 +101,22 @@ const SOURCE_NEWS_CRAWLER: DataProvenance = {
   label: "Kho tin bài do worker thu thập, chấm sắc thái bằng PhoBERT",
 };
 
+/**
+ * Thảo luận của NGƯỜI NGOÀI, khác hẳn kho tin bài. Tách nguồn riêng vì hai kho được
+ * chấm bằng hai model khác nhau: đọc số của chúng như thể cùng một thang đo là sai.
+ *
+ * Không có Facebook trong danh sách, và đó không phải là thiếu sót: Meta đóng CrowdTangle
+ * từ 14/08/2024, bản thay thế (Meta Content Library) phải xin qua ICPSR. TikTok Research
+ * API chỉ mở cho cơ sở ở Mỹ/EEA/Anh/Thuỵ Sĩ/Brazil. Quét trang để lấy là vi phạm điều
+ * khoản nền tảng — hệ thống này không làm, và độ phủ thiếu được ghi nhận thay vì che đi.
+ */
+const SOURCE_SOCIAL_LISTENING: DataProvenance = {
+  label:
+    "YouTube Data API v3 (bình luận công khai) và Reddit search feed, chấm sắc thái bằng ViSoBERT",
+  legalBasis:
+    "API chính thức của nền tảng cho dữ liệu công khai. Tài khoản người bình luận lưu dưới dạng mã băm, không lưu tên hiển thị.",
+};
+
 const SOURCE_PLATFORM_RESEARCH_API: DataProvenance = {
   label:
     "Cần quyền truy cập nghiên cứu của nền tảng (Meta Content Library, TikTok Research API) — chưa đăng ký",
@@ -328,6 +344,15 @@ const KPI_SPECS: readonly KpiSpec[] = [
     cadence: "annual",
     provenance: SOURCE_ADMISSION_SCHEME,
     hint: "Thí sinh sẵn sàng đánh đổi bao nhiêu điểm để vào Học viện thay vì trường khác.",
+    comparability: {
+      basis: "calendar",
+      caveat:
+        "So theo NĂM tuyển sinh. Cơ cấu ngành mỗi trường một khác nên đọc theo XU HƯỚNG qua các năm, không đọc như một mức tuyệt đối. Chỉ tính trường công bố từ 10 ngành trở lên.",
+    },
+    targetRationale: {
+      basis: "pending_approval",
+      note: "Năm 2025 Học viện bình quân 24,02 điểm, Trường ĐH Công nghệ 25,75 — chênh −1,73. Đặt mục tiêu +0,5 điểm là đảo chiều chênh lệch, cần Học viện xác nhận có khả thi trong một mùa hay không.",
+    },
   },
   {
     key: "admission_quota",
@@ -608,6 +633,11 @@ const KPI_SPECS: readonly KpiSpec[] = [
       basis: "trend_continuation",
       note: "Đo được 56,9% trên 239 bài đã gán nhãn (PhoBERT). Đặt 60% là nhích nhẹ trên mức hiện tại — mức 75% ban đầu không có căn cứ nào, và không đạt được với dòng tin điểm chuẩn vốn trung tính theo bản chất.",
     },
+    comparability: {
+      basis: "admission_cycle",
+      caveat:
+        "Mốc gốc là tháng đầu chuỗi. Lượng tin bài dồn vào mùa công bố điểm chuẩn (tháng 7-8), nên so hai tháng bất kỳ trong năm là so hai mùa khác nhau — đọc kèm cột số bài của từng tháng.",
+    },
     hint: "Báo chí đưa tin điểm chuẩn và thông báo tuyển sinh nên phần lớn bài là trung tính. Tỷ lệ tích cực thấp hơn mạng xã hội là bình thường, không phải dấu hiệu xấu.",
   },
   {
@@ -625,6 +655,11 @@ const KPI_SPECS: readonly KpiSpec[] = [
     targetRationale: {
       basis: "trend_continuation",
       note: "Đo được 80,0% trên 90 thảo luận (ViSoBERT). Đặt 75% làm ngưỡng cảnh báo: tụt xuống dưới mức này là dấu hiệu dư luận đang xấu đi, chứ không phải mục tiêu phải vượt.",
+    },
+    comparability: {
+      basis: "calendar",
+      caveat:
+        "Mẫu quá mỏng để so hai tháng với nhau: có tháng chỉ 1-2 thảo luận, khi đó tỷ lệ chỉ phản ánh đúng một người. Chỉ so khi cả hai tháng đều đạt tối thiểu 10 thảo luận.",
     },
     hint: "Mẫu còn mỏng (90 thảo luận trong một năm) — đọc kèm số lượng, đừng đọc riêng tỷ lệ.",
   },
@@ -880,10 +915,10 @@ const REQUIREMENTS: Record<string, KpiRequirement> = {
     todo: "Crawler và bộ bóc Biểu 18 đã chạy, nhưng biểu mẫu này KHÔNG có ô số nhập học so với chỉ tiêu — phải bóc thêm bảng kết quả tuyển sinh trong đề án tuyển sinh",
   },
   score_premium: {
-    platform: "Công bố điểm chuẩn hằng năm của 6 trường",
-    fields: ["điểm chuẩn theo ngành", "phương thức xét tuyển", "năm"],
-    readiness: "needs_build",
-    todo: "Viết parser trang điểm chuẩn (worker/crawler/benchmarks.py)",
+    platform: "Trang công bố điểm chuẩn của từng trường",
+    fields: ["điểm chuẩn theo ngành (thang 30)", "mã ngành", "năm"],
+    readiness: "connected",
+    todo: "Mới khai được trang của Học viện và Trường ĐH Công nghệ. Bách khoa Hà Nội không truy cập được, UIT dựng bảng bằng JavaScript, Mật mã công bố dạng danh sách trúng tuyển, FPT xét học bạ nên không có thang 30",
   },
   admission_quota: {
     platform: "Thông báo tuyển sinh của Học viện",
@@ -987,8 +1022,14 @@ const REQUIREMENTS: Record<string, KpiRequirement> = {
   positive_sentiment_share: {
     platform: "PhoBERT chấm trên kho tin bài",
     fields: ["sentiment_score", "model_version", "scored_at"],
-    readiness: "needs_build",
-    todo: "Viết bước chấm sắc thái (worker/nlp/sentiment.py), nướng sẵn model vào image",
+    readiness: "connected",
+    todo: null,
+  },
+  social_positive_sentiment_share: {
+    platform: "ViSoBERT chấm trên kho thảo luận mạng xã hội",
+    fields: ["sentiment_score", "model_version", "scored_at"],
+    readiness: "connected",
+    todo: null,
   },
   attribute_coverage: {
     platform: "Trích thuộc tính trên kho tin bài",
@@ -1166,6 +1207,12 @@ const INTERPRETATIONS: Record<string, KpiInterpretation> = {
   positive_sentiment_share: {
     positive: "Tăng: được nhắc tới nhiều đi kèm được nhắc tới tốt.",
     negative: "Giảm: hiện diện tăng mà sắc thái xấu đi còn hại hơn im lặng.",
+  },
+  social_positive_sentiment_share: {
+    positive:
+      "Tăng: người ngoài nói về Học viện theo hướng tốt — thứ không mua được bằng ngân sách truyền thông.",
+    negative:
+      "Giảm: dư luận đang xấu đi. Đọc thẳng các bình luận tiêu cực để biết vì sao, đừng chỉ nhìn tỷ lệ.",
   },
   attribute_coverage: {
     positive: "Tăng: tin bài không chỉ nhắc tên mà còn gắn đúng ba thuộc tính mục tiêu.",

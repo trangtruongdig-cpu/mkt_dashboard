@@ -1,0 +1,5 @@
+Thư mục tài nguyên tĩnh của Next.js.
+
+Giữ file này để git theo dõi được thư mục: git không lưu thư mục rỗng, mà Dockerfile của
+web lại COPY thẳng apps/web/public. Thiếu thư mục thì `docker compose up --build web` hỏng
+ở bước COPY — đúng lỗi đã xảy ra sau một lần dọn lịch sử repo.

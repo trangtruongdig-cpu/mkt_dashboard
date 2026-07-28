@@ -288,3 +288,27 @@ seeds:
       - dbt_utils.unique_combination_of_columns:
           arguments:
             combination_of_columns: [thang, phien_ban_model]
+
+  - name: mart__admission_score_benchmark
+    description: >
+      Điểm chuẩn bình quân theo trường và năm. Giữ cả số ngành và độ trải vì bình quân
+      của hai trường có cơ cấu ngành khác nhau không so trực tiếp được.
+    columns:
+      - name: ma_truong
+        tests: [not_null]
+      - name: nam
+        tests: [not_null]
+      - name: so_nganh
+        tests: [not_null]
+      - name: diem_binh_quan
+        description: Bình quân không trọng số của các ngành, thang 30.
+        tests: [not_null]
+      - name: du_nganh
+        description: >
+          Đúng khi trường có từ 10 ngành trở lên. Bình quân trên vài ngành lẻ không đại
+          diện cho trường — tầng đọc phải lọc theo cột này.
+        tests: [not_null]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ma_truong, nam]

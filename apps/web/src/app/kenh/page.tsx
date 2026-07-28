@@ -1,3 +1,4 @@
+import { SENTIMENT_SOURCE_LABELS } from "@ptit/shared";
 import Link from "next/link";
 import { Card } from "@/components/Card";
 import { ChannelTable } from "@/components/ChannelTable";
@@ -110,8 +111,8 @@ export default async function TrangKenh() {
         </Card>
 
         <Card
-          title="Sắc thái thảo luận theo tuần"
-          subtitle={`${sentiment.totalMentions.toLocaleString("vi-VN")} lượt nhắc · mô hình ${sentiment.modelVersion}`}
+          title={`Sắc thái theo tháng — ${SENTIMENT_SOURCE_LABELS[sentiment.source]}`}
+          subtitle={`${sentiment.totalMentions.toLocaleString("vi-VN")} lượt nhắc · mô hình ${sentiment.modelVersion} · chiều cao cột là số lượt, tháng dưới ${sentiment.minSampleForTrend} lượt được làm mờ`}
         >
           <SentimentChart data={sentiment} />
         </Card>

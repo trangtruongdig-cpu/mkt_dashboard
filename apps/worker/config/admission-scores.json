@@ -1,0 +1,57 @@
+{
+  "_ghi_chu": [
+    "Trang công bố điểm chuẩn trúng tuyển của nhóm trường đối sánh.",
+    "",
+    "Điểm chuẩn là thước đo LỰA CHỌN mạnh nhất quan sát được từ bên ngoài: nó cho biết",
+    "thí sinh sẵn sàng đánh đổi bao nhiêu điểm để vào trường này thay vì trường khác.",
+    "",
+    "Mỗi trường công bố một kiểu và KHÔNG có quy luật đặt đường dẫn chung, nên phải khai",
+    "từng trang một. Bộ bóc dò cột theo TIÊU ĐỀ chứ không theo vị trí, nên chỉ cần bảng",
+    "có một cột tên kiểu 'Điểm chuẩn' hoặc 'Điểm trúng tuyển' là chạy được.",
+    "",
+    "pages rỗng nghĩa là chưa dò ra trang, không phải trường đó không công bố. Ô trống",
+    "này hiện lên cột 'nền tảng và kỹ thuật' của bảng điều khiển như một việc còn phải làm."
+  ],
+  "schools": [
+    {
+      "key": "ptit",
+      "pages": [
+        {
+          "year": 2025,
+          "url": "https://ptit.edu.vn/diem-chuan-trung-tuyen-vao-dai-hoc-he-chinh-quy-nam-2025/",
+          "note": "Trang có hai bảng; bảng thứ hai là thang quy đổi phương thức xét tuyển, bộ bóc tự loại."
+        }
+      ]
+    },
+    {
+      "key": "uet",
+      "pages": [
+        {
+          "year": 2025,
+          "url": "https://tuyensinh.uet.vnu.edu.vn/uncategorized/thong-bao-diem-trung-tuyen-dai-hoc-chinh-quy-vao-truong-dai-hoc-cong-nghe-dhqghn-nam-2025/",
+          "note": "Cột tên là 'Điểm trúng tuyển', mã ngành dạng CN1..CN9."
+        }
+      ]
+    },
+    {
+      "key": "hust",
+      "pages": [],
+      "note": "ts.hust.edu.vn không truy cập được từ môi trường thu thập (fetch failed). Cần thử lại từ mạng khác hoặc tìm trang công bố trên hust.edu.vn."
+    },
+    {
+      "key": "uit",
+      "pages": [],
+      "note": "tuyensinh.uit.edu.vn dựng bảng điểm chuẩn bằng JavaScript, không có <table> trong HTML thô."
+    },
+    {
+      "key": "actvn",
+      "pages": [],
+      "note": "Công bố dạng danh sách trúng tuyển, không có bảng điểm chuẩn theo ngành."
+    },
+    {
+      "key": "fpt",
+      "pages": [],
+      "note": "Xét tuyển theo học bạ và xếp hạng THPT, không công bố điểm chuẩn thang 30 nên chỉ số này không áp dụng."
+    }
+  ]
+}
