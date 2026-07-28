@@ -107,16 +107,32 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-ptit_dashboard}
       POSTGRES_USER: ${POSTGRES_USER:-ptit}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      CRAWLER_SCHEMA: news_raw
+      # PHẢI là `raw`, không phải `news_raw`.
+      #
+      # dbt đọc mọi bảng thô từ lược đồ `raw` (xem dbt/models/staging/_sources.yml), và
+      # scripts/duckdb_to_postgres.py cũng đổ vào `raw`. Để `news_raw` ở đây thì worker
+      # trong Docker ghi vào một lược đồ KHÔNG AI ĐỌC: job hằng đêm chạy xong, báo thành
+      # công, mà mọi mart vẫn đứng yên — không có lỗi nào để lần ra.
+      CRAWLER_SCHEMA: raw
       CRAWLER_TIMEZONE: ${CRAWLER_TIMEZONE:-Asia/Ho_Chi_Minh}
       CRAWLER_USER_AGENT: ${CRAWLER_USER_AGENT:-PTIT-BrandMonitor/0.1 (academic research; +https://ptit.edu.vn)}
       CRAWLER_DOMAIN_DELAY: ${CRAWLER_DOMAIN_DELAY:-1.5}
+      # Khoá API cho phần lắng nghe mạng xã hội. Thiếu khoá nào thì nguồn tương ứng tự bỏ
+      # qua kèm cảnh báo trong nhật ký, các nguồn còn lại vẫn chạy — không làm hỏng cả mẻ.
+      # Đọc từ .env gốc; giá trị thật nằm ở apps/worker/.env khi chạy ngoài Docker.
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY:-}
+      GOOGLE_CSE_KEY: ${GOOGLE_CSE_KEY:-}
+      GOOGLE_CSE_CX: ${GOOGLE_CSE_CX:-}
+      REDDIT_DELAY: ${REDDIT_DELAY:-8}
+      REDDIT_BACKOFF: ${REDDIT_BACKOFF:-12}
     depends_on:
       # Chờ api chứ không chỉ chờ postgres: bảng crawler_source do migration của api tạo.
       api:
         condition: service_healthy
-    volumes:
-      - hf_models:/home/appuser/.cache/huggingface
+    # Không mount volume cho model nữa: trọng số đã được nướng vào image ở tầng `models`
+    # của docker/worker.Dockerfile, tại /models, và HF_HUB_OFFLINE=1 cấm gọi ra mạng.
+    # Volume rỗng ở đây từng che mất chính lỗi "quên nướng model vào image".
     networks: [ptit_dashboard_net]
 
   metabase:
@@ -156,7 +172,6 @@ volumes:
   pgdata:
   redisdata:
   metabase_data:
-  hf_models:
   caddy_data:
   caddy_config:
 

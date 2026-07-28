@@ -8,12 +8,15 @@ import {
   ReachResponseSchema,
   SentimentResponseSchema,
   ShareOfSearchResponseSchema,
+  SocialMentionsResponseSchema,
   type ChannelsResponse,
   type KpiCascadeResponse,
   type OverviewResponse,
   type ReachResponse,
   type SentimentResponse,
   type ShareOfSearchResponse,
+  type SocialMentionsQuery,
+  type SocialMentionsResponse,
 } from "@ptit/shared";
 import type { z } from "zod";
 
@@ -69,6 +72,56 @@ export async function getDashboardData(): Promise<DashboardData> {
     // Không làm sập trang demo vì API chưa lên — nhưng phải nói rõ trên giao diện.
     console.warn("[dashboard] Không gọi được API, quay về dữ liệu giả lập:", error);
     return { source: "demo", apiUrl: API_URL, ...demo };
+  }
+}
+
+export interface SocialMentionsData {
+  source: DataSource;
+  mentions: SocialMentionsResponse | null;
+  /** Vì sao không có dữ liệu. `null` khi lấy được bình thường. */
+  reason: string | null;
+}
+
+/**
+ * Danh sách ý kiến đọc được.
+ *
+ * KHÔNG có bản giả lập dự phòng, khác hẳn các khối số liệu tổng hợp. Bịa ra con số thì
+ * người xem vẫn đọc chúng như xu hướng và bảng đã ghi rõ "số liệu giả lập"; nhưng bịa ra
+ * những CÂU như thể có người thật đã viết chúng về Học viện là dựng lời cho người không
+ * nói. Không lấy được thì nói không lấy được, và nói rõ vì sao.
+ */
+export async function getSocialMentions(
+  query: Partial<SocialMentionsQuery> = {},
+): Promise<SocialMentionsData> {
+  if (!API_URL) {
+    return {
+      source: "demo",
+      mentions: null,
+      reason:
+        "Chưa cấu hình địa chỉ API. Danh sách ý kiến không có bản giả lập — đây là lời của người thật, không bịa được.",
+    };
+  }
+
+  const thamSo = new URLSearchParams();
+  if (query.sentiment) thamSo.set("sentiment", query.sentiment);
+  if (query.platform) thamSo.set("platform", query.platform);
+  if (query.limit) thamSo.set("limit", String(query.limit));
+  const chuoi = thamSo.toString();
+
+  try {
+    const mentions = await fetchJson(
+      `/api/v1/social-mentions${chuoi ? `?${chuoi}` : ""}`,
+      SocialMentionsResponseSchema,
+    );
+    return { source: "api", mentions, reason: null };
+  } catch (error) {
+    console.warn("[lang-nghe] Không gọi được API ý kiến:", error);
+    return {
+      source: "demo",
+      mentions: null,
+      reason:
+        "Không đọc được kho ý kiến. Kiểm tra worker đã chạy `social thu-thap` và `nlp cham`, rồi `dbt build` chưa.",
+    };
   }
 }
 

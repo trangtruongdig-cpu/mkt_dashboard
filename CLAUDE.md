@@ -264,10 +264,44 @@ dbt docs generate && dbt docs serve
 
 ## 11. Trạng thái hiện tại
 
-Repo mới có tài liệu nhiệm vụ và một script ví dụ gọi Claude API (`claude_example.py`) —
-script này là phần thử nghiệm, không thuộc kiến trúc chính, có thể xoá khi bắt đầu scaffold.
+Cập nhật 28/07/2026.
 
-Máy dev hiện tại: Node 26, Python 3.14, **Docker chưa cài** — cần cài Docker Desktop trước
-khi dựng hệ thống. Phiên bản trong container (Node 24 LTS, Python 3.12) mới là phiên bản chuẩn.
-Không chạy worker bằng Python 3.14 của máy host vì `torch`/`transformers` chưa hỗ trợ đầy đủ.
-Node 26 chạy dev được, nhưng khi nghi ngờ lỗi môi trường thì đối chiếu với Node 24 trong container.
+**Đã chạy bằng dữ liệu thật:**
+
+| Mảng | Trạng thái |
+|---|---|
+| GA4 → dbt → dashboard | ✅ chạy, `mart__channel_performance`, `mart__admission_funnel`, `mart__program_demand` |
+| Crawler tin bài | ✅ 1.748 bài, `mart__news_sentiment` (PhoBERT) |
+| Lắng nghe mạng xã hội | ✅ YouTube + Reddit, `mart__social_sentiment` · `mart__social_mention` (ViSoBERT) |
+| Wikipedia pageviews | ✅ `mart__brand_attention` |
+| Tài liệu Ba công khai | ✅ `mart__disclosure_benchmark` |
+| Diễn đàn Việt | ⏸ chờ khoá Custom Search dùng được |
+| Facebook / TikTok toàn nền tảng | ❌ không có đường hợp pháp, xem ghi chú trong `social-sources.json` |
+
+**Chuỗi lệnh dựng lại toàn bộ từ số 0:**
+
+```bash
+cp .env.example .env                       # rồi sửa hai mật khẩu bắt buộc
+docker compose up -d --build               # postgres, api, web, worker, metabase, caddy
+cd apps/worker && uv sync
+uv run python scripts/download_models.py   # 1,4GB, chỉ cần khi chạy ngoài Docker
+uv run python -m crawler thu-thap          # tin bài
+uv run python -m social thu-thap           # mạng xã hội
+uv run python -m nlp cham                  # chấm sắc thái cả hai kho
+uv run python scripts/duckdb_to_postgres.py
+cd ../../dbt && dbt build
+# rồi đặt DATA_SOURCE=postgres trong .env và `docker compose up -d api web`
+```
+
+**Máy dev hiện tại:** Node 26, Python 3.14, Docker 29.6. Phiên bản trong container
+(Node 24 LTS, Python 3.12) mới là phiên bản chuẩn. Không chạy worker bằng Python 3.14 của
+máy host vì `torch`/`transformers` chưa hỗ trợ đầy đủ — dùng `apps/worker/.venv` (3.12).
+
+**Việc còn treo, cần người quyết:**
+
+- Bốn file `.duckdb` chứa dữ liệu vận hành thật đã bị commit vào lịch sử git ở hai commit
+  chưa push. `git rm --cached` chỉ dọn được working tree, không xoá blob khỏi lịch sử.
+  Repo đang public nên phải purge lịch sử (filter-repo/BFG) TRƯỚC khi push — việc này
+  `.claude/hooks/guard.py` cố ý chặn vì cần người kiểm chứng trước và sau.
+- Ba khối `overview` / `reach` / `channels` trên `/kenh` vẫn là dữ liệu giả lập; chỉ khối
+  sắc thái đã nối thật. Chân trang nói rõ điều này.

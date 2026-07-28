@@ -9,7 +9,19 @@ import { SentimentChart } from "@/components/charts/SentimentChart";
 import { getDashboardData } from "@/lib/api";
 import { formatCompact, formatPercent, formatUpdatedAt } from "@/lib/format";
 
-export const revalidate = 300;
+/**
+ * Render động, nhưng dữ liệu vẫn được cache 5 phút ở tầng `fetch`.
+ *
+ * Không dùng `export const revalidate`: nó khiến Next.js dựng sẵn HTML lúc BUILD, thời
+ * điểm API còn chưa chạy. Kết quả là bản đầu tiên sau mỗi lần triển khai luôn hiện
+ * "Nguồn: số liệu giả lập", và phải chờ hết chu kỳ mới tự sửa — người mở dashboard ngay
+ * sau khi deploy sẽ thấy số bịa và không biết đó là số bịa nếu không đọc kỹ dòng nhỏ.
+ *
+ * `next: { revalidate: 300 }` trong `src/lib/api.ts` vẫn giữ nguyên: trang render mỗi
+ * lượt truy cập, nhưng bốn lệnh gọi API dùng lại kết quả cache trong 5 phút. Tươi mà
+ * không tăng tải.
+ */
+export const dynamic = "force-dynamic";
 
 export default async function TrangKenh() {
   const { source, apiUrl, overview, reach, channels, sentiment } =
@@ -39,6 +51,12 @@ export default async function TrangKenh() {
             href="/muc-tieu"
           >
             → Chuỗi suy diễn mục tiêu
+          </Link>
+          <Link
+            className="text-series-1 underline underline-offset-2"
+            href="/lang-nghe"
+          >
+            → Đọc từng ý kiến của người ngoài
           </Link>
         </nav>
       </header>
@@ -126,14 +144,24 @@ export default async function TrangKenh() {
       </Card>
 
       <footer className="mt-10 border-t border-hairline pt-5 text-xs leading-relaxed text-ink-muted">
-        <p>
-          Bản demo giao diện. Số liệu hiển thị là{" "}
-          <strong className="font-medium text-ink-secondary">
-            dữ liệu giả lập
-          </strong>{" "}
-          sinh tất định trong <code>@ptit/shared</code>, chưa đấu nối Airbyte và
-          dbt — không dùng cho báo cáo.
-        </p>
+        {source === "api" ? (
+          <p>
+            Khối sắc thái đọc từ kho thật (
+            <code>mart__social_sentiment</code>). Ba khối còn lại —{" "}
+            <strong className="font-medium text-ink-secondary">
+              tiếp cận, hiệu quả kênh, chỉ số tổng quan
+            </strong>{" "}
+            — vẫn là dữ liệu giả lập vì chưa đấu nối xong, không dùng cho báo cáo.
+          </p>
+        ) : (
+          <p>
+            Số liệu hiển thị là{" "}
+            <strong className="font-medium text-ink-secondary">
+              dữ liệu giả lập
+            </strong>{" "}
+            sinh tất định trong <code>@ptit/shared</code> — không dùng cho báo cáo.
+          </p>
+        )}
         <p className="mt-1">
           Nhiệm vụ nghiên cứu: xây dựng dashboard theo dõi hoạt động marketing số
           và thương hiệu — Học viện Công nghệ Bưu chính Viễn thông.

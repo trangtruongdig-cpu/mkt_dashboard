@@ -32,7 +32,19 @@ import {
 import { getKpiData } from "@/lib/api";
 import { formatUpdatedAt } from "@/lib/format";
 
-export const revalidate = 300;
+/**
+ * Render động, nhưng dữ liệu vẫn được cache 5 phút ở tầng `fetch`.
+ *
+ * Không dùng `export const revalidate`: nó khiến Next.js dựng sẵn HTML lúc BUILD, thời
+ * điểm API còn chưa chạy. Kết quả là bản đầu tiên sau mỗi lần triển khai luôn hiện
+ * "Nguồn: số liệu giả lập", và phải chờ hết chu kỳ mới tự sửa — người mở dashboard ngay
+ * sau khi deploy sẽ thấy số bịa và không biết đó là số bịa nếu không đọc kỹ dòng nhỏ.
+ *
+ * `next: { revalidate: 300 }` trong `src/lib/api.ts` vẫn giữ nguyên: trang render mỗi
+ * lượt truy cập, nhưng bốn lệnh gọi API dùng lại kết quả cache trong 5 phút. Tươi mà
+ * không tăng tải.
+ */
+export const dynamic = "force-dynamic";
 
 /** Diễn giải từng tầng — nằm sau nút (i) ở đầu cột, không chiếm chỗ trên màn hình. */
 const TIER_NOTE: Record<ObjectiveTier, string> = {

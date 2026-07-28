@@ -17,6 +17,16 @@
 .secrets/
 apps/worker/.data/
 
+# Trọng số model tải về máy dev (1,4GB). Ảnh worker tự tải bản của riêng nó ở tầng
+# `models` của docker/worker.Dockerfile, vào /models.
+#
+# Thiếu dòng này thì bản sao cục bộ bị `COPY apps/worker/ ./` kéo vào ảnh, nằm ở
+# /app/.models SONG SONG với /models — ảnh phình gấp đôi vì chứa hai bản trọng số giống
+# hệt nhau, và mỗi lần build lại phải nén thêm 1,4GB. Đây là nguyên nhân thật của lỗi
+# "no space left on device" lúc đóng gói, không phải do đĩa quá nhỏ.
+apps/worker/.models/
+**/.models/
+
 .git
 .github
 docs/
