@@ -75,7 +75,18 @@ def test_ptit_phai_dung_rieng_thanh_mot_tu() -> None:
 
 
 def test_tin_khong_lien_quan_thi_khong_khop() -> None:
-    assert find_keywords("Đại học Bách khoa Hà Nội công bố điểm chuẩn", TU_KHOA) == []
+    """Ngoài nhóm sáu trường đối sánh thì không khớp.
+
+    Trước đây bài kiểm này dùng Bách khoa Hà Nội làm ví dụ "không liên quan". Từ khi
+    bộ từ khoá phủ cả nhóm đối sánh để tính thị phần thảo luận, Bách khoa nằm TRONG
+    phạm vi — nên ví dụ phải đổi sang một trường ngoài nhóm.
+    """
+    assert find_keywords("Đại học Y Hà Nội công bố điểm chuẩn", TU_KHOA) == []
+
+
+def test_khop_ca_truong_doi_sanh() -> None:
+    """Không khớp trường đối sánh thì kho chỉ có bài về Học viện, thị phần luôn bằng 100%."""
+    assert find_keywords("Đại học Bách khoa Hà Nội công bố điểm chuẩn", TU_KHOA) != []
 
 
 def test_khong_tra_ve_tu_khoa_trung() -> None:

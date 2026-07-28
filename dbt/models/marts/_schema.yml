@@ -165,3 +165,126 @@ seeds:
       - dbt_utils.unique_combination_of_columns:
           arguments:
             combination_of_columns: [ma_truong, nam]
+
+  - name: mart__social_sentiment
+    description: >
+      Phân bố sắc thái thảo luận của NGƯỜI NGOÀI về Học viện, theo tuần. Hợp đồng dữ
+      liệu với backend cho chỉ số `positive_sentiment_share`.
+
+      Đã loại bỏ nội dung do chính Học viện đăng (owned) và các hạt không mang ý kiến
+      (tiêu đề, mô tả video). Mỗi thảo luận chỉ tính điểm của một phiên bản model.
+    columns:
+      - name: thang
+        description: Ngày đầu tháng báo cáo.
+        tests: [not_null]
+      - name: phien_ban_model
+        description: >
+          Model và bản trọng số đã sinh ra các điểm này. Đổi model là đổi cách đọc số —
+          không so trực tiếp hai tuần được chấm bằng hai phiên bản khác nhau.
+        tests: [not_null]
+      - name: so_thao_luan
+        description: >
+          Mẫu số. PHẢI hiển thị kèm mọi tỷ lệ phần trăm — một tháng 2 bản ghi và một tháng
+          200 bản ghi cùng cho ra 100% tích cực, nhưng chỉ một trong hai là thông tin.
+        tests: [not_null]
+      - name: so_tich_cuc
+        tests: [not_null]
+      - name: so_trung_tinh
+        tests: [not_null]
+      - name: so_tieu_cuc
+        tests: [not_null]
+      - name: ty_le_tich_cuc_pct
+        description: Thảo luận tích cực trên tổng, đơn vị %.
+      - name: ty_le_tieu_cuc_pct
+        description: Thảo luận tiêu cực trên tổng, đơn vị %.
+      - name: do_chac_chan_tb
+        description: >
+          Mức chắc chắn trung bình của model trong tháng, thang 0–1. Tụt thấp là dấu hiệu
+          model gặp loại văn bản nó không quen — xem lại trước khi tin số.
+      - name: so_bi_cat
+        description: Số bản ghi dài quá giới hạn token, chỉ được chấm trên phần đầu.
+      - name: so_uoc_luong_ngay
+        description: >
+          Số bản ghi không có ngày đăng, phải lùi về lần đầu hệ thống nhìn thấy. Muộn hơn
+          thực tế nhưng không bao giờ sớm hơn.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [thang, phien_ban_model]
+
+  - name: mart__share_of_voice
+    description: >
+      Thị phần thảo luận trên báo chí theo tháng, chỉ tính earned media (bài do báo
+      ngoài viết, loại bài trên kênh của chính Học viện). Chỉ có nghĩa khi mỗi trường
+      được thu thập bằng cùng một số lượng từ khoá tìm kiếm.
+    columns:
+      - name: thang
+        description: Tháng đăng bài, cắt về ngày đầu tháng.
+        tests: [not_null]
+      - name: ma_truong
+        tests: [not_null]
+      - name: so_lan_nhac
+        description: >
+          Số lần trường được nhắc. Một bài so sánh nhắc nhiều trường được đếm cho từng
+          trường — đây là số LẦN NHẮC, không phải số bài.
+        tests: [not_null]
+      - name: so_dau_bao
+        description: Số đầu báo khác nhau đã nhắc tới trường trong tháng.
+      - name: thi_phan_pct
+        description: Tỷ trọng số lần nhắc trong tổng của cả nhóm, cùng tháng.
+      - name: la_hoc_vien
+        tests: [not_null]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [thang, ma_truong]
+
+  - name: mart__news_sentiment
+    description: >
+      Sắc thái tin bài BÁO NGOÀI viết về Học viện, theo tháng. Hợp đồng dữ liệu với
+      backend cho chỉ số `positive_sentiment_share`.
+
+      Đã loại thông cáo do chính Học viện đăng, và chỉ giữ bài có nhãn thương hiệu `ptit`
+      — kho tin bài phục vụ cả nhóm sáu trường đối sánh, không lọc thì sắc thái bài về
+      trường khác bị tính thành sắc thái về Học viện.
+
+      Bài chưa qua bước gán nhãn (`crawler gan-nhan`) không có mặt ở đây. Thà thiếu bài
+      còn hơn tính nhầm bài của trường khác.
+    columns:
+      - name: thang
+        description: Ngày đầu tháng báo cáo.
+        tests: [not_null]
+      - name: phien_ban_model
+        description: >
+          Model và bản trọng số đã sinh ra các điểm này. PhoBERT cho tin bài, khác model
+          dùng cho mạng xã hội — không so trực tiếp hai chỉ số như thể cùng thang đo.
+        tests: [not_null]
+      - name: so_tin_bai
+        description: Mẫu số. Phải hiển thị kèm mọi tỷ lệ phần trăm.
+        tests: [not_null]
+      - name: so_tich_cuc
+        tests: [not_null]
+      - name: so_trung_tinh
+        tests: [not_null]
+      - name: so_tieu_cuc
+        tests: [not_null]
+      - name: so_dau_bao
+        description: >
+          Số đầu báo khác nhau trong tháng. Một tháng 20 bài nhưng chỉ 2 đầu báo là độ
+          phủ hẹp, đọc khác hẳn 20 bài trên 15 đầu báo.
+      - name: ty_le_tich_cuc_pct
+        description: Tin bài tích cực trên tổng, đơn vị %.
+      - name: ty_le_tieu_cuc_pct
+        description: Tin bài tiêu cực trên tổng, đơn vị %.
+      - name: do_chac_chan_tb
+        description: Mức chắc chắn trung bình của model trong tháng, thang 0–1.
+      - name: so_bi_cat
+        description: >
+          Số bài dài quá 256 token, chỉ được chấm trên tiêu đề và phần đầu. Với tin tức
+          thì lập trường thường nằm ở đó, nhưng con số này phải hiện ra để tự đánh giá.
+      - name: so_uoc_luong_ngay
+        description: Số bài không có ngày đăng, phải lùi về thời điểm chấm.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [thang, phien_ban_model]

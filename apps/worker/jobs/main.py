@@ -34,7 +34,7 @@ from crawler.settings import (
     has_control_plane,
 )
 
-from . import crawler_job
+from . import crawler_job, nlp_job, social_job
 from .schedules import cron_for
 
 log = logging.getLogger("jobs")
@@ -43,9 +43,21 @@ log = logging.getLogger("jobs")
 JOB_PREFIX = "crawler:"
 SYNC_JOB_ID = "noi_bo:dong_bo_lich"
 POLL_JOB_ID = "noi_bo:nhat_luot_cho"
+SOCIAL_JOB_ID = "noi_bo:lang_nghe_mxh"
+NLP_JOB_ID = "noi_bo:cham_sac_thai"
 
 # Bao lâu một lần đọc lại lịch từ cơ sở dữ liệu, tính bằng giây.
 SYNC_INTERVAL_SECONDS = 60
+
+# Ba mẻ nối đuôi nhau, KHÔNG chạy song song và thứ tự không đổi được:
+#   2h  tin bài      (lịch do quản trị viên đặt, xem dong_bo_lich)
+#   3h  mạng xã hội  — gọi ra Internet, chạy chồng mẻ tin bài chỉ làm cả hai chậm và dễ
+#                      bị nguồn ngoài chặn
+#   4h  chấm sắc thái — chỉ chấm những gì mẻ 3h đã ghi xuống kho. Chạy trước mẻ 3h là
+#                      chấm vào tập dữ liệu của hôm qua rồi phải đợi thêm một ngày.
+# Lịch cố định vì hai nguồn này chưa có màn hình quản trị. Xem jobs/social_job.py.
+SOCIAL_CRON = "0 3 * * *"
+NLP_CRON = "0 4 * * *"
 
 
 def dong_bo_lich(scheduler: BlockingScheduler) -> None:
@@ -144,6 +156,24 @@ def main() -> int:
         name="Nhặt lượt chạy thủ công",
         max_instances=1,
         coalesce=True,
+    )
+    scheduler.add_job(
+        social_job.chay_theo_lich,
+        trigger=CronTrigger.from_crontab(SOCIAL_CRON, timezone=SCHEDULER_TIMEZONE),
+        id=SOCIAL_JOB_ID,
+        name="Lắng nghe mạng xã hội",
+        max_instances=1,
+        coalesce=True,
+        misfire_grace_time=3600,
+    )
+    scheduler.add_job(
+        nlp_job.chay_theo_lich,
+        trigger=CronTrigger.from_crontab(NLP_CRON, timezone=SCHEDULER_TIMEZONE),
+        id=NLP_JOB_ID,
+        name="Chấm sắc thái tiếng Việt",
+        max_instances=1,
+        coalesce=True,
+        misfire_grace_time=3600,
     )
 
     # Đồng bộ ngay một lần thay vì đợi hết chu kỳ đầu tiên.

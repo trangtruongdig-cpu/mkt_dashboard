@@ -18,6 +18,10 @@ models:
     staging:
       +schema: stg
       +materialized: view
+    # Tầng logic trung gian: view, KHÔNG expose ra ngoài. Backend không được đọc tầng này.
+    intermediate:
+      +schema: int
+      +materialized: view
     # Tầng phục vụ dashboard: bảng thật, vì backend đọc trực tiếp và cần nhanh.
     marts:
       +schema: mart

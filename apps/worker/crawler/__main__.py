@@ -133,6 +133,10 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("nguon", help="Liệt kê nguồn và từ khoá đang cấu hình")
     sub.add_parser("thong-ke", help="Thống kê dữ liệu đã có trong kho")
     sub.add_parser("seed", help="Nạp nguồn từ file JSON vào PostgreSQL để quản trị trên web")
+    sub.add_parser(
+        "gan-nhan",
+        help="Gán nhãn thương hiệu cho tin bài đã có trong kho (nền của thị phần thảo luận)",
+    )
 
     # Nhánh tài liệu công khai bắt buộc (Thông tư 09/2024 và 08/2022). Chạy theo thứ tự:
     # cong-khai → cong-khai-do → cong-khai-boc-so.
@@ -178,6 +182,10 @@ def main(argv: list[str] | None = None) -> int:
             _in_thong_ke()
         elif args.lenh == "seed":
             _seed()
+        elif args.lenh == "gan-nhan":
+            from . import brand_tag_job
+
+            brand_tag_job.run()
         elif args.lenh == "cong-khai":
             from . import edu_docs_job
 

@@ -412,6 +412,7 @@ const KPI_SPECS: readonly KpiSpec[] = [
     label: "Tỷ lệ có việc làm trong 12 tháng sau tốt nghiệp",
     objectiveKey: "biz_loyalty",
     tier: "business",
+    // Giá trị thật do PostgresKpiRepository đọc từ mart__disclosure_benchmark ghi đè.
     value: null,
     unit: "percent",
     target: 95,
@@ -419,6 +420,16 @@ const KPI_SPECS: readonly KpiSpec[] = [
     higherIsBetter: true,
     cadence: "annual",
     provenance: SOURCE_PUBLIC_DISCLOSURE,
+    comparability: {
+      basis: "calendar",
+      caveat:
+        "So giữa hai NĂM HỌC gần nhất CÓ SỐ, không phải hai năm liền kề theo lịch: có năm Học viện bỏ trống ô này.",
+    },
+    targetRationale: {
+      basis: "internal_benchmark",
+      note: "Bách khoa Hà Nội đạt 94,61% ở năm học 2022-2023 — lấy mốc 95% để không thấp hơn trường dẫn đầu nhóm đối sánh.",
+    },
+    hint: "Bằng chứng thuyết phục nhất cho thuộc tính thương hiệu, và là số buộc phải công khai nên đối thủ cũng có.",
   },
   {
     key: "postgrad_intake_share",
@@ -487,8 +498,7 @@ const KPI_SPECS: readonly KpiSpec[] = [
     label: "Thị phần thảo luận trên báo chí",
     objectiveKey: "mkt_consideration",
     tier: "marketing",
-    // Crawler mới phủ tin bài về Học viện, chưa phủ đủ 6 thương hiệu nên chưa có
-    // mẫu số để chia thị phần.
+    // Giá trị thật do PostgresKpiRepository đọc từ mart__share_of_voice ghi đè.
     value: null,
     unit: "percent",
     target: 25,
@@ -496,7 +506,17 @@ const KPI_SPECS: readonly KpiSpec[] = [
     higherIsBetter: true,
     cadence: "daily",
     provenance: SOURCE_NEWS_CRAWLER,
+    comparability: {
+      basis: "admission_cycle",
+      caveat:
+        "Tin bài dồn vào mùa tuyển sinh nên phải so tháng với tháng trong cùng mùa. Chỉ xét tháng đủ mẫu (từ 20 lần nhắc trở lên): tháng lác đác vài bài cho ra tỷ trọng nhảy loạn.",
+    },
+    targetRationale: {
+      basis: "pending_approval",
+      note: "Chia đều cho 6 trường là 16,7%. Tháng 7/2026 Học viện đạt 18,94% — trên mức ngang bằng nhưng kém xa Bách khoa Hà Nội 59,85%. Đặt 25% làm bước tiến vừa sức, chờ Học viện chốt lại sau một mùa đủ dữ liệu.",
+    },
   },
+
   {
     key: "new_program_share",
     label: "Tỷ trọng tin bài nhắc nhóm ngành mới",
@@ -545,37 +565,68 @@ const KPI_SPECS: readonly KpiSpec[] = [
   // ── Truyền thông ───────────────────────────────────────────────────────────
   {
     key: "brand_search_index",
-    label: "Chỉ số quan tâm tìm kiếm thương hiệu",
+    label: "Lượt tra cứu Học viện trên Wikipedia mỗi tuần",
     objectiveKey: "com_awareness",
     tier: "communication",
-    value: 64,
+    // Trước đây chỉ số này lấy thang 0–100 của Google Trends. Google chặn hoàn toàn
+    // (HTTP 429 ở mọi lần thử), nên giữ nguyên con số cũ là hiện số của một nguồn
+    // không còn truy cập được. Đổi sang lượt xem trang Wikipedia: hẹp hơn về nhóm
+    // công chúng, nhưng là SỐ ĐẾM TUYỆT ĐỐI nên so được giữa các năm.
+    value: null,
     unit: "count",
-    target: 75,
-    baseline: 58,
+    target: 300,
+    baseline: null,
     higherIsBetter: true,
     cadence: "weekly",
-    provenance: SOURCE_TRENDS,
+    provenance: SOURCE_WIKIPEDIA,
     comparability: {
       basis: "admission_cycle",
       caveat:
         "Là chỉ số tuyệt đối nên đỉnh mùa tuyển sinh chi phối hoàn toàn — phải neo vào mốc công bố điểm thi, không so cùng tuần theo lịch.",
     },
-    hint: "Thang 0–100 của Google Trends, không phải số lượt tìm kiếm tuyệt đối.",
+    targetRationale: {
+      basis: "historical_peak",
+      note: "Tuần cao nhất trong 26 tuần đã đo đạt khoảng 300 lượt. Lấy chính mức đó làm mục tiêu duy trì, chờ đủ một mùa tuyển sinh để đặt lại.",
+    },
+    hint: "Số đếm tuyệt đối, đã loại lượt truy cập của bot (agent=user).",
   },
   {
     key: "positive_sentiment_share",
-    label: "Tỷ lệ thảo luận tích cực",
+    label: "Tỷ lệ tin bài tích cực",
     objectiveKey: "com_attributes",
     tier: "communication",
-    // Chưa viết bước chấm PhoBERT nên chưa có số nào cả. Điền một con số đẹp vào đây
-    // là đúng cái sai mà ràng buộc trong schema sinh ra để chặn.
+    // Giá trị do `PostgresKpiRepository` đọc từ `mart__news_sentiment` ghi đè lúc chạy.
+    // Để `null` ở đây là đúng: đây là phần CẤU TRÚC, không phải phần số đo.
+    value: null,
+    unit: "percent",
+    target: 60,
+    baseline: null,
+    higherIsBetter: true,
+    cadence: "daily",
+    provenance: SOURCE_NEWS_CRAWLER,
+    targetRationale: {
+      basis: "trend_continuation",
+      note: "Đo được 56,9% trên 239 bài đã gán nhãn (PhoBERT). Đặt 60% là nhích nhẹ trên mức hiện tại — mức 75% ban đầu không có căn cứ nào, và không đạt được với dòng tin điểm chuẩn vốn trung tính theo bản chất.",
+    },
+    hint: "Báo chí đưa tin điểm chuẩn và thông báo tuyển sinh nên phần lớn bài là trung tính. Tỷ lệ tích cực thấp hơn mạng xã hội là bình thường, không phải dấu hiệu xấu.",
+  },
+  {
+    key: "social_positive_sentiment_share",
+    label: "Tỷ lệ thảo luận tích cực của người ngoài",
+    objectiveKey: "com_attributes",
+    tier: "communication",
     value: null,
     unit: "percent",
     target: 75,
     baseline: null,
     higherIsBetter: true,
     cadence: "daily",
-    provenance: SOURCE_NEWS_CRAWLER,
+    provenance: SOURCE_SOCIAL_LISTENING,
+    targetRationale: {
+      basis: "trend_continuation",
+      note: "Đo được 80,0% trên 90 thảo luận (ViSoBERT). Đặt 75% làm ngưỡng cảnh báo: tụt xuống dưới mức này là dấu hiệu dư luận đang xấu đi, chứ không phải mục tiêu phải vượt.",
+    },
+    hint: "Mẫu còn mỏng (90 thảo luận trong một năm) — đọc kèm số lượng, đừng đọc riêng tỷ lệ.",
   },
   {
     key: "attribute_coverage",
@@ -826,7 +877,7 @@ const REQUIREMENTS: Record<string, KpiRequirement> = {
     platform: "Trang Ba công khai của 6 trường đối sánh",
     fields: ["số nhập học mới", "chỉ tiêu", "tỷ lệ nhập học so với kế hoạch"],
     readiness: "needs_build",
-    todo: "Viết crawler + bóc tách PDF biểu mẫu (worker/crawler/edu_docs.py, pdfplumber)",
+    todo: "Crawler và bộ bóc Biểu 18 đã chạy, nhưng biểu mẫu này KHÔNG có ô số nhập học so với chỉ tiêu — phải bóc thêm bảng kết quả tuyển sinh trong đề án tuyển sinh",
   },
   score_premium: {
     platform: "Công bố điểm chuẩn hằng năm của 6 trường",
@@ -844,7 +895,7 @@ const REQUIREMENTS: Record<string, KpiRequirement> = {
     platform: "Trang Ba công khai của 6 trường đối sánh",
     fields: ["số nhập học mới của từng trường"],
     readiness: "needs_build",
-    todo: "Dùng chung crawler với chỉ số tỷ lệ nhập học trên chỉ tiêu",
+    todo: "Biểu 18 cho quy mô đào tạo chứ không cho số nhập học mới; cần bóc bảng kết quả tuyển sinh trong đề án, và còn thiếu FPT nên mẫu số chưa đủ",
   },
   tuition_revenue: {
     platform: "Mô hình ước tính từ chỉ tiêu và học phí công bố",
@@ -862,19 +913,22 @@ const REQUIREMENTS: Record<string, KpiRequirement> = {
     platform: "Trang Ba công khai của Học viện",
     fields: ["tỷ lệ thôi học", "quy mô đào tạo"],
     readiness: "needs_build",
-    todo: "Dùng chung crawler tài liệu Ba công khai",
+    todo: "Crawler tài liệu công khai đã chạy, nhưng bản Biểu 18 các trường đang đăng theo mẫu Thông tư 36/2017 không có ô này — cần bản theo mẫu Thông tư 09/2024",
   },
   employment_rate: {
-    platform: "Trang Ba công khai của Học viện",
-    fields: ["tỷ lệ có việc làm 12 tháng sau tốt nghiệp"],
-    readiness: "needs_build",
-    todo: "Dùng chung crawler tài liệu Ba công khai",
+    platform: "Biểu mẫu 18 trên trang công khai của Học viện",
+    fields: [
+      "tỷ lệ có việc làm 12 tháng sau tốt nghiệp",
+      "số sinh viên tốt nghiệp theo khối ngành",
+    ],
+    readiness: "connected",
+    todo: "Biểu mẫu của Học viện bỏ trống ô tỷ lệ ở dòng tổng nên con số là bình quân gia quyền tính từ các khối ngành — đề nghị Học viện công bố thẳng dòng tổng",
   },
   postgrad_intake_share: {
     platform: "Trang Ba công khai của Học viện",
     fields: ["số nhập học mới theo từng trình độ đào tạo"],
     readiness: "needs_build",
-    todo: "Dùng chung crawler tài liệu Ba công khai",
+    todo: "Crawler tài liệu công khai đã chạy, nhưng bản Biểu 18 các trường đang đăng theo mẫu Thông tư 36/2017 không có ô này — cần bản theo mẫu Thông tư 09/2024",
   },
   share_of_search: {
     platform: "Google Trends",
@@ -894,13 +948,17 @@ const REQUIREMENTS: Record<string, KpiRequirement> = {
       "6 bài tương ứng 6 trường",
     ],
     readiness: "connected",
-    todo: "Dựng model dbt trên bảng raw_brand_pageviews rồi đổi KpiRepository sang đọc PostgreSQL — dữ liệu đã có trong kho, còn thiếu đường lên API",
+    todo: null,
   },
   share_of_voice: {
-    platform: "Crawler tin bài (news-please)",
-    fields: ["url", "publisher", "published_at", "thương hiệu được nhắc"],
-    readiness: "needs_build",
-    todo: "Mở rộng danh sách nguồn để phủ đủ 6 thương hiệu, không chỉ Học viện",
+    platform: "Crawler tin bài + gán nhãn thương hiệu",
+    fields: [
+      "url, publisher, published_at",
+      "brands — danh sách trường được nhắc trong bài",
+      "is_owned — tách bài trên kênh của Học viện",
+    ],
+    readiness: "connected",
+    todo: "Chạy `crawler gan-nhan` sau mỗi lần thu thập, nếu không bài mới không có nhãn và mẫu số thiếu",
   },
   new_program_share: {
     platform: "Crawler tin bài (news-please)",
@@ -921,10 +979,10 @@ const REQUIREMENTS: Record<string, KpiRequirement> = {
     todo: "Mở rộng crawler sang nguồn diễn đàn; cân nhắc điều khoản sử dụng của từng nguồn",
   },
   brand_search_index: {
-    platform: "Google Trends",
-    fields: ["interest_over_time của riêng từ khoá Học viện"],
-    readiness: "public_ready",
-    todo: "Dùng chung lượt gọi với chỉ số thị phần tìm kiếm",
+    platform: "Wikimedia Pageviews API",
+    fields: ["lượt xem trang của riêng Học viện, gộp theo tuần"],
+    readiness: "connected",
+    todo: null,
   },
   positive_sentiment_share: {
     platform: "PhoBERT chấm trên kho tin bài",

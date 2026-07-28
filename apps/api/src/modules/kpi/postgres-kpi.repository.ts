@@ -37,13 +37,14 @@ export class PostgresKpiRepository extends KpiRepository {
       // Ba nguồn đọc riêng, mỗi nguồn tự chịu lỗi của mình: dữ liệu công khai và
       // Wikipedia được nạp bằng job khác GA4 nên có thể chưa có, và khi đó không được
       // kéo sập luôn các chỉ số đã đọc được.
-      const [tu_ga4, tu_cong_khai, tu_chu_y] = await Promise.all([
+      const [tu_ga4, tu_cong_khai, tu_chu_y, tu_bao_chi] = await Promise.all([
         this.docAnToan("GA4", () => this.docGiaTri()),
         this.docAnToan("tài liệu công khai", () => this.docGiaTriCongKhai()),
         this.docAnToan("thị phần chú ý", () => this.docGiaTriChuY()),
+        this.docAnToan("thị phần thảo luận", () => this.docGiaTriThaoLuan()),
       ]);
 
-      const do_duoc = [...tu_ga4, ...tu_cong_khai, ...tu_chu_y];
+      const do_duoc = [...tu_ga4, ...tu_cong_khai, ...tu_chu_y, ...tu_bao_chi];
       this.logger.log(`Đã đọc ${do_duoc.length} chỉ số từ bảng mart.`);
 
       // Bộ số liệu giả lập gắn nhãn kỳ "12 tuần gần nhất". Giữ nguyên nhãn đó khi đã
@@ -329,13 +330,55 @@ export class PostgresKpiRepository extends KpiRepository {
     }>(sql`
       with moc as (
         select min(tuan) as dau, max(tuan) as cuoi from mart.mart__brand_attention
+      ),
+      ptit as (
+        select
+          max(a.thi_phan_pct) filter (where a.tuan = m.cuoi) as tp_cuoi,
+          max(a.thi_phan_pct) filter (where a.tuan = m.dau)  as tp_dau,
+          max(a.so_luot_xem)  filter (where a.tuan = m.cuoi) as lx_cuoi,
+          max(a.so_luot_xem)  filter (where a.tuan = m.dau)  as lx_dau
+        from mart.mart__brand_attention a cross join moc m
+        where a.ma_truong = 'ptit'
+      )
+      select 'attention_share' as kpi_key, tp_cuoi as value, tp_dau as baseline from ptit
+      union all
+      -- Lượt xem tuyệt đối, không phải tỷ trọng: đo mức quan tâm chứ không đo vị thế
+      -- so với nhóm. Hai chỉ số có thể đi ngược chiều nhau khi cả nhóm cùng lên.
+      select 'brand_search_index', lx_cuoi, lx_dau from ptit
+    `);
+
+    return this.thanhChiSo(ket_qua);
+  }
+
+  /**
+   * Thị phần thảo luận trên báo chí, tháng gần nhất so với tháng liền trước.
+   *
+   * Khác với thị phần chú ý (so với tuần đầu kỳ): tin bài dồn theo mùa tuyển sinh nên
+   * tháng liền trước là mốc so hợp lý hơn, và dữ liệu chỉ mới đủ vài tháng.
+   */
+  private async docGiaTriThaoLuan(): Promise<KpiMeasuredValue[]> {
+    const ket_qua = await this.db.execute<{
+      kpi_key: string;
+      value: string | number | null;
+      baseline: string | number | null;
+    }>(sql`
+      with du_mau as (
+        -- Chỉ xét tháng đủ mẫu. Tháng lác đác vài bài cho ra tỷ trọng nhảy loạn, và
+        -- tháng chỉ có một bài thì thị phần luôn là 100%.
+        select distinct thang from mart.mart__share_of_voice where du_mau
+      ),
+      moc as (
+        select
+          max(thang)                                             as nay,
+          (select max(thang) from du_mau where thang < (select max(thang) from du_mau)) as truoc
+        from du_mau
       )
       select
-        'attention_share' as kpi_key,
-        max(a.thi_phan_pct) filter (where a.tuan = m.cuoi) as value,
-        max(a.thi_phan_pct) filter (where a.tuan = m.dau)  as baseline
-      from mart.mart__brand_attention a cross join moc m
-      where a.ma_truong = 'ptit'
+        'share_of_voice' as kpi_key,
+        max(s.thi_phan_pct) filter (where s.thang = m.nay)   as value,
+        max(s.thi_phan_pct) filter (where s.thang = m.truoc) as baseline
+      from mart.mart__share_of_voice s cross join moc m
+      where s.ma_truong = 'ptit'
     `);
 
     return this.thanhChiSo(ket_qua);

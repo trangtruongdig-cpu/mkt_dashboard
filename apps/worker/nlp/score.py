@@ -1,16 +1,11 @@
 """Luồng chạy chính: đọc bản ghi chưa chấm → chấm theo lô → ghi bảng điểm.
 
-Hạt nào được chấm, và vì sao:
+Kho nào chấm bằng model nào, lọc bỏ hạt nào — tất cả khai ở `Corpus` trong settings.py,
+không rải ở đây. Thêm kho thứ ba là khai thêm một Corpus, không phải sửa file này.
 
-  comment · post · thread   CÓ. Đây là ý kiến của người thật về Học viện.
-  video                     KHÔNG. Tiêu đề và mô tả video là lời giới thiệu của người làm
-                            nội dung, không phải dư luận. Chấm chúng rồi gộp vào biểu đồ
-                            sắc thái là trộn thông điệp truyền thông vào tiếng nói công chúng
-                            — đúng lỗi mà cột `is_owned` sinh ra để tránh.
-
-Bản ghi `is_owned` VẪN được chấm chứ không loại ở đây: "nội dung Học viện tự đăng đang mang
-sắc thái gì" là câu hỏi có ích riêng của nó. Việc tách hai nhóm khi lên báo cáo là của dbt,
-và dbt cần cả hai nhóm mới tách được.
+Bản ghi `is_owned` VẪN được chấm chứ không loại từ đầu: "nội dung Học viện tự đăng đang mang
+sắc thái gì" là câu hỏi có ích riêng của nó. Việc tách owned khỏi earned khi lên báo cáo là
+của dbt, và dbt cần có cả hai nhóm mới tách được.
 """
 
 from __future__ import annotations
@@ -18,17 +13,15 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from .model import BoChamSacThai
-from .settings import DO_DAI_TOI_THIEU, KICH_THUOC_LO, ModelSacThai
+from .settings import DO_DAI_TOI_THIEU, KICH_THUOC_LO, Corpus
 from .storage import DiemSacThai, Store, now, open_store
-
-# Hạt dữ liệu mang ý kiến của người ngoài. Xem phần đầu file.
-HAT_Y_KIEN = ("comment", "post", "thread")
 
 
 @dataclass
 class Stats:
     """Số liệu một lần chạy."""
 
+    corpus: str = ""
     model_version: str = ""
     can_cham: int = 0
     da_cham: int = 0
@@ -38,7 +31,7 @@ class Stats:
 
 
 def run(
-    cau_hinh: ModelSacThai,
+    corpus: Corpus,
     gioi_han: int | None = None,
     store: Store | None = None,
     bo_cham: BoChamSacThai | None = None,
@@ -47,12 +40,12 @@ def run(
 
     `gioi_han` để chạy thử trên vài chục bản ghi trước khi thả cả kho vào model.
     """
-    bo_cham = bo_cham or BoChamSacThai(cau_hinh)
-    stats = Stats(model_version=bo_cham.model_version)
+    bo_cham = bo_cham or BoChamSacThai(corpus.model)
+    stats = Stats(corpus=corpus.ma, model_version=bo_cham.model_version)
 
-    tu_dong: Store = store or open_store()
+    tu_dong: Store = store or open_store(corpus)
     try:
-        can_cham = tu_dong.can_cham(bo_cham.model_version, HAT_Y_KIEN, DO_DAI_TOI_THIEU)
+        can_cham = tu_dong.can_cham(bo_cham.model_version, DO_DAI_TOI_THIEU)
         if gioi_han is not None:
             can_cham = can_cham[:gioi_han]
         stats.can_cham = len(can_cham)
@@ -61,7 +54,7 @@ def run(
             stats.tong_trong_kho = tu_dong.count(bo_cham.model_version)
             return stats
 
-        print(f"Chấm {len(can_cham)} bản ghi bằng {bo_cham.model_version}")
+        print(f"Chấm {len(can_cham)} bản ghi kho {corpus.ma!r} bằng {bo_cham.model_version}")
 
         for dau in range(0, len(can_cham), KICH_THUOC_LO):
             lo = can_cham[dau : dau + KICH_THUOC_LO]
@@ -104,6 +97,7 @@ def run(
 
 def in_tong_ket(stats: Stats) -> None:
     print("\n" + "─" * 70)
+    print(f"Kho              : {stats.corpus}")
     print(f"Model            : {stats.model_version}")
     print(f"Cần chấm         : {stats.can_cham}")
     print(f"Đã chấm mẻ này   : {stats.da_cham}")
@@ -116,7 +110,10 @@ def in_tong_ket(stats: Stats) -> None:
             print(f"  {nhan_viet.get(nhan, nhan):<12} {so:>5}  {ty_le:5.1f}%")
 
     if stats.bi_cat:
-        print(f"\nBị cắt vì quá dài: {stats.bi_cat} (cột `truncated` đánh dấu để kiểm chứng lại)")
+        print(
+            f"\nBị cắt vì quá dài: {stats.bi_cat}. Điểm của những bản ghi này là điểm của phần "
+            "đầu văn bản, không phải toàn văn — cột `truncated` đánh dấu để kiểm chứng lại."
+        )
 
     print(f"\nTổng đã chấm bằng model này: {stats.tong_trong_kho}")
     if stats.can_cham == 0:

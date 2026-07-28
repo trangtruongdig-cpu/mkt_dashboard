@@ -12,6 +12,7 @@ Hai điều dễ sai và đã được chặn ở đây:
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import Any
 
@@ -21,6 +22,12 @@ from .settings import (
     ModelSacThai,
     NlpError,
 )
+
+# Mỗi lần đo độ dài thật của một câu dài, tokenizer lại cảnh báo "sequence length is longer
+# than the specified maximum". Ở đây đó là việc CỐ Ý: phải mã hoá không cắt mới biết câu nào
+# bị cắt, rồi mới ghi được cột `truncated`. Cảnh báo này nhắc một nguy cơ không tồn tại
+# (câu đưa vào model đã cắt đúng cách rồi) mà lại lấp mất những dòng nhật ký thật sự cần đọc.
+logging.getLogger("transformers.tokenization_utils_base").setLevel(logging.ERROR)
 
 # Nhãn dùng trong kho và trên giao diện. Tiếng Anh để trùng với `SentimentBucketSchema`
 # ở packages/shared — backend và frontend đọc chung một bộ tên, không dịch qua lại.
@@ -42,6 +49,35 @@ QUY_DOI_NHAN = {
     "positive": POSITIVE,
     "tich_cuc": POSITIVE,
 }
+
+
+def doc_bang_nhan(id2label: dict[Any, Any], repo: str) -> dict[int, str]:
+    """Quy bảng nhãn của model về bộ chuẩn, và từ chối chạy nếu có nhãn không hiểu được.
+
+    Tách khỏi lớp `BoChamSacThai` để kiểm thử được mà không phải nạp 500MB trọng số —
+    đây chính là chỗ dễ sai nhất của cả mảng chấm sắc thái nên phải có test bao.
+
+    Thà dừng còn hơn chấm ra một cột `positive` thật ra đang chứa điểm tiêu cực: sai kiểu
+    đó không có triệu chứng nào cả, báo cáo vẫn đẹp, chỉ là ngược.
+    """
+    nhan: dict[int, str] = {}
+    la: list[str] = []
+
+    for i, ten in id2label.items():
+        chuan = QUY_DOI_NHAN.get(str(ten).strip().lower())
+        if chuan is None:
+            la.append(str(ten))
+        else:
+            nhan[int(i)] = chuan
+
+    if la:
+        raise NlpError(
+            f"Model {repo!r} có nhãn lạ: {', '.join(la)}. "
+            "Thêm vào QUY_DOI_NHAN trong nlp/model.py rồi chạy lại — không đoán bừa."
+        )
+    if set(nhan.values()) != {POSITIVE, NEUTRAL, NEGATIVE}:
+        raise NlpError(f"Model {repo!r} không đủ ba nhãn: {sorted(set(nhan.values()))}.")
+    return nhan
 
 
 @dataclass(frozen=True)
@@ -86,31 +122,7 @@ class BoChamSacThai:
         self._nhan = self._doc_nhan()
 
     def _doc_nhan(self) -> dict[int, str]:
-        """Đọc bảng nhãn từ chính model, và từ chối chạy nếu không hiểu được nhãn nào.
-
-        Thà dừng còn hơn chấm ra một cột `positive` thật ra đang chứa điểm tiêu cực.
-        """
-        goc: dict[Any, Any] = dict(self._model.config.id2label)
-        nhan: dict[int, str] = {}
-        la: list[str] = []
-
-        for i, ten in goc.items():
-            chuan = QUY_DOI_NHAN.get(str(ten).strip().lower())
-            if chuan is None:
-                la.append(str(ten))
-            else:
-                nhan[int(i)] = chuan
-
-        if la:
-            raise NlpError(
-                f"Model {self.cau_hinh.repo!r} có nhãn lạ: {', '.join(la)}. "
-                "Thêm vào QUY_DOI_NHAN trong nlp/model.py rồi chạy lại — không đoán bừa."
-            )
-        if set(nhan.values()) != {POSITIVE, NEUTRAL, NEGATIVE}:
-            raise NlpError(
-                f"Model {self.cau_hinh.repo!r} không đủ ba nhãn: {sorted(set(nhan.values()))}."
-            )
-        return nhan
+        return doc_bang_nhan(dict(self._model.config.id2label), self.cau_hinh.repo)
 
     @property
     def model_version(self) -> str:

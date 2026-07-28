@@ -1,16 +1,10 @@
 {
   "_ghi_chu": "Từ khoá nhận diện thương hiệu PTIT. Sửa file này, không sửa mã Python.",
-
   "search_terms": [
-    "\"Học viện Công nghệ Bưu chính Viễn thông\"",
-    "\"Học viện Bưu chính Viễn thông\"",
     "\"Học viện Công nghệ Bưu chính Viễn thông\" tuyển sinh",
     "\"Học viện Công nghệ Bưu chính Viễn thông\" điểm chuẩn",
-    "\"Học viện Công nghệ Bưu chính Viễn thông\" sinh viên",
-    "PTIT tuyển sinh",
-    "ptit.edu.vn"
+    "\"Học viện Công nghệ Bưu chính Viễn thông\" sinh viên"
   ],
-
   "_ghi_chu_owned": [
     "Kênh do chính Học viện vận hành. Google News có đánh chỉ mục các trang này nên chúng",
     "lọt vào kết quả tìm kiếm — nếu không đánh dấu thì thông cáo tự đăng bị đếm thành",
@@ -22,12 +16,174 @@
     "portal.ptit.edu.vn",
     "PTIT"
   ],
-
   "match_keywords": [
-    { "text": "Học viện Công nghệ Bưu chính Viễn thông", "mode": "substring" },
-    { "text": "Học viện Bưu chính Viễn thông", "mode": "substring" },
-    { "text": "Học viện Công nghệ BCVT", "mode": "substring" },
-    { "text": "ptit.edu.vn", "mode": "substring" },
-    { "text": "PTIT", "mode": "token" }
+    {
+      "text": "Học viện Công nghệ Bưu chính Viễn thông",
+      "mode": "substring"
+    },
+    {
+      "text": "Học viện Bưu chính Viễn thông",
+      "mode": "substring"
+    },
+    {
+      "text": "Học viện Công nghệ BCVT",
+      "mode": "substring"
+    },
+    {
+      "text": "ptit.edu.vn",
+      "mode": "substring"
+    },
+    {
+      "text": "PTIT",
+      "mode": "token"
+    }
+  ],
+  "_ghi_chu_doi_sanh": [
+    "Từ khoá của năm trường đối sánh, để tính THỊ PHẦN THẢO LUẬN.",
+    "",
+    "Không có khối này thì kho chỉ có tin bài về Học viện, và 'thị phần' không có mẫu số.",
+    "",
+    "Từ khoá phải ĐẶC TRƯNG. Ví dụ sai điển hình: dùng 'Công nghệ Thông tin' cho UIT —",
+    "cụm này xuất hiện trong 33/479 bài của kho hiện tại mà phần lớn nói về ngành học của",
+    "Học viện, không nói về trường UIT. Mọi từ khoá dưới đây đều đã loại kiểu nhầm đó.",
+    "",
+    "mode 'token' bắt buộc với tên viết tắt (HUST, UIT, KMA): để 'substring' thì 'KMA'",
+    "khớp luôn vào giữa một từ khác."
+  ],
+  "competitors": [
+    {
+      "key": "hust",
+      "label": "Đại học Bách khoa Hà Nội",
+      "search_terms": [
+        "\"Đại học Bách khoa Hà Nội\" tuyển sinh",
+        "\"Đại học Bách khoa Hà Nội\" điểm chuẩn",
+        "\"Đại học Bách khoa Hà Nội\" sinh viên"
+      ],
+      "match_keywords": [
+        {
+          "text": "Đại học Bách khoa Hà Nội",
+          "mode": "substring"
+        },
+        {
+          "text": "ĐH Bách khoa Hà Nội",
+          "mode": "substring"
+        },
+        {
+          "text": "HUST",
+          "mode": "token"
+        }
+      ]
+    },
+    {
+      "key": "uet",
+      "label": "Trường ĐH Công nghệ (ĐHQGHN)",
+      "search_terms": [
+        "\"Trường Đại học Công nghệ ĐHQGHN\" tuyển sinh",
+        "\"Trường Đại học Công nghệ ĐHQGHN\" điểm chuẩn",
+        "\"Trường Đại học Công nghệ ĐHQGHN\" sinh viên"
+      ],
+      "match_keywords": [
+        {
+          "text": "Trường Đại học Công nghệ, Đại học Quốc gia Hà Nội",
+          "mode": "substring"
+        },
+        {
+          "text": "Đại học Công nghệ - ĐHQGHN",
+          "mode": "substring"
+        },
+        {
+          "text": "Đại học Công nghệ – ĐHQGHN",
+          "mode": "substring"
+        },
+        {
+          "text": "UET",
+          "mode": "token"
+        }
+      ]
+    },
+    {
+      "key": "uit",
+      "label": "Trường ĐH Công nghệ Thông tin (ĐHQG-HCM)",
+      "search_terms": [
+        "\"Trường Đại học Công nghệ Thông tin\" tuyển sinh",
+        "\"Trường Đại học Công nghệ Thông tin\" điểm chuẩn",
+        "\"Trường Đại học Công nghệ Thông tin\" sinh viên"
+      ],
+      "match_keywords": [
+        {
+          "text": "Trường Đại học Công nghệ Thông tin, Đại học Quốc gia",
+          "mode": "substring"
+        },
+        {
+          "text": "Đại học Công nghệ Thông tin - ĐHQG",
+          "mode": "substring"
+        },
+        {
+          "text": "Đại học Công nghệ Thông tin – ĐHQG",
+          "mode": "substring"
+        },
+        {
+          "text": "UIT",
+          "mode": "token"
+        }
+      ]
+    },
+    {
+      "key": "fpt",
+      "label": "Trường Đại học FPT",
+      "search_terms": [
+        "\"Trường Đại học FPT\" tuyển sinh",
+        "\"Trường Đại học FPT\" điểm chuẩn",
+        "\"Trường Đại học FPT\" sinh viên"
+      ],
+      "match_keywords": [
+        {
+          "text": "Trường Đại học FPT",
+          "mode": "substring"
+        },
+        {
+          "text": "Đại học FPT",
+          "mode": "substring"
+        },
+        {
+          "text": "FPT University",
+          "mode": "substring"
+        }
+      ]
+    },
+    {
+      "key": "actvn",
+      "label": "Học viện Kỹ thuật Mật mã",
+      "search_terms": [
+        "\"Học viện Kỹ thuật Mật mã\" tuyển sinh",
+        "\"Học viện Kỹ thuật Mật mã\" điểm chuẩn",
+        "\"Học viện Kỹ thuật Mật mã\" sinh viên"
+      ],
+      "match_keywords": [
+        {
+          "text": "Học viện Kỹ thuật Mật mã",
+          "mode": "substring"
+        },
+        {
+          "text": "Học viện Kỹ thuật mật mã",
+          "mode": "substring"
+        },
+        {
+          "text": "KMA",
+          "mode": "token"
+        }
+      ]
+    }
+  ],
+  "_ghi_chu_can_bang": [
+    "MỖI TRƯỜNG PHẢI CÓ ĐÚNG BA TỪ KHOÁ TÌM KIẾM, THEO CÙNG BA MẪU.",
+    "",
+    "Trước khi cân bằng: Học viện có 7 từ khoá, mỗi trường đối sánh 1–2. Kết quả là",
+    "thị phần thảo luận của Học viện 52,3% — nhưng con số đó đo công sức thu thập của",
+    "chính ta, không đo mức độ báo chí nhắc tới. Thêm một từ khoá cho một trường là",
+    "làm sai lệch mẫu số của cả nhóm.",
+    "",
+    "Lọc RSS (nguồn trung lập) thay cho tìm kiếm cũng không dùng được: chỉ 12 bài có",
+    "nhãn, quá ít để làm chỉ số."
   ]
 }

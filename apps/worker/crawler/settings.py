@@ -104,6 +104,22 @@ class BrandKeywords:
             )
         owned = [str(s).strip() for s in du_lieu.get("owned_sources", []) if str(s).strip()]
 
+        # Gộp từ khoá của nhóm trường đối sánh vào cùng bộ.
+        #
+        # Không gộp thì kho chỉ có tin bài về Học viện, và chỉ số "thị phần thảo luận"
+        # không có mẫu số — nó sẽ luôn bằng 100%, tức là vô nghĩa. Gộp ở đây để bước
+        # thu thập không phải biết gì về chuyện có nhiều thương hiệu; phần phân biệt
+        # bài nào của trường nào do `crawler/brands.py` lo sau khi đã lưu.
+        for doi_thu in du_lieu.get("competitors", []):
+            search_terms.extend(
+                str(t).strip() for t in doi_thu.get("search_terms", []) if str(t).strip()
+            )
+            for muc in doi_thu.get("match_keywords", []):
+                text = str(muc.get("text", "")).strip()
+                mode = str(muc.get("mode", "substring")).strip()
+                if text and mode in ("substring", "token"):
+                    keywords.append(Keyword(text=text, mode=mode))  # type: ignore[arg-type]
+
         return cls(search_terms=search_terms, match_keywords=keywords, owned_sources=owned)
 
 

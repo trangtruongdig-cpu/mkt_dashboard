@@ -62,6 +62,16 @@ module = [
 ]
 ignore_missing_imports = true
 
+# transformers có type hint nhưng chưa phủ hết: `AutoTokenizer.from_pretrained` bị coi là
+# hàm không kiểu, và mypy strict từ chối mọi lệnh gọi tới nó.
+#
+# Nới đúng một luật, đúng một file. `nlp/model.py` là nơi DUY NHẤT trong dự án chạm vào
+# transformers — chính vì đã gom lại một chỗ nên ngoại lệ này mới hẹp được đến vậy.
+# Mọi luật khác của strict vẫn áp dụng cho file đó, và phần còn lại của dự án không đổi.
+[[tool.mypy.overrides]]
+module = ["nlp.model"]
+disallow_untyped_calls = false
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]

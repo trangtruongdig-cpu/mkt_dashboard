@@ -129,16 +129,23 @@ export function buildDemoDataset(referenceDate: Date = new Date()): {
   const weightedEngagementRate =
     sum(channels.channels.map((c) => c.engagement)) / totalReach;
 
-  // Sắc thái: 8 tuần gần nhất, xu hướng tích cực tăng nhẹ.
-  const byWeek = Array.from({ length: WEEKS }, (_, i) => {
+  // Sắc thái: 8 tháng gần nhất, xu hướng tích cực tăng nhẹ.
+  const cuoiKy = new Date(`${last}T00:00:00Z`);
+  const byMonth = Array.from({ length: WEEKS }, (_, i) => {
     const rnd = seeded(hashString(`sent:${last}:${i}`));
     const volume = Math.round(380 + rnd() * 190);
     const positiveShare = 0.55 + i * 0.011 + rnd() * 0.05;
     const negativeShare = 0.14 - i * 0.006 + rnd() * 0.03;
     const positive = Math.round(volume * positiveShare);
     const negative = Math.round(volume * Math.max(negativeShare, 0.04));
+    const moc = new Date(
+      Date.UTC(cuoiKy.getUTCFullYear(), cuoiKy.getUTCMonth() - (WEEKS - 1 - i), 1),
+    );
+    const thang = String(moc.getUTCMonth() + 1).padStart(2, "0");
     return {
-      weekLabel: `Tuần ${i + 1}`,
+      monthLabel: `${thang}/${moc.getUTCFullYear()}`,
+      monthStart: moc.toISOString().slice(0, 10),
+      total: volume,
       positive,
       negative,
       neutral: volume - positive - negative,
@@ -147,14 +154,18 @@ export function buildDemoDataset(referenceDate: Date = new Date()): {
 
   const sentiment: SentimentResponse = {
     period,
+    // Dữ liệu giả lập không thuộc nguồn nào cả; khai là `social` để giao diện có thứ để
+    // vẽ, và `modelVersion` nói thẳng đây là số giả để không ai nhầm là đo thật.
+    source: "social",
     modelVersion: "phobert-base-v1 (dữ liệu giả lập)",
-    totalMentions: sum(byWeek.map((w) => w.positive + w.neutral + w.negative)),
+    totalMentions: sum(byMonth.map((m) => m.total)),
     total: {
-      positive: sum(byWeek.map((w) => w.positive)),
-      neutral: sum(byWeek.map((w) => w.neutral)),
-      negative: sum(byWeek.map((w) => w.negative)),
+      positive: sum(byMonth.map((m) => m.positive)),
+      neutral: sum(byMonth.map((m) => m.neutral)),
+      negative: sum(byMonth.map((m) => m.negative)),
     },
-    byWeek,
+    byMonth,
+    minSampleForTrend: 10,
   };
 
   const positiveShare =

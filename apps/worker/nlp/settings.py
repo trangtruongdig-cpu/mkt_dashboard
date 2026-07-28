@@ -69,6 +69,65 @@ def model_theo_ma(ma: str) -> ModelSacThai:
     return MODELS[ma]
 
 
+@dataclass(frozen=True)
+class Corpus:
+    """Một kho văn bản cần chấm, kèm model phù hợp với loại văn bản đó.
+
+    Ghép cứng kho với model ngay ở đây để không ai lỡ tay chấm bình luận YouTube bằng
+    PhoBERT: chọn nhầm không báo lỗi, chỉ cho ra điểm sai một cách im lặng.
+    """
+
+    ma: str
+    mo_ta: str
+    bang_tho: str
+    bang_diem: str
+    model: ModelSacThai
+
+    cot_khoa: str = "mention_key"
+
+    bieu_thuc_van_ban: str = "body_text"
+    """Biểu thức SQL lấy văn bản cần chấm. Là HẰNG do mã nguồn quy định, không bao giờ
+    nhận đầu vào từ người dùng."""
+
+    dieu_kien: str = "true"
+    """Điều kiện lọc thêm, cũng là hằng. Dùng để loại những hạt dữ liệu không mang ý kiến."""
+
+
+SOCIAL = Corpus(
+    ma="social",
+    mo_ta="Thảo luận của người ngoài trên mạng xã hội và diễn đàn",
+    bang_tho="raw_social_mention",
+    bang_diem="social_sentiment",
+    model=VISOBERT,
+    # Tiêu đề và mô tả video là lời giới thiệu của người làm nội dung, không phải nhận xét
+    # về Học viện. Chấm chúng rồi gộp vào biểu đồ sắc thái là trộn thông điệp truyền thông
+    # vào tiếng nói công chúng.
+    dieu_kien="content_type IN ('comment', 'post', 'thread')",
+)
+
+NEWS = Corpus(
+    ma="news",
+    mo_ta="Tin bài báo chí viết về Học viện",
+    bang_tho="raw_news_mention",
+    bang_diem="news_sentiment",
+    model=PHOBERT,
+    # Tiêu đề mang phần lớn lập trường của bài, nên luôn đưa vào. Thân bài bị model cắt ở
+    # 256 token — tức điểm của một bài dài thực chất là điểm của TIÊU ĐỀ + PHẦN ĐẦU BÀI,
+    # không phải của toàn văn. Cột `truncated` đánh dấu để về sau còn kiểm chứng lại.
+    bieu_thuc_van_ban="coalesce(title, '') || ' ' || coalesce(body_text, '')",
+    # Không lọc `is_owned` ở đây: "thông cáo Học viện tự đăng mang sắc thái gì" là câu hỏi
+    # có ích riêng. Việc tách earned khỏi owned khi lên báo cáo là của dbt.
+)
+
+CORPUS = {c.ma: c for c in (SOCIAL, NEWS)}
+
+
+def corpus_theo_ma(ma: str) -> Corpus:
+    if ma not in CORPUS:
+        raise NlpError(f"Không có kho {ma!r}. Hiện có: {', '.join(sorted(CORPUS))}.")
+    return CORPUS[ma]
+
+
 # Nơi cất trọng số model. Trong Docker, thư mục này là một layer đã nướng sẵn lúc build —
 # mục 6 CLAUDE.md: máy chủ Học viện có thể không ra được Internet, và nghiệm thu phải chạy
 # offline được.

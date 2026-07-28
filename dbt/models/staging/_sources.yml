@@ -29,3 +29,24 @@ sources:
         description: >
           Số liệu bóc từ Biểu mẫu 18 của từng trường. Cột `warnings` ghi mọi chỗ đáng
           ngờ trong lúc bóc — phải đọc trước khi so sánh chéo giữa các trường.
+      - name: raw_news_mention
+        description: >
+          Tin bài công khai có nhắc tới nhóm sáu trường đối sánh. Cột `brands` là danh
+          sách JSON khoá thương hiệu, do bước `crawler gan-nhan` điền — phải chạy lại
+          bước đó sau mỗi lần thu thập, nếu không bài mới sẽ không có nhãn.
+      - name: raw_social_mention
+        description: >
+          Thảo luận của NGƯỜI NGOÀI về Học viện: bình luận YouTube, bài đăng Reddit,
+          chủ đề diễn đàn. Khác với raw_news_mention (báo chí viết) — đây là tiếng nói
+          của người dùng thường. Cột `is_owned` tách phần do chính Học viện đăng.
+      - name: social_sentiment
+        description: >
+          Điểm sắc thái do worker chấm bằng ViSoBERT. Bảng RIÊNG, không đụng vào bản ghi
+          gốc. Khoá là cặp (mention_key, model_version): một thảo luận có nhiều dòng ở
+          đây nếu đã được chấm bằng nhiều phiên bản model — join thẳng vào bảng thảo luận
+          sẽ nhân đôi số lượt nhắc đến.
+      - name: news_sentiment
+        description: >
+          Điểm sắc thái tin bài do worker chấm bằng PhoBERT. Cùng khuôn với
+          social_sentiment: khoá là cặp (mention_key, model_version), một bài có nhiều
+          dòng nếu đã chấm bằng nhiều phiên bản model.
