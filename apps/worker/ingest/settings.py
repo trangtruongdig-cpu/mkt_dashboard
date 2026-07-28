@@ -15,11 +15,6 @@ REPO_ROOT = WORKER_ROOT.parent.parent
 CUSTOM_REPORTS_PATH = REPO_ROOT / "airbyte" / "config" / "ga4-custom-reports.json"
 BENCHMARK_BRANDS_PATH = WORKER_ROOT / "config" / "benchmark-brands.json"
 
-# File do API ghi ra sau khi người dùng bấm "Kết nối Google" trên giao diện web.
-# Quyền 0600, nằm trong .gitignore. Đây là nguồn ưu tiên; biến môi trường chỉ là
-# đường lùi cho ai muốn cấu hình tay.
-GOOGLE_CREDENTIALS_PATH = REPO_ROOT / ".secrets" / "google.json"
-
 load_dotenv(WORKER_ROOT / ".env")
 
 
@@ -27,8 +22,11 @@ class ConfigError(RuntimeError):
     """Cấu hình thiếu hoặc sai — dừng ngay thay vì chạy tiếp với giá trị nửa vời."""
 
 
-def _required(name: str, goi_y: str = "") -> str:
+def _required(name: str, goi_y: str = "", cu: str = "") -> str:
+    """Đọc biến bắt buộc. `cu` là tên cũ vẫn chấp nhận để .env sẵn có không gãy."""
     value = os.getenv(name, "").strip()
+    if not value and cu:
+        value = os.getenv(cu, "").strip()
     if not value:
         thong_diep = f"Thiếu biến môi trường {name}."
         if goi_y:
@@ -49,45 +47,30 @@ class Ga4Settings:
 
     @classmethod
     def load(cls) -> Ga4Settings:
-        """Ưu tiên thông tin do giao diện web ghi ra, sau đó mới đến biến môi trường."""
-        if GOOGLE_CREDENTIALS_PATH.exists():
-            return cls._from_credentials_file()
+        """Chỉ đọc từ biến môi trường.
+
+        Trước đây ưu tiên file `.secrets/google.json` do API ghi ra. Bỏ hẳn đường đó:
+        file nằm trong repo nên chỉ cần một lần gom cả thư mục là bí mật lọt vào commit.
+        Giờ API và worker cùng đọc một bộ biến môi trường — vẫn là một nguồn sự thật,
+        nhưng không có gì nằm trên đĩa trong repo.
+        """
         return cls.from_env()
 
     @classmethod
-    def _from_credentials_file(cls) -> Ga4Settings:
-        du_lieu: dict[str, Any] = json.loads(
-            GOOGLE_CREDENTIALS_PATH.read_text(encoding="utf-8")
-        )
-
-        thieu = [
-            khoa
-            for khoa in ("clientId", "clientSecret", "refreshToken", "propertyId")
-            if not du_lieu.get(khoa)
-        ]
-        if thieu:
-            raise ConfigError(
-                f"{GOOGLE_CREDENTIALS_PATH} còn thiếu: {', '.join(thieu)}. "
-                "Mở trang /ket-noi trên giao diện web và hoàn tất các bước còn lại."
-            )
-
-        return cls(
-            property_id=str(du_lieu["propertyId"]),
-            client_id=str(du_lieu["clientId"]),
-            client_secret=str(du_lieu["clientSecret"]),
-            refresh_token=str(du_lieu["refreshToken"]),
-            start_date=os.getenv("GA4_START_DATE", "2025-07-01").strip(),
-            window_in_days=int(os.getenv("GA4_WINDOW_IN_DAYS", "30")),
-        )
-
-    @classmethod
     def from_env(cls) -> Ga4Settings:
-        goi_y = "Cách dễ nhất: mở giao diện web, vào trang Kết nối dữ liệu."
+        goi_y = (
+            "Đặt trong .env của worker, cùng tên biến với API. "
+            "Chạy luồng OAuth ở trang /ket-noi để lấy refresh token."
+        )
         return cls(
             property_id=_required("GA4_PROPERTY_ID", goi_y),
-            client_id=_required("GA4_CLIENT_ID", goi_y),
-            client_secret=_required("GA4_CLIENT_SECRET", goi_y),
-            refresh_token=_required("GA4_REFRESH_TOKEN", goi_y),
+            client_id=_required("GOOGLE_CLIENT_ID", goi_y, cu="GA4_CLIENT_ID"),
+            client_secret=_required(
+                "GOOGLE_CLIENT_SECRET", goi_y, cu="GA4_CLIENT_SECRET"
+            ),
+            refresh_token=_required(
+                "GOOGLE_REFRESH_TOKEN", goi_y, cu="GA4_REFRESH_TOKEN"
+            ),
             start_date=os.getenv("GA4_START_DATE", "2025-07-01").strip(),
             window_in_days=int(os.getenv("GA4_WINDOW_IN_DAYS", "30")),
         )

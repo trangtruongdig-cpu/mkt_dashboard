@@ -69,9 +69,9 @@ def main() -> int:
 
     print("\n" + "=" * 72)
     print("Dán ba dòng sau vào apps/worker/.env  (KHÔNG commit file này):\n")
-    print(f"GA4_CLIENT_ID={client_id}")
-    print(f"GA4_CLIENT_SECRET={client_secret}")
-    print(f"GA4_REFRESH_TOKEN={credentials.refresh_token}")
+    print(f"GOOGLE_CLIENT_ID={client_id}")
+    print(f"GOOGLE_CLIENT_SECRET={client_secret}")
+    print(f"GOOGLE_REFRESH_TOKEN={credentials.refresh_token}")
     print("=" * 72)
     print("\nSau đó kiểm tra:  uv run python -m ingest check")
     return 0

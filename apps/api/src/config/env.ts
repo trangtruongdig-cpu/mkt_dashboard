@@ -32,6 +32,20 @@ export const EnvSchema = z.object({
     .enum(["true", "false"])
     .default("false")
     .transform((v) => v === "true"),
+
+  /**
+   * Uỷ quyền Google Analytics. Bí mật chỉ được nằm ở đây, không có đường nào khác —
+   * CLAUDE.md mục 4. Để trống khi chưa đấu nối; màn hình Kết nối vẫn dựng được và
+   * hướng dẫn từng bước.
+   *
+   * Chuỗi rỗng nghĩa là "chưa có", `CredentialStoreService` quy đổi sang `null`.
+   */
+  GOOGLE_CLIENT_ID: z.string().default(""),
+  GOOGLE_CLIENT_SECRET: z.string().default(""),
+  /** Lấy được sau khi chạy xong luồng OAuth ở trang /ket-noi. */
+  GOOGLE_REFRESH_TOKEN: z.string().default(""),
+  /** Property GA4 chọn để đồng bộ, dạng số thuần (ví dụ 464491273). */
+  GA4_PROPERTY_ID: z.string().default(""),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

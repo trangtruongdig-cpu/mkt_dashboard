@@ -66,7 +66,17 @@ def test_config_khong_lam_ro_bi_mat_khi_in() -> None:
 
 
 def test_thieu_bien_moi_truong_thi_bao_loi_ro_rang(monkeypatch: pytest.MonkeyPatch) -> None:
-    for bien in ("GA4_PROPERTY_ID", "GA4_CLIENT_ID", "GA4_CLIENT_SECRET", "GA4_REFRESH_TOKEN"):
+    # Xoá cả tên mới lẫn tên cũ — _required chấp nhận tên cũ làm đường lùi, để sót
+    # một cái là test tưởng có lỗi trong khi thật ra biến vẫn đọc được.
+    for bien in (
+        "GA4_PROPERTY_ID",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET",
+        "GOOGLE_REFRESH_TOKEN",
+        "GA4_CLIENT_ID",
+        "GA4_CLIENT_SECRET",
+        "GA4_REFRESH_TOKEN",
+    ):
         monkeypatch.setenv(bien, "")
 
     with pytest.raises(Exception) as loi:

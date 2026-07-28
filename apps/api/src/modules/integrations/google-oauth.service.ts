@@ -102,7 +102,9 @@ export class GoogleOauthService {
       );
     }
 
-    this.store.write({
+    // Chỉ nhớ trong bộ nhớ tiến trình. Muốn giữ qua lần khởi động sau thì đặt
+    // GOOGLE_REFRESH_TOKEN trong .env — service này cố ý không ghi bí mật xuống đĩa.
+    this.store.remember({
       refreshToken: token.refresh_token,
       accountEmail: this.readEmailFromIdToken(token.id_token),
       connectedAt: new Date().toISOString(),
@@ -140,9 +142,13 @@ export class GoogleOauthService {
     return token.access_token;
   }
 
+  /**
+   * Chỉ xoá phần nhớ tạm. Nếu refresh token đến từ .env thì nó sẽ quay lại sau khi
+   * khởi động lại — muốn ngắt hẳn phải bỏ GOOGLE_REFRESH_TOKEN khỏi .env.
+   */
   disconnect(): void {
     this.accessToken = null;
-    this.store.write({
+    this.store.remember({
       refreshToken: null,
       accountEmail: null,
       propertyId: null,

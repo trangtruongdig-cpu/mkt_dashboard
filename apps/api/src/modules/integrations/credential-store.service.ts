@@ -1,15 +1,23 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { z } from "zod";
+import type { Env } from "../../config/env";
 
 /**
- * Nơi cất thông tin uỷ quyền Google.
+ * Nơi đọc thông tin uỷ quyền Google.
  *
- * Ghi ra file `<gốc repo>/.secrets/google.json` với quyền 0600 — cả API (Node) và
- * worker (Python) cùng đọc một file này, nên chỉ có một nguồn sự thật.
+ * Bí mật CHỈ đến từ biến môi trường — CLAUDE.md mục 4. Service này không ghi ra
+ * đĩa, không log giá trị bí mật, và không trả bí mật ngược qua API.
  *
- * File nằm trong .gitignore. KHÔNG bao giờ trả nội dung file này qua API.
+ * Vì sao đổi: trước đây bộ credential được ghi ra `<gốc repo>/.secrets/google.json`.
+ * File nằm ngay trong repo nên chỉ cần một lần gom cả thư mục là lọt vào commit —
+ * và đã lọt thật, chỉ dừng lại nhờ GitHub chặn ở bước đẩy lên. Đưa về biến môi
+ * trường thì không còn đường nào cho nó quay lại git.
+ *
+ * Đánh đổi phải biết: những gì luồng "Kết nối" phát hiện lúc chạy — refresh token
+ * vừa đổi được, property vừa chọn, tên tài khoản — chỉ nằm trong bộ nhớ tiến trình
+ * và MẤT khi khởi động lại. Muốn giữ lâu dài thì chép vào `.env` rồi dựng lại
+ * container. Xem `apps/api/.env.example`.
  */
 const StoredCredentialsSchema = z.object({
   clientId: z.string(),
@@ -24,60 +32,51 @@ const StoredCredentialsSchema = z.object({
 
 export type StoredCredentials = z.infer<typeof StoredCredentialsSchema>;
 
-const EMPTY: StoredCredentials = {
-  clientId: "",
-  clientSecret: "",
-  refreshToken: null,
-  accountEmail: null,
-  propertyId: null,
-  propertyDisplayName: null,
-  accountDisplayName: null,
-  connectedAt: null,
-};
-
-/** Đi ngược lên tìm gốc workspace, để chạy đúng cả khi dev lẫn khi đã build. */
-function findRepoRoot(): string {
-  let current = resolve(process.cwd());
-  for (let i = 0; i < 8; i += 1) {
-    if (existsSync(join(current, "pnpm-workspace.yaml"))) return current;
-    const parent = dirname(current);
-    if (parent === current) break;
-    current = parent;
-  }
-  return process.cwd();
+/** Biến môi trường để trống nghĩa là chưa có, không phải chuỗi rỗng hợp lệ. */
+function rongThanhNull(gia_tri: string): string | null {
+  const cat = gia_tri.trim();
+  return cat.length > 0 ? cat : null;
 }
 
 @Injectable()
 export class CredentialStoreService {
-  private readonly logger = new Logger(CredentialStoreService.name);
-  private readonly filePath =
-    process.env.GOOGLE_CREDENTIALS_PATH ??
-    join(findRepoRoot(), ".secrets", "google.json");
+  /**
+   * Giá trị phát hiện trong phiên chạy hiện tại. Không bao giờ chạm đĩa.
+   * Ghi đè lên giá trị từ môi trường vì nó mới hơn.
+   */
+  private runtime: Partial<StoredCredentials> = {};
+
+  constructor(private readonly config: ConfigService<Env, true>) {}
 
   read(): StoredCredentials {
-    if (!existsSync(this.filePath)) return { ...EMPTY };
+    const tu_moi_truong: StoredCredentials = {
+      clientId: this.config.get("GOOGLE_CLIENT_ID", { infer: true }).trim(),
+      clientSecret: this.config
+        .get("GOOGLE_CLIENT_SECRET", { infer: true })
+        .trim(),
+      refreshToken: rongThanhNull(
+        this.config.get("GOOGLE_REFRESH_TOKEN", { infer: true }),
+      ),
+      propertyId: rongThanhNull(
+        this.config.get("GA4_PROPERTY_ID", { infer: true }),
+      ),
+      // Thuần hiển thị, không phải bí mật — chỉ có sau khi dò qua Admin API.
+      accountEmail: null,
+      propertyDisplayName: null,
+      accountDisplayName: null,
+      connectedAt: null,
+    };
 
-    try {
-      const raw: unknown = JSON.parse(readFileSync(this.filePath, "utf8"));
-      return StoredCredentialsSchema.parse(raw);
-    } catch {
-      this.logger.warn(
-        `Không đọc được ${this.filePath} — coi như chưa kết nối. Xoá file rồi kết nối lại.`,
-      );
-      return { ...EMPTY };
-    }
+    return { ...tu_moi_truong, ...this.runtime };
   }
 
-  write(patch: Partial<StoredCredentials>): StoredCredentials {
-    const next: StoredCredentials = { ...this.read(), ...patch };
-
-    mkdirSync(dirname(this.filePath), { recursive: true, mode: 0o700 });
-    writeFileSync(this.filePath, `${JSON.stringify(next, null, 2)}\n`, {
-      encoding: "utf8",
-      mode: 0o600,
-    });
-
-    return next;
+  /**
+   * Nhớ tạm trong bộ nhớ tiến trình. Cố ý KHÔNG persist: ghi bí mật xuống đĩa là
+   * đúng cái đã làm lộ khoá lần trước.
+   */
+  remember(patch: Partial<StoredCredentials>): StoredCredentials {
+    this.runtime = { ...this.runtime, ...patch };
+    return this.read();
   }
 
   hasOauthClient(): boolean {

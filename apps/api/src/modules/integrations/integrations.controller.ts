@@ -68,16 +68,18 @@ export class IntegrationsController {
 
   @Post("google/client")
   @ApiOperation({
-    summary: "Lưu OAuth client (bước một lần)",
+    summary: "Khai báo OAuth client cho phiên chạy hiện tại",
     description:
       "Nhận client_id và client_secret của OAuth client do người dùng tạo trên Google Cloud. " +
-      "Lưu vào file .secrets/google.json quyền 0600, không bao giờ trả ngược ra ngoài.",
+      "Chỉ giữ trong bộ nhớ tiến trình và không bao giờ trả ngược ra ngoài — bí mật không " +
+      "được ghi xuống đĩa. Muốn giữ qua lần khởi động sau, đặt GOOGLE_CLIENT_ID và " +
+      "GOOGLE_CLIENT_SECRET trong .env.",
   })
   @ZodOkResponse(ConnectionStatusSchema, "Trạng thái sau khi lưu")
   saveClient(
     @Body(new ZodValidationPipe(SaveOauthClientSchema)) body: SaveOauthClient,
   ): ConnectionStatus {
-    this.store.write({
+    this.store.remember({
       clientId: body.clientId.trim(),
       clientSecret: body.clientSecret.trim(),
     });
@@ -150,7 +152,7 @@ export class IntegrationsController {
       );
     }
 
-    this.store.write({
+    this.store.remember({
       propertyId: chon.propertyId,
       propertyDisplayName: chon.displayName,
       accountDisplayName: chon.accountName,
