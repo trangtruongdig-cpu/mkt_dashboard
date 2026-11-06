@@ -131,14 +131,51 @@ describe("Cây mục tiêu tuân thủ khung IBMC", () => {
     expect(thieu).toEqual([]);
   });
 
-  it("chỉ số chưa có nguồn dữ liệu thì KHÔNG được có giá trị", () => {
+  it("mọi chỉ số ƯỚC LƯỢNG đều nêu căn cứ, và không chỉ số đo thật nào mang nhãn ước lượng", () => {
+    for (const kpi of cascade.kpis) {
+      const laUocLuong = kpi.requirement.readiness === "estimated";
+      if (laUocLuong) {
+        expect(
+          kpi.estimateBasis,
+          `${kpi.key} là ước lượng mà không nêu căn cứ`,
+        ).not.toBeNull();
+      } else {
+        expect(
+          kpi.estimateBasis,
+          `${kpi.key} không phải ước lượng mà lại nêu căn cứ`,
+        ).toBeNull();
+      }
+    }
+  });
+
+  it("danh sách chỉ số ước lượng là danh sách ĐÓNG — thêm một cái phải sửa test này", () => {
+    // Cổng cố ý: một con số ước lượng lọt vào bảng điều khiển mà không ai để ý là cách
+    // nhanh nhất để người đọc tưởng nó là số đo. Thêm ước lượng mới thì phải sửa ở đây,
+    // tức là phải có người nhìn thấy nó.
+    const uoc_luong = cascade.kpis
+      .filter((k) => k.requirement.readiness === "estimated")
+      .map((k) => k.key)
+      .sort();
+
+    expect(uoc_luong).toEqual([
+      "aided_awareness",
+      "cost_per_consideration",
+      "cost_per_enrolment",
+      "spontaneous_awareness",
+      "top_of_mind",
+    ]);
+  });
+
+  it("chỉ số có giá trị thì giá trị đó phải đến từ nguồn ĐÃ KHAI", () => {
     // Lỗi nguy hiểm nhất của một dashboard là một con số trông như thật nhưng do người
-    // ta điền vào cho đỡ trống.
+    // ta điền vào cho đỡ trống. Ba mức được phép mang giá trị: đã kết nối, nguồn công
+    // khai đã viết mã, và ước lượng — mức cuối phải kèm công thức, kiểm ở test trên.
     const bia_so = cascade.kpis.filter(
       (k) =>
         k.value !== null &&
         k.requirement.readiness !== "connected" &&
-        k.requirement.readiness !== "public_ready",
+        k.requirement.readiness !== "public_ready" &&
+        k.requirement.readiness !== "estimated",
     );
     expect(bia_so.map((k) => k.key)).toEqual([]);
   });

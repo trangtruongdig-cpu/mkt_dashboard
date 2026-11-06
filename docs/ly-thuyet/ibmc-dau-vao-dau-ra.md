@@ -135,6 +135,18 @@ nhưng không chứng minh được *hiệu quả đồng tiền* — đúng kho
 kỹ thuật**: không có nguồn công khai nào thay thế. Mẫu số đã có sẵn (`admission_consideration_views`
 từ GA4), chỉ thiếu tử số.
 
+**Tạm thời đang hiển thị ƯỚC LƯỢNG** (06/11/2026), mang mức sẵn sàng `estimated` nên mọi chỗ
+hiện mức sẵn sàng đều nói ra, và hợp đồng buộc kèm công thức:
+
+| Giả định | Dẫn xuất |
+|---|---|
+| Ngân sách truyền thông tuyển sinh = **1% doanh thu học phí** ≈ 8,57 tỷ đ/mùa | chi phí mỗi người nhập học ≈ **1,07 triệu đ** (÷ chỉ tiêu 8.000) · chi phí mỗi lượt xem trang quyết định ≈ **104 nghìn đ** (÷ 82.234 lượt, số đo thật) |
+
+Cố ý **không** dùng thông lệ 5–10% doanh số của bài 2.5: đó là ngưỡng ngành hàng tiêu dùng
+nhanh, áp vào đây ra 42,85 tỷ — vô lý với một trường công lập, và mâu thuẫn với chính cảnh
+báo đã ghi ở §2 rằng ngưỡng đó không chuyển sang được. Lấy 1% là đặt thấp có chủ ý để con số
+dẫn xuất không thổi phồng. Thay dự toán thật vào là hai chỉ số tự đúng theo.
+
 ### 4.3 Thị phần tìm kiếm — chỉ số lý thuyết mạnh nhất, hiện không lấy được
 
 Đây là nghịch lý đáng ghi lại: theo Les Binet (IPA, 2020), *share of search* đi cùng thị
@@ -197,6 +209,12 @@ là proxy hành vi tìm kiếm, và nhãn trên giao diện phải nói đúng �
 sau khi kết thúc. Rẻ nếu gắn vào quy trình đã có (ngày hội tư vấn và khâu xác nhận nhập
 học), đắt gấp nhiều lần nếu làm riêng.
 
+**Tạm thời đang hiển thị SỐ MINH HOẠ** cho ba mức nhận biết (`top_of_mind` 12% ·
+`spontaneous_awareness` 48% · `aided_awareness` 86%), mang mức sẵn sàng `estimated`. Chúng
+đặt theo hình dạng điển hình của tháp nhận biết (Aaker 1991) — mỗi mức thấp hơn mức dưới nó
+— **chỉ để thử giao diện và để thấy ba mức khác nhau ra sao**. Chưa đợt khảo sát nào được
+chạy, nên không dùng chúng để báo cáo hay nghiệm thu.
+
 **Bảng hỏi đã soạn sẵn:** [`ibmc-khao-sat-nhan-biet.md`](ibmc-khao-sat-nhan-biet.md) — khi
 Học viện đồng ý chạy thì chỉ việc phát, không phải thiết kế lại. Trong đó có phần quan
 trọng nhất và cũng dễ hỏng nhất: **thứ tự câu hỏi**. Ba mức nhận biết chỉ khác nhau ở chỗ
@@ -215,7 +233,12 @@ Số liệu tính từ cây mục tiêu sau khi dựng lại theo khung (06/11/2
 | Kinh doanh | 4 | 11 | 2 |
 | Marketing | 5 | 10 | 5 |
 | Truyền thông | 4 | 18 | 4 |
-| **Tổng** | **13** | **39** | **11** |
+| **Tổng** | **13** | **44** | **16** |
+
+Trong 16 chỉ số có số, **5 là ước lượng** (`estimated`), không phải số đo: hai chỉ số chi phí
+suy từ giả định ngân sách, ba chỉ số nhận biết là số minh hoạ. Chúng được tách thành một mức
+sẵn sàng riêng để không bao giờ bị đọc nhầm thành số đo, và hợp đồng buộc mỗi cái kèm công
+thức hoặc lời khai là số minh hoạ.
 
 Đọc con số 11/39 cho đúng: đây **không** phải mức hoàn thành 28%. Cây mục tiêu là bản đồ
 nhiệm vụ, nên phần lớn ô trống là *việc chưa làm*, và ba trong bốn chỗ thiếu ở §4 là chỗ

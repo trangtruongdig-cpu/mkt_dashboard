@@ -81,6 +81,18 @@ export const READINESS_GLYPH: Record<DataReadiness, Glyph> = {
     color: "var(--status-good)",
     label: DATA_READINESS_LABELS.connected,
   },
+  /*
+   * Ước lượng mang HÌNH RIÊNG và màu cảnh báo, không mượn hình của "đã kết nối".
+   * Một con số ước lượng nằm cạnh một con số đo được, cùng kiểu chữ cùng ô, thì không
+   * ai phân biệt nổi — đó đúng là cách một bảng điều khiển mất uy tín. Hợp đồng dữ
+   * liệu đã buộc mọi chỉ số ước lượng phải kèm `estimateBasis`; chỗ này là nơi điều
+   * đó hiện ra thành hình.
+   */
+  estimated: {
+    icon: IconSparkles,
+    color: "var(--status-warning)",
+    label: DATA_READINESS_LABELS.estimated,
+  },
   public_ready: {
     icon: IconClock,
     color: "var(--status-warning)",

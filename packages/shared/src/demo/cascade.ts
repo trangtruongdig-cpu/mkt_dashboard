@@ -195,6 +195,20 @@ const SOURCE_GA4: DataProvenance = {
   },
 };
 
+/**
+ * Khảo sát thí sinh — nguồn DUY NHẤT đo được ba mức nhận biết.
+ *
+ * Bảng hỏi đã soạn sẵn ở `docs/ly-thuyet/ibmc-khao-sat-nhan-biet.md`, nhưng CHƯA đợt
+ * nào được chạy. Mọi con số gắn nguồn này hiện là số minh hoạ.
+ */
+const SOURCE_SURVEY: DataProvenance = {
+  label: "Khảo sát thí sinh — bảng hỏi đã soạn, chưa đợt nào được chạy",
+  benchmark: {
+    coverage: "full",
+    note: "Bảng hỏi thiết kế để đo cả 6 trường trong cùng một đợt (câu A3 và B1), nên khi chạy sẽ có đủ mẫu số đối sánh. Hiện chưa đợt nào được chạy.",
+  },
+};
+
 const SOURCE_MINISTRY_STATS: DataProvenance = {
   label:
     "Thống kê nguyện vọng đăng ký xét tuyển theo lĩnh vực do Bộ Giáo dục và Đào tạo công bố hằng năm",
@@ -525,6 +539,8 @@ interface KpiSpec {
   provenance: DataProvenance;
   comparability?: Comparability;
   targetRationale?: TargetRationale;
+  /** Chỉ khai khi chỉ số là ước lượng; khi đó `requirement.readiness` phải là `estimated`. */
+  estimateBasis?: string;
   hint?: string;
 }
 
@@ -1209,27 +1225,31 @@ const KPI_SPECS: readonly KpiSpec[] = [
     label: "Chi phí truyền thông trên mỗi người nhập học",
     objectiveKey: "biz_profit",
     tier: "business",
-    value: null,
+    value: 1_071_250,
     unit: "currency",
     target: null,
     baseline: null,
     higherIsBetter: false,
     cadence: "annual",
     provenance: SOURCE_INTERNAL_BUDGET,
-    hint: "Chưa chốt mức cần đạt vì chưa có mùa nào đo được. Phải có một mùa làm gốc trước khi cam kết giảm — cam kết trước khi biết mức nền là con số không có căn cứ.",
+    estimateBasis:
+      "GIẢ ĐỊNH: ngân sách truyền thông tuyển sinh bằng 1% doanh thu học phí, tức 1% × 857 tỷ ≈ 8,57 tỷ đồng/mùa. KHÔNG dùng thông lệ 5–10% của bài 2.5: đó là ngưỡng ngành hàng tiêu dùng nhanh, áp vào đây ra 42,85 tỷ — vô lý với một trường công lập. 1% là mức đặt thấp có chủ ý để con số dẫn xuất không thổi phồng. Thay con số thật vào là hai chỉ số này tự đúng theo. Chia cho chỉ tiêu 8.000: 8,57 tỷ ÷ 8.000 ≈ 1,07 triệu đồng mỗi người nhập học. Mẫu số dùng CHỈ TIÊU chứ không phải số nhập học thật, nên con số thật sẽ cao hơn một chút.",
+    hint: "Chưa chốt mức cần đạt vì chưa có mùa nào ĐO được. Phải có một mùa làm gốc trước khi cam kết giảm — cam kết trước khi biết mức nền là con số không có căn cứ.",
   },
   {
     key: "cost_per_consideration",
     label: "Chi phí trên mỗi lượt xem trang quyết định chọn trường",
     objectiveKey: "biz_profit",
     tier: "business",
-    value: null,
+    value: 104_215,
     unit: "currency",
     target: null,
     baseline: null,
     higherIsBetter: false,
     cadence: "annual",
     provenance: SOURCE_INTERNAL_BUDGET,
+    estimateBasis:
+      "GIẢ ĐỊNH: ngân sách truyền thông tuyển sinh bằng 1% doanh thu học phí, tức 1% × 857 tỷ ≈ 8,57 tỷ đồng/mùa. KHÔNG dùng thông lệ 5–10% của bài 2.5: đó là ngưỡng ngành hàng tiêu dùng nhanh, áp vào đây ra 42,85 tỷ — vô lý với một trường công lập. 1% là mức đặt thấp có chủ ý để con số dẫn xuất không thổi phồng. Thay con số thật vào là hai chỉ số này tự đúng theo. Chia cho 82.234 lượt xem trang quyết định đo được bằng GA4: 8,57 tỷ ÷ 82.234 ≈ 104 nghìn đồng mỗi lượt. Mẫu số ở đây là số ĐO THẬT, chỉ tử số là giả định.",
     hint: "Mẫu số đã đo được bằng GA4 (admission_consideration_views); chỉ còn thiếu tử số là chi phí từ dự toán.",
   },
   {
@@ -1295,6 +1315,57 @@ const KPI_SPECS: readonly KpiSpec[] = [
     cadence: "daily",
     provenance: SOURCE_NEWS_CRAWLER,
     hint: "Có bằng chứng cứng để hậu thuẫn: employment_rate là số buộc phải công khai. Thuộc tính có bằng chứng thì rẻ hơn khi xây.",
+  },
+  // ── Ba mức nhận biết — chỉ đo được bằng khảo sát (bài 5.1) ────────────────
+  // Giá trị hiện tại là SỐ MINH HOẠ. Chúng mang readiness "estimated" nên mọi chỗ
+  // hiển thị mức sẵn sàng đều tự nói ra, và schema buộc phải kèm căn cứ.
+  {
+    key: "top_of_mind",
+    label: "Nhận biết đầu tiên (top of mind)",
+    objectiveKey: "com_awareness",
+    tier: "communication",
+    value: 12,
+    unit: "percent",
+    target: null,
+    baseline: null,
+    higherIsBetter: true,
+    cadence: "annual",
+    provenance: SOURCE_SURVEY,
+    estimateBasis:
+      "SỐ MINH HOẠ, chưa đợt khảo sát nào được chạy. Đặt theo hình dạng điển hình của tháp nhận biết (Aaker 1991): mỗi mức luôn thấp hơn mức dưới nó, và khoảng cách lớn nhất nằm giữa nhớ tự nhiên và nhớ khi được nhắc. Dùng để thử giao diện và để thấy ba mức khác nhau ra sao — KHÔNG dùng để báo cáo hay nghiệm thu. Bảng hỏi và cỡ mẫu: docs/ly-thuyet/ibmc-khao-sat-nhan-biet.md.",
+    hint: "Chỉ đặt mục tiêu cho mức này khi đã dẫn đầu hoặc ít nhất khác 0 — bài 5.1. Đo bằng câu A1, hỏi TRƯỚC khi đáp viên nhìn thấy bất kỳ tên trường nào.",
+  },
+  {
+    key: "spontaneous_awareness",
+    label: "Nhận biết tự nhiên (không gợi ý)",
+    objectiveKey: "com_awareness",
+    tier: "communication",
+    value: 48,
+    unit: "percent",
+    target: null,
+    baseline: null,
+    higherIsBetter: true,
+    cadence: "annual",
+    provenance: SOURCE_SURVEY,
+    estimateBasis:
+      "SỐ MINH HOẠ, chưa đợt khảo sát nào được chạy. Đặt theo hình dạng điển hình của tháp nhận biết (Aaker 1991): mỗi mức luôn thấp hơn mức dưới nó, và khoảng cách lớn nhất nằm giữa nhớ tự nhiên và nhớ khi được nhắc. Dùng để thử giao diện và để thấy ba mức khác nhau ra sao — KHÔNG dùng để báo cáo hay nghiệm thu. Bảng hỏi và cỡ mẫu: docs/ly-thuyet/ibmc-khao-sat-nhan-biet.md.",
+    hint: "Tổng của câu A1 và A2. Đây là mức mà thị phần tìm kiếm đang làm proxy — khi có số thật thì giữ cả hai và đối chiếu, đừng xoá proxy vì proxy chạy hằng tuần còn khảo sát mỗi mùa hai lần.",
+  },
+  {
+    key: "aided_awareness",
+    label: "Nhận biết khi được nhắc",
+    objectiveKey: "com_awareness",
+    tier: "communication",
+    value: 86,
+    unit: "percent",
+    target: null,
+    baseline: null,
+    higherIsBetter: true,
+    cadence: "annual",
+    provenance: SOURCE_SURVEY,
+    estimateBasis:
+      "SỐ MINH HOẠ, chưa đợt khảo sát nào được chạy. Đặt theo hình dạng điển hình của tháp nhận biết (Aaker 1991): mỗi mức luôn thấp hơn mức dưới nó, và khoảng cách lớn nhất nằm giữa nhớ tự nhiên và nhớ khi được nhắc. Dùng để thử giao diện và để thấy ba mức khác nhau ra sao — KHÔNG dùng để báo cáo hay nghiệm thu. Bảng hỏi và cỡ mẫu: docs/ly-thuyet/ibmc-khao-sat-nhan-biet.md.",
+    hint: "Đây là SÀN: mức này thấp thì mọi mục tiêu truyền thông phía trên đều chưa có nền. Đo bằng câu A3, danh sách 6 trường đảo ngẫu nhiên theo từng đáp viên.",
   },
 ] as const;
 
@@ -1567,13 +1638,13 @@ const REQUIREMENTS: Record<string, KpiRequirement> = {
   cost_per_enrolment: {
     platform: "Dự toán nội bộ, cần quyền truy cập",
     fields: ["kinh phí truyền thông tuyển sinh theo mùa", "số nhập học"],
-    readiness: "needs_access",
+    readiness: "estimated",
     todo: "Phải được Học viện đồng ý cung cấp số dự toán và quyết toán phần truyền thông tuyển sinh; không có nguồn công khai nào thay thế được",
   },
   cost_per_consideration: {
     platform: "Dự toán nội bộ ghép với GA4",
     fields: ["kinh phí truyền thông theo kỳ", "lượt xem trang quyết định"],
-    readiness: "needs_access",
+    readiness: "estimated",
     todo: "Mẫu số đã có từ GA4; chờ số chi phí. Khi ghép phải cùng cửa sổ thời gian, và cửa sổ phải neo theo mốc chu kỳ tuyển sinh chứ không theo lịch",
   },
   marketing_budget_ratio: {
@@ -1599,6 +1670,29 @@ const REQUIREMENTS: Record<string, KpiRequirement> = {
     fields: ["nội dung bài", "nhãn thuộc tính", "ngày xuất bản"],
     readiness: "public_ready",
     todo: "Bước trích thuộc tính đã chạy; chờ kho đủ bài có toàn văn để tháng nào đó đạt ngưỡng mẫu",
+  },
+  top_of_mind: {
+    platform: "Khảo sát thí sinh",
+    fields: [
+      "câu A1 — trường nghĩ tới đầu tiên",
+      "lớp",
+      "tỉnh/thành",
+      "có định học CNTT",
+    ],
+    readiness: "estimated",
+    todo: "Chạy đợt khảo sát NỀN trước khi mở cổng đăng ký nguyện vọng; không có đợt nền thì đợt sau không so được với gì",
+  },
+  spontaneous_awareness: {
+    platform: "Khảo sát thí sinh",
+    fields: ["câu A1", "câu A2 — các trường còn nhớ"],
+    readiness: "estimated",
+    todo: "Chạy cùng đợt với top_of_mind; cỡ mẫu tối thiểu 600 sau lọc, nếu không thì chênh lệch giữa hai mùa nằm trong sai số",
+  },
+  aided_awareness: {
+    platform: "Khảo sát thí sinh",
+    fields: ["câu A3 — nhận ra trong danh sách 6 trường"],
+    readiness: "estimated",
+    todo: "Chạy cùng đợt; danh sách 6 trường phải đảo ngẫu nhiên theo từng đáp viên",
   },
 };
 
@@ -1834,6 +1928,24 @@ const INTERPRETATIONS: Record<string, KpiInterpretation> = {
     negative:
       "Giảm: bỏ trống thuộc tính mà thí sinh và phụ huynh quan tâm nhất ở khâu quyết định.",
   },
+  top_of_mind: {
+    positive:
+      "Tăng: Học viện là cái tên bật ra đầu tiên — vị trí đắt nhất và khó giành nhất trong tâm trí thí sinh.",
+    negative:
+      "Giảm hoặc gần 0: mọi nỗ lực truyền thông đang không đọng lại thành trí nhớ, dù hiện diện có thể vẫn nhiều.",
+  },
+  spontaneous_awareness: {
+    positive:
+      "Tăng: Học viện nằm trong tập cân nhắc tự nhiên, không cần ai nhắc mới nhớ ra.",
+    negative:
+      "Giảm: rơi khỏi tập cân nhắc. Đây là mức cảnh báo sớm nhất, vì thí sinh không chọn thứ họ không nhớ.",
+  },
+  aided_awareness: {
+    positive:
+      "Cao: nền nhận biết đủ rộng để các mục tiêu thuộc tính và lựa chọn có chỗ đứng.",
+    negative:
+      "Thấp: chưa đủ người biết Học viện tồn tại, nên chưa đến lúc bàn tới thuộc tính hay thứ hạng nguyện vọng.",
+  },
 };
 
 function toKpi(spec: KpiSpec): CascadeKpi {
@@ -1852,6 +1964,7 @@ function toKpi(spec: KpiSpec): CascadeKpi {
     ...spec,
     requirement,
     interpretation,
+    estimateBasis: spec.estimateBasis ?? null,
     status: evaluateStatus(spec.value, spec.target, spec.higherIsBetter),
   };
 }

@@ -255,6 +255,15 @@ export const DataReadinessSchema = z.enum([
   "needs_access",
   /** Chưa có phương án thu thập nào. */
   "not_planned",
+  /**
+   * Con số đang hiện là ƯỚC LƯỢNG theo một công thức đã nêu, KHÔNG phải số đo.
+   *
+   * Tách thành một mức riêng chứ không mượn `connected`: một con số ước lượng nằm cạnh
+   * một con số đo được, cùng kiểu chữ, cùng ô, thì không ai phân biệt nổi — và đó đúng
+   * là cách một bảng điều khiển mất uy tín. Mức này buộc chỉ số phải khai `estimateBasis`,
+   * và mọi chỗ hiển thị mức sẵn sàng sẽ tự động nói ra.
+   */
+  "estimated",
 ]);
 export type DataReadiness = z.infer<typeof DataReadinessSchema>;
 
@@ -264,6 +273,7 @@ export const DATA_READINESS_LABELS: Record<DataReadiness, string> = {
   needs_build: "Nguồn công khai, chờ viết mã thu thập",
   needs_access: "Cần xin quyền truy cập",
   not_planned: "Chưa có phương án",
+  estimated: "Ước lượng, chưa phải số đo",
 };
 
 /** Nền tảng và phần việc kỹ thuật cần có để một chỉ số chạy được. */
@@ -386,6 +396,15 @@ export const CascadeKpiSchema = z
      */
     comparability: ComparabilitySchema.optional(),
     /**
+     * Công thức hoặc căn cứ của con số ước lượng. BẮT BUỘC khi `readiness = estimated`,
+     * và phải là `null` ở mọi mức khác.
+     *
+     * Bắt buộc vì một ước lượng không nêu được cách tính thì không khác gì một con số
+     * bịa: người đọc sau không kiểm lại được, không tranh luận được, và không biết nó
+     * sai lệch bao nhiêu.
+     */
+    estimateBasis: z.string().min(1).nullable().default(null),
+    /**
      * Bắt buộc với chỉ số có `target`. Một mức cần đạt không nêu được căn cứ thì
      * không ai dám sửa, mà cũng không ai dám tin.
      */
@@ -410,7 +429,8 @@ export const CascadeKpiSchema = z
     // do người ta điền vào cho đỡ trống.
     const coNguon =
       kpi.requirement.readiness === "connected" ||
-      kpi.requirement.readiness === "public_ready";
+      kpi.requirement.readiness === "public_ready" ||
+      kpi.requirement.readiness === "estimated";
     if (kpi.value !== null && !coNguon) {
       ctx.addIssue({
         code: "custom",
@@ -430,7 +450,25 @@ export const CascadeKpiSchema = z
       });
     }
 
-    // Chỉ siết với chỉ số đã có dữ liệu thật. Chỉ số còn chờ nguồn thì mức cần đạt
+    // Ước lượng phải nêu cách tính, và chỉ ước lượng mới được nêu. Thiếu chiều thứ hai
+    // thì một chỉ số đo thật vẫn có thể mang chú thích "ước lượng" và gieo nghi ngờ sai chỗ.
+    const laUocLuong = kpi.requirement.readiness === "estimated";
+    if (laUocLuong && kpi.estimateBasis === null) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["estimateBasis"],
+        message: `KPI ${kpi.key}: là ước lượng nhưng chưa nêu công thức hay căn cứ.`,
+      });
+    }
+    if (!laUocLuong && kpi.estimateBasis !== null) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["estimateBasis"],
+        message: `KPI ${kpi.key}: nêu căn cứ ước lượng nhưng mức sẵn sàng là '${kpi.requirement.readiness}', không phải 'estimated'.`,
+      });
+    }
+
+    // Chỉ siết với dữ liệu thật. Chỉ số còn chờ nguồn thì mức cần đạt
     // vẫn đang là dự kiến, chưa đến lúc đòi căn cứ.
     if (
       kpi.requirement.readiness === "connected" &&
