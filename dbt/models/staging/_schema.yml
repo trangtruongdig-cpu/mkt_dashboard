@@ -1,0 +1,41 @@
+version: 2
+
+# Mục 7 CLAUDE.md buộc mọi model có schema.yml. File này hiện mới mô tả model staging
+# được thêm gần nhất; 11 model staging còn lại vẫn chưa có mô tả và test khoá — đó là
+# việc còn thiếu đã biết, không phải quy ước mới.
+models:
+  - name: stg__de_an__finance
+    description: >
+      Học phí, tổng nguồn thu và chi phí đào tạo bình quân một sinh viên, bóc từ đề án
+      tuyển sinh của từng trường. 1:1 với bảng thô `raw_de_an_figure`, chỉ ép kiểu, đổi
+      tên cột và tách học phí thành bốn cột theo đơn vị công bố.
+    columns:
+      - name: duong_dan_tai_lieu
+        description: Khoá tự nhiên — mỗi đề án một dòng.
+        tests: [unique, not_null]
+      - name: ma_truong
+        description: Khoá thương hiệu, đối chiếu với nhóm sáu trường đối sánh.
+        tests: [not_null]
+      - name: nam
+        description: Năm tuyển sinh của đề án, ưu tiên năm ghi trong chính tài liệu.
+      - name: don_vi_hoc_phi
+        description: >
+          Đơn vị trường công bố học phí. Null nghĩa là bước bóc không xác định được
+          đơn vị và đã BỎ luôn trị số — con số không có đơn vị thì không so sánh được.
+        tests:
+          - accepted_values:
+              arguments:
+                values: [tin_chi, nam, thang, hoc_ky]
+      - name: he_dao_tao
+        description: Hệ đào tạo mức học phí áp cho. Null = không dò được trong văn bản.
+        tests:
+          - accepted_values:
+              arguments:
+                values: [chinh_quy, vua_lam_vua_hoc, tu_xa, lien_thong]
+      - name: hoc_phi_can_tren
+        description: Cận trên khi học phí công bố theo khoảng. Null = một mức duy nhất.
+      - name: chi_phi_dao_tao_moi_sinh_vien
+        description: Mục 1.14.2 của đề án — đồng/sinh viên/năm. Mẫu số của chi phí trên mỗi người học.
+      - name: boc_sach
+        description: Không có cảnh báo nào trong lúc bóc. False thì phải đọc `canh_bao` trước khi dùng.
+        tests: [not_null]

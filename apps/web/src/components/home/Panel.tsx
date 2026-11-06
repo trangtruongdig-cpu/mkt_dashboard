@@ -2,7 +2,11 @@ import type { ComponentType, ReactNode } from "react";
 import type { IconProps } from "@/components/ui/icons";
 
 interface PanelProps {
-  icon: ComponentType<IconProps>;
+  /**
+   * Hình của khối. Bỏ trống khi khối không có hình nào mang thêm nghĩa — thà không có
+   * hình còn hơn lặp lại cùng một hình ở mọi khối, vì khi ấy nó thành đồ trang trí.
+   */
+  icon?: ComponentType<IconProps>;
   title: string;
   /** Chữ phụ bên phải tiêu đề: kỳ báo cáo, số bản ghi… Giữ ngắn. */
   meta?: ReactNode;
@@ -36,7 +40,7 @@ export function Panel({
     >
       <header className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-2.5">
         <div className="flex min-w-0 items-center gap-2">
-          <Icon className="h-4 w-4 shrink-0 text-ink-muted" />
+          {Icon ? <Icon className="h-4 w-4 shrink-0 text-ink-muted" /> : null}
           <h2 className="truncate text-[13px] font-semibold text-ink">{title}</h2>
           {hint}
         </div>

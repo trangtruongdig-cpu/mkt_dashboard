@@ -20,6 +20,10 @@ Ràng buộc chi phối mọi quyết định kỹ thuật:
 Tài liệu nhiệm vụ (QĐ 671/QĐ-BTTTT, thuyết minh dự toán) nằm ở thư mục gốc — đọc trước khi
 thay đổi phạm vi chức năng.
 
+**Lý thuyết gốc của dashboard** nằm ở `docs/ly-thuyet/` — khung IBMC (mục tiêu kinh doanh →
+marketing → truyền thông). Mọi chỉ số trên màn hình đều phải trỏ về một mục tiêu trong khung
+này; đọc skill `ibmc` trước khi thêm hoặc sửa chỉ số, mục tiêu, bảng mart hay biểu đồ.
+
 ## 2. Ngăn xếp công nghệ — ĐÃ CHỐT
 
 Không tự ý thay thế các lựa chọn dưới đây. Muốn đổi, phải hỏi người dùng trước.

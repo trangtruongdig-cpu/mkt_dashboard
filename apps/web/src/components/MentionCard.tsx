@@ -107,6 +107,62 @@ export function MentionCard({ mention, confidenceThreshold }: MentionCardProps) 
           </>
         )}
       </div>
+
+      {/*
+        Dữ liệu thô, đóng sẵn.
+        Dùng <details> chứ không dùng state: khối này là phần phụ để KIỂM CHỨNG, không
+        phải phần chính để đọc. Mở sẵn thì mỗi câu dài thêm mười dòng và người ta thôi
+        đọc chính nội dung. Dùng thẻ gốc của trình duyệt nên chạy được cả khi JavaScript
+        chưa tải, và trình đọc màn hình hiểu ngay.
+      */}
+      <details className="mt-3 border-t border-hairline pt-2">
+        <summary className="cursor-pointer text-xs text-ink-muted hover:text-ink">
+          Dữ liệu thô và cách chấm
+        </summary>
+        <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 font-mono text-[11px] leading-relaxed text-ink-muted">
+          <dt>mention_key</dt>
+          <dd className="break-all">{mention.provenance.mentionKey}</dd>
+
+          <dt>author_ref</dt>
+          <dd className="break-all">
+            {mention.provenance.authorRef ?? "—"}
+            {mention.provenance.authorRef?.startsWith("anon:") && (
+              <span className="ml-2 font-sans not-italic">
+                (đã băm lúc thu thập, không lưu tên hiển thị)
+              </span>
+            )}
+          </dd>
+
+          <dt>discovered_via</dt>
+          <dd>{mention.provenance.discoveredVia}</dd>
+
+          <dt>search_term</dt>
+          <dd>{mention.provenance.searchTerm ?? "— (bình luận đi kèm video, không tự tìm)"}</dd>
+
+          <dt>first_seen_at</dt>
+          <dd>{new Date(mention.provenance.firstSeenAt).toLocaleString("vi-VN")}</dd>
+
+          <dt>published_at</dt>
+          <dd>
+            {new Date(mention.occurredAt).toLocaleString("vi-VN")}
+            {mention.occurredAtEstimated && " (ước lượng)"}
+          </dd>
+
+          <dt>body_chars</dt>
+          <dd>{mention.text.length}</dd>
+
+          <dt className="pt-1">điểm model</dt>
+          <dd className="pt-1">
+            tích cực {mention.provenance.scores.positive.toFixed(4)} · trung tính{" "}
+            {mention.provenance.scores.neutral.toFixed(4)} · tiêu cực{" "}
+            {mention.provenance.scores.negative.toFixed(4)}
+          </dd>
+        </dl>
+        <p className="mt-2 text-[11px] leading-relaxed text-ink-muted">
+          Cả ba điểm đều hiện, không chỉ nhãn thắng: một câu 0,34/0,33/0,33 và một câu
+          0,99/0,01/0,00 đều ra cùng một nhãn, nhưng mức độ chắc chắn khác hẳn nhau.
+        </p>
+      </details>
     </article>
   );
 }

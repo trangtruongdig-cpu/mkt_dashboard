@@ -6,14 +6,17 @@ import {
   CrawlerRunSchema,
   CrawlerSourceListSchema,
   CrawlerSourceSchema,
+  KpiTargetOverrideListSchema,
   SessionSchema,
   type CrawlerOverview,
   type CrawlerRun,
   type CrawlerRunList,
   type CrawlerSource,
   type CrawlerSourceList,
+  type KpiTargetOverrideList,
   type Session,
   type UpdateCrawlerSource,
+  type UpdateKpiTarget,
 } from "@ptit/shared";
 import type { z } from "zod";
 import { apiUrl, isApiConfigured } from "./api-client";
@@ -75,6 +78,7 @@ async function request<T>(path: string, schema: z.ZodType<T>, init?: RequestInit
 
 const AUTH = "/api/v1/auth";
 const CRAWLER = "/api/v1/admin/crawler";
+const KPI_TARGETS = "/api/v1/admin/kpi-targets";
 
 export const authApi = {
   login: (username: string, password: string): Promise<Session> =>
@@ -109,4 +113,24 @@ export const crawlerAdminApi = {
 
   runOne: (id: number): Promise<CrawlerRun> =>
     request(`${CRAWLER}/sources/${id}/runs`, CrawlerRunSchema, { method: "POST" }),
+};
+
+/**
+ * Sửa mức cần đạt của chỉ số.
+ *
+ * Đi qua đây — cùng đường với các lời gọi quản trị khác — chứ không qua route handler
+ * của Next.js như bản cũ: mục tiêu phải được lưu vào PostgreSQL kèm tên người sửa, và
+ * chỉ người đã đăng nhập mới sửa được.
+ */
+export const kpiTargetApi = {
+  update: (kpiKey: string, patch: UpdateKpiTarget): Promise<KpiTargetOverrideList> =>
+    request(`${KPI_TARGETS}/${encodeURIComponent(kpiKey)}`, KpiTargetOverrideListSchema, {
+      method: "PATCH",
+      body: JSON.stringify(patch),
+    }),
+
+  reset: (kpiKey: string): Promise<KpiTargetOverrideList> =>
+    request(`${KPI_TARGETS}/${encodeURIComponent(kpiKey)}`, KpiTargetOverrideListSchema, {
+      method: "DELETE",
+    }),
 };

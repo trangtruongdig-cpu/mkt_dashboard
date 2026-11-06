@@ -14,3 +14,5 @@ export * from "./schemas/utm";
 export * from "./schemas/kpi-value-override";
 export * from "./demo/dataset";
 export * from "./demo/cascade";
+export * from "./schemas/data-lineage";
+export * from "./demo/lineage";

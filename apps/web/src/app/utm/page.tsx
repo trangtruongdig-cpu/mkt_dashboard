@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { UtmBuilder } from "@/components/utm/UtmBuilder";
 
 export const metadata: Metadata = { title: "Tạo link gắn thẻ — Dashboard PTIT" };
@@ -8,13 +7,7 @@ export default function TrangTaoLinkUtm() {
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-5 py-8 sm:px-8 sm:py-12">
       <header className="mb-8">
-        <Link
-          href="/"
-          className="text-xs text-ink-muted underline decoration-hairline underline-offset-2 hover:text-ink-secondary"
-        >
-          ← Về bảng điều khiển
-        </Link>
-        <h1 className="mt-3 text-xl font-semibold text-ink sm:text-2xl">
+        <h1 className="text-xl font-semibold text-ink sm:text-2xl">
           Tạo link gắn thẻ
         </h1>
         <p className="mt-1.5 text-sm text-ink-secondary">

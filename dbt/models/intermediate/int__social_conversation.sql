@@ -35,6 +35,11 @@ select
     m.duong_dan,
     m.noi_dung,
     m.so_luot_thich,
+    -- Vết truy nguyên, mang lên tới giao diện. Xem ghi chú ở mart__social_mention.
+    m.ma_tac_gia,
+    m.cach_phat_hien,
+    m.tu_khoa_tim,
+    m.lan_dau_thay,
     -- Thời điểm đăng là mốc đúng để dựng biểu đồ theo thời gian. Nguồn nào không cho
     -- biết ngày đăng (một số chủ đề diễn đàn) thì lùi về lần đầu hệ thống nhìn thấy —
     -- muộn hơn thực tế, nhưng không bao giờ sớm hơn.

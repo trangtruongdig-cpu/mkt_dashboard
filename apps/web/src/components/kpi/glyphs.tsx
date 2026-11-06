@@ -112,7 +112,7 @@ export const TIER_ICON: Record<ObjectiveTier, Icon> = {
 const GROWTH_ICON: Record<GrowthSource, Icon> = {
   penetration: IconUsers,
   frequency: IconRepeat,
-  volume: IconWallet,
+  consumption: IconWallet,
   choice: IconTarget,
   loyalty: IconShield,
 };
@@ -125,9 +125,9 @@ const GOAL_ICON: Record<CommunicationGoal, Icon> = {
 };
 
 /**
- * Hình và nhãn phân loại của một mục tiêu: lấy theo nguồn tăng trưởng (tầng kinh
- * doanh) hoặc theo nhóm mục tiêu truyền thông. Tầng marketing không có phân loại
- * riêng nên dùng hình và nhãn của chính tầng.
+ * Hình và nhãn phân loại của một mục tiêu: lấy theo nguồn tăng trưởng (tầng
+ * marketing) hoặc theo nhóm mục tiêu truyền thông. Mục tiêu không mang phân loại nào
+ * thì dùng hình và nhãn của chính tầng nó.
  *
  * Trả về cả cụm thay vì trả thẳng component: nơi gọi lấy `glyph.icon` bằng phép truy
  * cập thuộc tính, không phải tạo component ngay trong lúc render.
@@ -186,7 +186,7 @@ export function GlyphPill({ glyph, count }: GlyphPillProps) {
   const Icon = glyph.icon;
 
   return (
-    <span className="inline-flex items-center gap-1.5 text-[11px] text-ink-secondary">
+    <span className="inline-flex shrink-0 items-center gap-1.5 text-[11px] text-ink-secondary">
       <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: glyph.color }} />
       <span>{glyph.label}</span>
       {count === undefined ? null : (

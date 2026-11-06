@@ -1,10 +1,16 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import {
+  applyTargetOverrides,
+  findOrphanOverrides,
   KpiCascadeResponseSchema,
+  KpiTargetOverrideListSchema,
   ShareOfSearchResponseSchema,
   type KpiCascadeResponse,
+  type KpiTargetOverrideList,
   type ShareOfSearchResponse,
+  type UpdateKpiTarget,
 } from "@ptit/shared";
+import { KpiTargetRepository } from "./kpi-target.repository";
 import { KpiRepository } from "./kpi.repository";
 
 /**
@@ -16,15 +22,71 @@ import { KpiRepository } from "./kpi.repository";
  */
 @Injectable()
 export class KpiService {
-  constructor(private readonly repository: KpiRepository) {}
+  private readonly logger = new Logger(KpiService.name);
 
+  constructor(
+    private readonly repository: KpiRepository,
+    private readonly targets: KpiTargetRepository,
+  ) {}
+
+  /**
+   * Cây mục tiêu, ĐÃ chồng mức cần đạt do người dùng sửa.
+   *
+   * Chồng ở đây chứ không ở frontend: `applyTargetOverrides` tính lại `status` từ mục
+   * tiêu mới, và nếu để mỗi trang tự làm thì sẽ có trang nhớ làm, trang quên — hiện ra
+   * hai con số khác nhau cho cùng một chỉ số.
+   */
   async getCascade(): Promise<KpiCascadeResponse> {
-    return KpiCascadeResponseSchema.parse(await this.repository.getCascade());
+    const goc = await this.repository.getCascade();
+    const ghi_de = await this.targets.list();
+
+    const mo_coi = findOrphanOverrides(goc, ghi_de);
+    if (mo_coi.length > 0) {
+      // Không im lặng bỏ qua: bản ghi đè trỏ tới chỉ số không còn tồn tại nghĩa là cây
+      // cascade đã đổi khoá, và mục tiêu người dùng từng chốt đang không có hiệu lực.
+      this.logger.warn(
+        `Có ${mo_coi.length} bản ghi đè trỏ tới chỉ số không tồn tại: ${mo_coi.join(", ")}`,
+      );
+    }
+
+    return KpiCascadeResponseSchema.parse(applyTargetOverrides(goc, ghi_de));
   }
 
   async getShareOfSearch(): Promise<ShareOfSearchResponse> {
     return ShareOfSearchResponseSchema.parse(
       await this.repository.getShareOfSearch(),
     );
+  }
+
+  async listTargets(): Promise<KpiTargetOverrideList> {
+    return KpiTargetOverrideListSchema.parse({ overrides: await this.targets.list() });
+  }
+
+  /**
+   * Sửa mức cần đạt của một chỉ số.
+   *
+   * Chặn khoá không có trong cây cascade: nhận bừa thì bản ghi đè sẽ nằm trong cơ sở dữ
+   * liệu mà không bao giờ có hiệu lực, và người sửa vẫn thấy thông báo "đã lưu".
+   */
+  async saveTarget(
+    kpiKey: string,
+    thay_doi: UpdateKpiTarget,
+    nguoi_sua: string,
+  ): Promise<KpiTargetOverrideList> {
+    const goc = await this.repository.getCascade();
+    if (!goc.kpis.some((kpi) => kpi.key === kpiKey)) {
+      throw new NotFoundException(`Không có chỉ số nào mang khoá "${kpiKey}"`);
+    }
+
+    await this.targets.save(kpiKey, thay_doi, nguoi_sua);
+    return this.listTargets();
+  }
+
+  async removeTarget(kpiKey: string): Promise<KpiTargetOverrideList> {
+    const da_xoa = await this.targets.remove(kpiKey);
+    if (!da_xoa) {
+      throw new NotFoundException(`Chỉ số "${kpiKey}" vốn chưa có bản ghi đè nào`);
+    }
+    return this.listTargets();
   }
 }

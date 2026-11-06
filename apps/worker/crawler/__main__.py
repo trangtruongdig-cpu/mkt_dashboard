@@ -161,6 +161,10 @@ def main(argv: list[str] | None = None) -> int:
         "cong-khai-boc-so",
         help="Bóc số liệu từ các bản Biểu 18 đọc được bằng máy",
     )
+    sub.add_parser(
+        "de-an-boc-so",
+        help="Bóc học phí, nguồn thu và chi phí/sinh viên từ đề án tuyển sinh",
+    )
 
     p_thu = sub.add_parser("thu-thap", help="Tìm bài và ghi vào kho")
     p_thu.add_argument(
@@ -217,6 +221,10 @@ def main(argv: list[str] | None = None) -> int:
             from . import bm18_job
 
             bm18_job.run()
+        elif args.lenh == "de-an-boc-so":
+            from . import de_an_job
+
+            de_an_job.run()
         elif args.lenh == "thu-thap":
             from . import collect
 

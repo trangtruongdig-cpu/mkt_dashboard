@@ -3,14 +3,18 @@ import {
   buildDemoDataset,
   buildDemoShareOfSearch,
   ChannelsResponseSchema,
+  DataLineageResponseSchema,
   KpiCascadeResponseSchema,
+  KpiTargetOverrideListSchema,
   OverviewResponseSchema,
   ReachResponseSchema,
   SentimentResponseSchema,
   ShareOfSearchResponseSchema,
   SocialMentionsResponseSchema,
   type ChannelsResponse,
+  type DataLineageResponse,
   type KpiCascadeResponse,
+  type KpiTargetOverride,
   type OverviewResponse,
   type ReachResponse,
   type SentimentResponse,
@@ -39,12 +43,20 @@ export interface DashboardData {
   sentiment: SentimentResponse;
 }
 
+/**
+ * `revalidate = 0` nghĩa là không đệm.
+ *
+ * Mặc định 300 giây hợp với số liệu do dbt dựng theo lịch. Nhưng dữ liệu người dùng sửa
+ * được ngay trên giao diện thì phải đọc tươi: sửa mức cần đạt rồi tải lại trang mà vẫn
+ * thấy con số cũ nằm trong đệm 5 phút là cách chắc chắn khiến người dùng bấm Lưu lần nữa.
+ */
 async function fetchJson<T>(
   path: string,
   schema: z.ZodType<T>,
+  revalidate = 300,
 ): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
-    next: { revalidate: 300 },
+    next: { revalidate },
     headers: { accept: "application/json" },
   });
   if (!response.ok) {
@@ -130,6 +142,8 @@ export interface KpiData {
   apiUrl: string | null;
   cascade: KpiCascadeResponse;
   shareOfSearch: ShareOfSearchResponse;
+  /** Chỉ số nào đã được sửa mức cần đạt, kèm căn cứ và người sửa. Rỗng ở chế độ giả lập. */
+  overrides: KpiTargetOverride[];
 }
 
 /**
@@ -138,25 +152,17 @@ export interface KpiData {
  * `parse` ở đây không chỉ kiểm kiểu: schema cascade kiểm luôn cây mục tiêu có liền
  * mạch không. Một chỉ số không gắn mục tiêu nào, hay một mục tiêu trỏ sai tầng, sẽ
  * làm hỏng lời gọi này thay vì lặng lẽ hiện ra màn hình.
- */
-/**
- * Chồng các mức cần đạt đã sửa từ giao diện lên cascade gốc.
  *
- * Đặt ở đây để mọi trang đọc cascade đều thấy cùng một con số. `applyTargetOverrides`
- * tự tính lại trạng thái đúng/chệch hướng nên không nơi nào phải nhớ làm việc đó.
+ * Mức cần đạt đã sửa được API chồng sẵn vào `cascade` — không chồng lại ở đây. Trước
+ * đây việc chồng làm ở phía web, đọc từ `data/kpi-targets.json`: dữ liệu mất khi dựng
+ * lại container, và `status` phụ thuộc vào việc frontend có nhớ gọi `applyTargetOverrides`
+ * hay không. Nay cả hai đường đọc đều lấy đúng một con số từ máy chủ.
  */
 export async function getKpiData(): Promise<KpiData> {
-  const { applyTargetOverrides } = await import("@ptit/shared");
-  const { docTatCa } = await import("./kpi-targets-store");
-
-  const du_lieu = await napKpiData();
-  return { ...du_lieu, cascade: applyTargetOverrides(du_lieu.cascade, docTatCa()) };
-}
-
-async function napKpiData(): Promise<KpiData> {
   const demo = {
     cascade: buildDemoCascade(),
     shareOfSearch: buildDemoShareOfSearch(),
+    overrides: [] as KpiTargetOverride[],
   };
 
   if (!API_URL) {
@@ -164,13 +170,47 @@ async function napKpiData(): Promise<KpiData> {
   }
 
   try {
-    const [cascade, shareOfSearch] = await Promise.all([
-      fetchJson("/api/v1/kpi-cascade", KpiCascadeResponseSchema),
+    const [cascade, shareOfSearch, danh_sach] = await Promise.all([
+      fetchJson("/api/v1/kpi-cascade", KpiCascadeResponseSchema, 0),
       fetchJson("/api/v1/share-of-search", ShareOfSearchResponseSchema),
+      fetchJson("/api/v1/kpi-targets", KpiTargetOverrideListSchema, 0),
     ]);
-    return { source: "api", apiUrl: API_URL, cascade, shareOfSearch };
+    return {
+      source: "api",
+      apiUrl: API_URL,
+      cascade,
+      shareOfSearch,
+      overrides: danh_sach.overrides,
+    };
   } catch (error) {
     console.warn("[kpi] Không gọi được API, quay về dữ liệu giả lập:", error);
     return { source: "demo", apiUrl: API_URL, ...demo };
+  }
+}
+
+export interface LineageData {
+  source: DataSource;
+  apiUrl: string | null;
+  lineage: DataLineageResponse | null;
+}
+
+/**
+ * Bản đồ đường ống dữ liệu.
+ *
+ * Không có bản giả lập thay thế: trang này nói về TRẠNG THÁI THẬT của kho. Dựng một
+ * đường ống giả để màn hình đỡ trống là đúng thứ nó sinh ra để chống. Gọi không được
+ * thì trả `null` và trang nói thẳng là chưa đọc được kho.
+ */
+export async function getDataLineage(): Promise<LineageData> {
+  if (!API_URL) {
+    return { source: "demo", apiUrl: null, lineage: null };
+  }
+
+  try {
+    const lineage = await fetchJson("/api/v1/data-lineage", DataLineageResponseSchema);
+    return { source: "api", apiUrl: API_URL, lineage };
+  } catch (error) {
+    console.warn("[lineage] Không đọc được bản đồ đường ống:", error);
+    return { source: "demo", apiUrl: API_URL, lineage: null };
   }
 }

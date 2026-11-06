@@ -67,3 +67,4 @@ pgdata/
 Thumbs.db
 .idea/
 .vscode/
+.codegraph/

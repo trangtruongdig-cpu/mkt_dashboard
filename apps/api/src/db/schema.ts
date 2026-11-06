@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
   boolean,
+  doublePrecision,
   index,
   integer,
   pgTable,
@@ -14,7 +15,7 @@ import {
  * Lược đồ các BẢNG NGHIỆP VỤ CỦA ỨNG DỤNG.
  *
  * Ở đây chỉ có bảng do chính API sở hữu: tài khoản, phiên đăng nhập, cấu hình nguồn
- * thu thập và nhật ký chạy.
+ * thu thập, nhật ký chạy và mức cần đạt đã sửa từ giao diện.
  *
  * KHÔNG khai báo ở đây:
  *   - `mart__*`, `stg__*`  — do dbt sinh ra, đọc bằng SQL thô trong repository.
@@ -105,6 +106,36 @@ export const crawlerRun = pgTable(
     errorMessage: text("error_message"),
   },
   (t) => [index("crawler_run_started_idx").on(t.startedAt)],
+);
+
+/**
+ * MỨC CẦN ĐẠT ĐÃ SỬA TỪ GIAO DIỆN.
+ *
+ * Giá trị mặc định của mọi chỉ số vẫn nằm trong mã nguồn (`buildDemoCascade`) để hệ
+ * thống chạy được khi chưa có cơ sở dữ liệu; bảng này chỉ chứa phần đã bị người dùng
+ * sửa, chồng lên trên.
+ *
+ * Trước đây dữ liệu này nằm trong `data/kpi-targets.json` do một route handler của
+ * Next.js ghi ra. Cách đó mất sạch khi dựng lại container và không ghi được ai sửa —
+ * `updated_by` khi ấy là chuỗi "chưa xác thực". Đưa về đây vì sửa mức cần đạt là sửa
+ * cam kết của Học viện, phải bền và phải truy được người chịu trách nhiệm.
+ */
+export const kpiTargetOverride = pgTable(
+  "kpi_target_override",
+  {
+    /** Khoá tự nhiên: `key` của chỉ số trong cây cascade. Một chỉ số chỉ có một bản ghi đè. */
+    kpiKey: text("kpi_key").primaryKey(),
+    /** `null` = gỡ mục tiêu, đưa chỉ số về trạng thái chờ chốt. */
+    target: doublePrecision("target"),
+    /** Đối chiếu với `TargetBasisSchema`. */
+    rationaleBasis: text("rationale_basis").notNull(),
+    /** Diễn giải cách ra con số. Bắt buộc không rỗng — ép ở tầng zod. */
+    rationaleNote: text("rationale_note").notNull(),
+    /** Tên đăng nhập của người sửa. Luôn có vì endpoint ghi nằm sau `AuthGuard`. */
+    updatedBy: text("updated_by").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("kpi_target_override_updated_idx").on(t.updatedAt)],
 );
 
 export const adminUserRelations = relations(adminUser, ({ many }) => ({

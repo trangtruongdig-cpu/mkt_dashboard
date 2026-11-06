@@ -8,6 +8,14 @@ import { MetricUnitSchema, PeriodSchema } from "./common";
  *
  *     Mục tiêu kinh doanh  →  Mục tiêu marketing  →  Mục tiêu truyền thông  →  KPI
  *
+ * Nội dung từng tầng lấy từ khung IBMC (xem `docs/ly-thuyet/ibmc-khung-dat-muc-tieu.md`):
+ *
+ *     kinh doanh    : Sale · Share · Growth · Profit          (số liệu của Học viện)
+ *     marketing     : Penetration · Frequency · Consumption ·
+ *                     Choice · Loyalty                        (hành vi người học)
+ *     truyền thông  : Awareness · Key attributes ·
+ *                     Creative quality · Hiệu quả kênh        (nhận thức người học)
+ *
  * Mỗi KPI bắt buộc trỏ về một mục tiêu (`objectiveKey`), mỗi mục tiêu marketing và
  * truyền thông bắt buộc trỏ về mục tiêu tầng trên (`parentKey`). Ràng buộc này được
  * kiểm ở tầng schema, không phải ở tầng giao diện — nghĩa là một chỉ số không gắn
@@ -39,7 +47,23 @@ export const PARENT_TIER: Record<ObjectiveTier, ObjectiveTier | null> = {
 };
 
 /**
- * Năm nguồn tăng trưởng của mục tiêu kinh doanh.
+ * NGUỒN TĂNG TRƯỞNG — thuộc tầng MARKETING, không phải tầng kinh doanh.
+ *
+ * Đây là bốn mục tiêu marketing của khung IBMC (bài 3.1), thứ Ehrenberg gọi là phép
+ * phân rã hành vi mua: doanh số thương hiệu = thâm nhập × tần suất × lượng mỗi lần.
+ * Tầng kinh doanh là chuyện khác — Sale, Share, Growth, Profit.
+ *
+ * Trước đây các giá trị này được khai ở tầng `business`, lệch một tầng so với khung
+ * gốc; xem `docs/ly-thuyet/ibmc-doi-chieu-cascade.md` điểm 1.
+ *
+ * HAI CHỖ CỐ Ý ĐI KHÁC BÀI GIẢNG — đừng "sửa lại cho đúng lý thuyết":
+ *
+ *  1. Bài 3.3 gộp Choice và Loyalty thành MỘT nguồn (thị phần trong giỏ hàng). Ở đây
+ *     tách thành hai, vì với đào tạo *được chọn lúc xét tuyển* và *giữ chân sau khi
+ *     nhập học* cách nhau 4–5 năm và dùng nguồn dữ liệu khác nhau.
+ *  2. Bài giảng dùng một từ `consumption` cho cả hai nửa. Ở đây giữ đúng tên đó,
+ *     nhưng lưu ý nửa đầu (lượng dùng mỗi lần) hiện CHƯA ánh xạ được sang giáo dục
+ *     đại học — chỉ nửa sau (giá trị mỗi lần, tức premiumisation) là đo được.
  *
  * Khung gốc sinh ra cho ngành hàng tiêu dùng nhanh; diễn giải lại cho giáo dục
  * đại học — nơi người học "mua" một lần với giá trị rất lớn — như sau:
@@ -49,8 +73,13 @@ export const GrowthSourceSchema = z.enum([
   "penetration",
   /** Tần suất: số lần một người học quay lại Học viện (đại học → sau đại học → ngắn hạn). */
   "frequency",
-  /** Lượng sử dụng: giá trị vòng đời một người học (học phí × số năm × dịch vụ kèm). */
-  "volume",
+  /**
+   * Lượng tiêu dùng, hai nửa theo bài 3.3:
+   * — *consumption volume* (lượng mỗi lần dùng): chưa ánh xạ được, cần dữ liệu nội bộ;
+   * — *consumption value* (giá trị mỗi lần): tỷ trọng hệ chất lượng cao và liên kết
+   *   quốc tế, tức giá trị vòng đời một người học. Đây là nửa đang đo.
+   */
+  "consumption",
   /** Lựa chọn: trong tập cân nhắc, thí sinh chọn Học viện ở thứ hạng nào. */
   "choice",
   /** Trung thành: giữ chân người học và mức độ cựu người học giới thiệu lại. */
@@ -61,12 +90,20 @@ export type GrowthSource = z.infer<typeof GrowthSourceSchema>;
 export const GROWTH_SOURCE_LABELS: Record<GrowthSource, string> = {
   penetration: "Thâm nhập",
   frequency: "Tần suất",
-  volume: "Lượng sử dụng",
+  consumption: "Lượng tiêu dùng",
   choice: "Lựa chọn",
   loyalty: "Trung thành",
 };
 
-/** Bốn nhóm mục tiêu truyền thông. */
+/**
+ * Bốn nhóm mục tiêu truyền thông (bài 5.1, 5.2).
+ *
+ * Lưu ý về bản chất: bốn nhóm này là bốn CHIỀU ĐÁNH GIÁ của mọi chiến dịch, không
+ * phải bốn mục tiêu con của bốn mục tiêu marketing khác nhau. Mô hình dữ liệu ở đây
+ * chỉ cho mỗi mục tiêu một cha, nên `parentKey` của tầng truyền thông phải đọc là
+ * *nhánh chịu ảnh hưởng chính*, KHÔNG phải *phạm vi áp dụng*. Xem
+ * `docs/ly-thuyet/ibmc-doi-chieu-cascade.md` điểm 6.
+ */
 export const CommunicationGoalSchema = z.enum([
   "awareness",
   "attributes",
@@ -127,6 +164,37 @@ export const DataProvenanceSchema = z.object({
   legalBasis: z.string().optional(),
 });
 export type DataProvenance = z.infer<typeof DataProvenanceSchema>;
+
+/**
+ * XUẤT XỨ LÝ THUYẾT của một mục tiêu — song song với xuất xứ dữ liệu.
+ *
+ * `DataProvenance` trả lời "con số này ở đâu ra". Trường này trả lời câu còn lại,
+ * câu mà hội đồng nghiệm thu sẽ hỏi: **căn cứ nào để chọn đo thứ này?**
+ *
+ * Khung IBMC là bản tổng hợp, không phải nguồn gốc của các lý thuyết thành phần, nên
+ * mỗi mục tiêu phải trả được nợ nguồn tới tác giả thật. Xem
+ * `docs/ly-thuyet/ibmc-xuat-xu-ly-thuyet.md`.
+ */
+export const TheoryRefSchema = z.object({
+  /** Khái niệm gốc, giữ nguyên thuật ngữ tiếng Anh khi đó là tên chuẩn trong văn liệu. */
+  concept: z.string().min(1),
+  /** Tác giả hoặc truyền thống nghiên cứu sinh ra khái niệm. */
+  origin: z.string().min(1),
+  /** Công trình kèm năm, đủ để tra lại. */
+  work: z.string().min(1),
+  /** Bài trong khoá IBMC, ví dụ "3.3" — để lần về `docs/ly-thuyet/ibmc-nguon/`. */
+  lesson: z.string().min(1),
+  /**
+   * Cảnh báo khi **lý thuyết gốc phản bác bài giảng**, hoặc khi phép dịch sang giáo
+   * dục đại học bị lệch. `null` khi không có.
+   *
+   * Đây là trường quan trọng nhất của cả khối: một khung tổng hợp che mất các tranh
+   * luận còn mở trong văn liệu, và người đặt mục tiêu cần biết mình đang đứng ở phía
+   * nào của tranh luận đó.
+   */
+  caveat: z.string().nullable(),
+});
+export type TheoryRef = z.infer<typeof TheoryRefSchema>;
 
 /**
  * Mức sẵn sàng của nguồn dữ liệu nuôi một chỉ số.
@@ -345,11 +413,24 @@ export const ObjectiveSchema = z.object({
   statement: z.string().min(1),
   /** Vì sao mục tiêu này tồn tại — hiện ra khi người xem hỏi "để làm gì". */
   rationale: z.string().min(1),
-  /** Chỉ có ở tầng kinh doanh. */
+  /**
+   * Khái niệm gốc mà mục tiêu này hiện thực hoá, và tác giả của nó. BẮT BUỘC.
+   *
+   * Bắt buộc vì cùng một lý do `provenance` bắt buộc với chỉ số: một mục tiêu không
+   * nêu được căn cứ lý thuyết thì không tranh luận được, và rất dễ là mục tiêu đặt ra
+   * vì có dữ liệu chứ không vì có lý do.
+   */
+  theory: TheoryRefSchema,
+  /** Chỉ có ở tầng marketing — nguồn tăng trưởng mà mục tiêu này khai thác. */
   growthSource: GrowthSourceSchema.nullable(),
   /** Chỉ có ở tầng truyền thông. */
   communicationGoal: CommunicationGoalSchema.nullable(),
-  /** Mục tiêu tầng trên mà mục tiêu này phục vụ. `null` ở tầng kinh doanh. */
+  /**
+   * Mục tiêu tầng trên mà mục tiêu này phục vụ. `null` ở tầng kinh doanh.
+   *
+   * Ở tầng truyền thông, đây là *nhánh chịu ảnh hưởng chính*, không phải phạm vi áp
+   * dụng duy nhất — xem ghi chú ở `CommunicationGoalSchema`.
+   */
   parentKey: z.string().nullable(),
   /** Đánh dấu trọng tâm của kỳ — dùng để làm nổi trên giao diện. Tối đa một cái mỗi tầng. */
   isFocus: z.boolean(),
@@ -411,13 +492,17 @@ export const KpiCascadeResponseSchema = z
         }
       }
 
-      // `growthSource` chỉ có nghĩa ở tầng kinh doanh, `communicationGoal` chỉ ở tầng
-      // truyền thông. Gắn nhầm tầng là dấu hiệu cascade đã bị hiểu sai.
-      if ((objective.tier === "business") !== (objective.growthSource !== null)) {
+      // `growthSource` chỉ có nghĩa ở tầng MARKETING — nguồn tăng trưởng là mục tiêu
+      // marketing (bài 3.1), không phải mục tiêu kinh doanh. `communicationGoal` chỉ ở
+      // tầng truyền thông. Gắn nhầm tầng là dấu hiệu cascade đã bị hiểu sai.
+      if (
+        (objective.tier === "marketing") !==
+        (objective.growthSource !== null)
+      ) {
         ctx.addIssue({
           code: "custom",
           path: ["objectives", index, "growthSource"],
-          message: `Mục tiêu ${objective.key}: nguồn tăng trưởng chỉ được khai ở tầng kinh doanh, và tầng kinh doanh bắt buộc phải khai.`,
+          message: `Mục tiêu ${objective.key}: nguồn tăng trưởng chỉ được khai ở tầng marketing, và tầng marketing bắt buộc phải khai.`,
         });
       }
       if (
@@ -435,7 +520,9 @@ export const KpiCascadeResponseSchema = z
     // Mỗi tầng nhiều nhất một trọng tâm — nếu mọi thứ đều là trọng tâm thì không có
     // trọng tâm nào, và giao diện mất khả năng dẫn mắt người xem.
     ObjectiveTierSchema.options.forEach((tier) => {
-      const focused = data.objectives.filter((o) => o.tier === tier && o.isFocus);
+      const focused = data.objectives.filter(
+        (o) => o.tier === tier && o.isFocus,
+      );
       if (focused.length > 1) {
         ctx.addIssue({
           code: "custom",

@@ -65,6 +65,8 @@ export class DemoDashboardRepository extends DashboardRepository {
       counts: { positive: 0, neutral: 0, negative: 0 },
       mentions: [],
       confidenceThreshold: MIN_CONFIDENCE,
+      // Phễu rỗng chứ không bịa bốn con số: chưa có kho thì không có gì để đếm.
+      funnel: [],
     };
   }
 }

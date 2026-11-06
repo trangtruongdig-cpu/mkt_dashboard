@@ -1,11 +1,18 @@
 import { SENTIMENT_SOURCE_LABELS } from "@ptit/shared";
 import Link from "next/link";
-import { Card } from "@/components/Card";
 import { ChannelTable } from "@/components/ChannelTable";
 import { StatTile } from "@/components/StatTile";
 import { ChannelBarChart } from "@/components/charts/ChannelBarChart";
 import { ReachLineChart } from "@/components/charts/ReachLineChart";
 import { SentimentChart } from "@/components/charts/SentimentChart";
+import { Panel } from "@/components/home/Panel";
+import { InfoHint } from "@/components/ui/InfoHint";
+import {
+  IconBarChart,
+  IconDatabase,
+  IconMegaphone,
+  IconTrendingUp,
+} from "@/components/ui/icons";
 import { getDashboardData } from "@/lib/api";
 import { formatCompact, formatPercent, formatUpdatedAt } from "@/lib/format";
 
@@ -36,16 +43,13 @@ export default async function TrangKenh() {
           Học viện Công nghệ Bưu chính Viễn thông
         </p>
         <h1 className="mt-1 text-xl font-semibold text-ink sm:text-2xl">
-          Dashboard Marketing số &amp; Thương hiệu
+          Hiệu quả theo kênh
         </h1>
         <p className="mt-1.5 text-sm text-ink-secondary">
           {overview.period.label} · Cập nhật{" "}
           {formatUpdatedAt(overview.updatedAt)}
         </p>
         <nav className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-          <Link className="text-series-1 underline underline-offset-2" href="/">
-            ← Bảng điều khiển mục tiêu
-          </Link>
           <Link
             className="text-series-1 underline underline-offset-2"
             href="/muc-tieu"
@@ -112,36 +116,67 @@ export default async function TrangKenh() {
       </section>
 
       <div className="mb-6">
-        <Card
+        <Panel
+          hint={
+            <InfoHint label="Về biểu đồ lượt tiếp cận">
+              Chỉ vẽ ba kênh có quy mô lớn nhất: bảng màu dành đúng ba khe cho chuỗi dữ
+              liệu, chuỗi thứ tư sẽ phá ngưỡng phân biệt màu của người mù màu. Di chuột
+              lên biểu đồ để xem số liệu từng ngày.
+            </InfoHint>
+          }
+          icon={IconTrendingUp}
           title="Lượt tiếp cận theo ngày"
-          subtitle="Ba kênh có quy mô lớn nhất. Di chuột lên biểu đồ để xem số liệu từng ngày."
         >
           <ReachLineChart data={reach} />
-        </Card>
+        </Panel>
       </div>
 
       <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card
+        <Panel
+          icon={IconBarChart}
+          // Kỳ báo cáo đã ghi ở đầu trang. Lặp lại cả câu ở đây làm `meta` dài hơn
+          // chỗ còn trống của khối nửa chiều ngang, và tiêu đề bị cắt cụt.
+          meta="Cộng dồn cả kỳ"
           title="Lượt tương tác theo kênh"
-          subtitle={`Cộng dồn trong ${overview.period.label.toLowerCase()}`}
         >
           <ChannelBarChart data={channels} />
-        </Card>
+        </Panel>
 
-        <Card
+        <Panel
+          hint={
+            <InfoHint label="Về biểu đồ sắc thái">
+              <p>
+                Chấm bằng mô hình <code>{sentiment.modelVersion}</code>. Chiều cao cột là
+                số lượt nhắc, nên cột thấp nghĩa là ít dữ liệu chứ không phải ít cảm xúc.
+              </p>
+              <p className="mt-2">
+                Tháng có dưới {sentiment.minSampleForTrend} lượt được làm mờ: một tỷ lệ
+                tính trên vài lượt nhắc không nói được xu hướng nào.
+              </p>
+            </InfoHint>
+          }
+          icon={IconMegaphone}
+          meta={`${sentiment.totalMentions.toLocaleString("vi-VN")} lượt nhắc`}
           title={`Sắc thái theo tháng — ${SENTIMENT_SOURCE_LABELS[sentiment.source]}`}
-          subtitle={`${sentiment.totalMentions.toLocaleString("vi-VN")} lượt nhắc · mô hình ${sentiment.modelVersion} · chiều cao cột là số lượt, tháng dưới ${sentiment.minSampleForTrend} lượt được làm mờ`}
         >
           <SentimentChart data={sentiment} />
-        </Card>
+        </Panel>
       </div>
 
-      <Card
+      <Panel
+        bodyClassName=""
+        hint={
+          <InfoHint label="Về bảng số liệu chi tiết">
+            Bảng này là bản đọc được bằng chữ của ba biểu đồ phía trên — mọi biểu đồ
+            trên bảng điều khiển đều phải có một đường đọc không cần nhìn màu, cho trình
+            đọc màn hình và cho bản in đen trắng của hồ sơ nghiệm thu.
+          </InfoHint>
+        }
+        icon={IconDatabase}
         title="Hiệu quả chi tiết theo kênh"
-        subtitle="Bảng số liệu đầy đủ, dùng được với trình đọc màn hình và khi in đen trắng."
       >
         <ChannelTable data={channels} />
-      </Card>
+      </Panel>
 
       <footer className="mt-10 border-t border-hairline pt-5 text-xs leading-relaxed text-ink-muted">
         {source === "api" ? (

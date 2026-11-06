@@ -24,6 +24,19 @@ select
     c.sac_thai,
     round(c.do_chac_chan::numeric, 3)           as do_chac_chan,
     c.da_bi_cat,
+    -- Vết truy nguyên. Mang cả ba điểm và cách phát hiện lên tới giao diện để người xem
+    -- mở được từ một câu trích dẫn ra đúng bản ghi thô đã sinh ra nó.
+    --
+    -- Chỉ hiện nhãn thắng là giấu mất thông tin: một câu 0,34/0,33/0,33 và một câu
+    -- 0,99/0,01/0,00 đều ra "tích cực", nhưng mức độ chắc chắn khác hẳn nhau. Hội đồng
+    -- nghiệm thu phải kiểm được điều đó mà không cần mở cơ sở dữ liệu.
+    round(c.diem_tich_cuc::numeric, 4)          as diem_tich_cuc,
+    round(c.diem_trung_tinh::numeric, 4)        as diem_trung_tinh,
+    round(c.diem_tieu_cuc::numeric, 4)          as diem_tieu_cuc,
+    c.ma_tac_gia,
+    c.cach_phat_hien,
+    c.tu_khoa_tim,
+    c.lan_dau_thay,
     -- Thứ tự đọc mặc định: ý kiến tiêu cực trước, rồi tới ý kiến được nhiều người thích.
     -- Một dashboard sắp theo thời gian sẽ chôn lời phàn nàn quan trọng nhất xuống dưới
     -- mười lời khen vô thưởng vô phạt đăng sau nó.

@@ -3,7 +3,8 @@ import { Meter } from "@/components/ui/Meter";
 import type { IconProps } from "@/components/ui/icons";
 
 interface SummaryTileProps {
-  icon: ComponentType<IconProps>;
+  /** Hình của ô. Bỏ trống khi cả hàng sẽ dùng cùng một hình — xem `Panel`. */
+  icon?: ComponentType<IconProps>;
   /** Nhãn ngắn, một dòng. Không đặt câu giải thích ở đây — đưa vào `hint`. */
   label: string;
   value: string;
@@ -43,22 +44,33 @@ export function SummaryTile({
         accent ? "border-series-1/40 ring-1 ring-series-1/15" : "border-hairline"
       }`}
     >
-      <div className="flex items-start justify-between gap-2">
-        <span
-          className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${
-            accent
-              ? "bg-series-1/10 text-series-1"
-              : "bg-surface-inset text-ink-secondary"
-          }`}
-        >
-          <Icon className="h-4 w-4" />
-        </span>
-        {hint}
-      </div>
+      {/* Hàng hình chỉ tồn tại khi CÓ hình. Dựng nó rỗng chỉ để giữ chỗ nút (i) sẽ
+          chừa ra một khoảng trống bằng chiều cao ô hình ở đỉnh mọi ô không có hình. */}
+      {Icon ? (
+        <div className="flex items-start justify-between gap-2">
+          <span
+            className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${
+              accent
+                ? "bg-series-1/10 text-series-1"
+                : "bg-surface-inset text-ink-secondary"
+            }`}
+          >
+            <Icon className="h-4 w-4" />
+          </span>
+          {hint}
+        </div>
+      ) : null}
 
-      <p className="mt-3 text-[11px] leading-tight font-medium text-ink-muted">
-        {label}
-      </p>
+      <div
+        className={`flex items-start justify-between gap-2 ${Icon ? "mt-3" : ""}`}
+      >
+        <p className="text-[11px] leading-tight font-medium text-ink-muted">
+          {label}
+        </p>
+        {/* Không có hình thì nút (i) về cùng hàng với nhãn, thay vì treo lơ lửng ở
+            một góc cách nội dung cả một khoảng trống. */}
+        {Icon ? null : hint}
+      </div>
 
       <p className="mt-1 flex items-baseline gap-1.5">
         {/* Con số lớn dùng chữ số tỷ lệ tự nhiên; tabular-nums chỉ để dành cho cột số. */}
@@ -81,16 +93,20 @@ export function SummaryTile({
         ) : null}
       </p>
 
-      <div className="mt-auto pt-3">
-        {meter ? (
-          <Meter
-            ariaLabel={meter.label}
-            color={meter.color}
-            ratio={meter.ratio}
-          />
-        ) : null}
-        {trend}
-      </div>
+      {/* Dải đáy chỉ dựng khi thật sự có thanh đo hoặc đường xu hướng — `mt-auto`
+          trên một thẻ rỗng kéo ô cao thêm đúng phần đệm của nó mà không thêm gì. */}
+      {meter || trend ? (
+        <div className="mt-auto pt-3">
+          {meter ? (
+            <Meter
+              ariaLabel={meter.label}
+              color={meter.color}
+              ratio={meter.ratio}
+            />
+          ) : null}
+          {trend}
+        </div>
+      ) : null}
     </article>
   );
 }

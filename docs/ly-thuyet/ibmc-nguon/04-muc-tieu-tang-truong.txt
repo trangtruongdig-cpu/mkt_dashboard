@@ -1,0 +1,36 @@
+Mục tiêu thứ ba mà tôi muốn giới thiệu hôm nay đó là tăng trưởng bao gồm với tăng trưởng của
+ngành hàng và tăng trưởng của thương hiệu. Trong ví dụ trên rõ ràng thương hiệu A bán nhiều hơn
+cả về mặt sản lượng và cái giá trị họ bán hơn năm trước 1000 chai dầu gội với giá cao hơn 5000đ
+mỗi chai. Nếu chỉ nhìn vào con số này chúng ta có thể thấy rằng ok vener của thương hiệu A có
+thể vỗ tay ăn mừng. Chúng ta có thể nói rằng thương hiệu VNA đã có một năm làm ăn rất là thành
+công. Nhưng liệu cái việc bán nhiều hơn có tỉ lệ thuận với việc tăng thị phần không? Hãy cùng
+làm phép tính đơn giản. Bạn hãy lấy sản lượng bán năm nay là 11.000 chai. Trừ cho sản lượng bán
+năm ngoái 10.000 chai, bạn sẽ ra được số lượng bán thêm là 1000 chai. Sau đó lấy 1000 chai này
+chia cho sản lượng bán năm ngoái 10.000 chai. Bạn sẽ thấy tăng trưởng sản lượng volume grâu của
+thương hiệu là 10%. Tương tự để tính tăng trưởng giá trị bạn lấy giá trị năm nay là 11.000 ngà
+trai nhân với giá bán 35.000đ rồi trừ cho giá trị năm ngoái là 10.000 trai nhân với giá bán
+30.000đ ngàn đồng bạn sẽ có được con số 85 triệu đồng sau đó lấy 85 triệu đồng chia cho giá trị
+bán năm ngoái 300 triệu đồng. Kết quả là ta thấy sự tăng trưởng là 28% về mặt giá trị. Nhưng mà
+nếu bạn so sánh tăng trưởng sản lượng của thương hiệu A là 10% với tăng trưởng sàn lượng toàn
+ngành là 20% bạn sẽ thấy thương hiệu A tăng trưởng thấp hơn nhiều so với các ngành hàng. Điều
+này có nghĩa là có đối thủ nào đó đang tăng trưởng nhanh hơn và lấy đi thị phần của thương hiệu
+A. Tương tự khi so sánh tăng trưởng giá trị của VNA là 28% với tăng trưởng giá trị toàn ngành
+là 30%. VNA vận tăng chậm hơn ngành 2% có nghĩa là có đối thủ đang tăng trưởng nhanh hơn và lấy
+đi thi phần về giá trị. Trong trường hợp này dù tăng trưởng về cả sản lượng và giá trị nhưng
+VNA vẫn mất thị phần. Vậy điều mà bạn cần lưu ý ở đây là phải luôn xem xét mối tương quan giữa
+tăng trưởng của thương hiệu và tăng trưởng của nganh hàng. Ngoài ra bạn cũng nên cân nhắc đến
+yếu tố lạm phát. Ví dụ nếu ngành hàng tăng trưởng 12% nhưng lạm phát năm đó tới 15% thì thực tế
+ngành hàng không tăng trưởng về mặt giá trị. Từ đây chúng ta dẫn đến một biểu đồ rất quan
+trọng. Cái biểu đồ này thể hiện mối tương quan giữa doanh số và tăng trưởng của thương hiệu so
+với ngành. Trong đó trục dọc là mức tăng hay giảm doanh số và trục ngang là tỉ lệ tăng trưởng
+của thương hiệu so với trung bình ngành hàng. Có bốn khả năng xảy ra. Trường hợp đầu tiên, nếu
+doanh số bán của bạn tăng cao hơn trung bình ảnh thì đó là điều rất đáng mừng vì bạn đang tăng
+trưởng rất khỏe mạnh. Trường hợp thứ hai, bạn vẫn tăng doanh số nhưng mà tăng trưởng lại thấp
+hơn nganh hàng. Điều này có nghĩa là bạn mất thị phần dù bán nhiều hơn năm trước. Trường hợp
+này bạn không nên vui hoặc chỉ vui một chút thôi. Trường hợp tệ nhất bạn rớt xố và rất nhanh
+hơn thị trường. Nghĩa là bạn vừa rớt số mà vừa mất thi phần vào tay đối thủ. Trường hợp cuối
+cùng gây tranh cãy nhất đó là bạn rước số nhưng may mắn là ngành hàng trung bình còn giảm nhiều
+hơn bạn. Điều này có nghĩa là dù tăng trưởng âm bạn vẫn tăng thị phần vì đối thủ còn rất nhiều
+hơn. Đó là ý nghĩa của việc xem xét doanh số, thi phần và tăng trưởng. Chúng ta tăng doanh số
+nhưng liệu sự tăng trưởng này có bền vững và khỏe mạnh không? Lý tưởng nhất là bạn phải tăng
+doanh số tăng thị phần bằng cách tăng trưởng. M.

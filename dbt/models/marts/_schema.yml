@@ -372,3 +372,58 @@ seeds:
         tests: [not_null]
       - name: da_bi_cat
         description: Nội dung dài quá giới hạn token, điểm chỉ tính trên phần đầu.
+
+  - name: mart__value_benchmark
+    description: >
+      Chiều GIÁ TRỊ của nhóm trường đối sánh: học phí, chi phí đào tạo bình quân và
+      tổng nguồn thu, bóc từ đề án tuyển sinh. Đi thành cặp với
+      `mart__disclosure_benchmark` (chiều sản lượng) — khung IBMC đòi sản lượng và giá
+      trị luôn đặt cạnh nhau được, vì dẫn đầu mặt này không kéo theo mặt kia.
+    columns:
+      - name: ma_truong
+        description: Khoá thương hiệu trong nhóm sáu trường đối sánh.
+        tests: [not_null]
+      - name: la_hoc_vien
+        description: Dòng của chính Học viện. Giao diện dùng cột này để làm nổi, không dò theo tên.
+        tests: [not_null]
+      - name: nam
+        description: Năm tuyển sinh của đề án.
+      - name: he_dao_tao
+        description: >
+          Hệ đào tạo mà mức học phí áp cho. Một phần của khoá cùng với trường và năm:
+          cùng một trường công bố nhiều đề án mỗi năm, mỗi hệ một bản, và học phí hệ
+          từ xa với hệ chính quy chênh nhau nhiều lần.
+        tests:
+          - accepted_values:
+              arguments:
+                values: [chinh_quy, vua_lam_vua_hoc, tu_xa, lien_thong]
+      - name: don_vi_hoc_phi
+        description: >
+          Đơn vị học phí trường công bố. BẮT BUỘC đọc kèm khi so sánh: bốn cột học phí
+          bên dưới loại trừ nhau, mỗi dòng chỉ có đúng một cột khác null.
+        tests:
+          - accepted_values:
+              arguments:
+                values: [tin_chi, nam, thang, hoc_ky]
+      - name: hoc_phi_can_tren
+        description: >
+          Cận trên khi trường công bố học phí theo khoảng tuỳ ngành, ví dụ "từ 29 đến
+          32 triệu đồng/năm". Null nghĩa là trường công bố một mức duy nhất. So một
+          trường công bố khoảng với một trường công bố mức đơn mà chỉ nhìn cận dưới là
+          so lệch — luôn đọc cột này kèm.
+      - name: hoc_phi_tren_chi_phi_pct
+        description: >
+          Học phí một năm trên chi phí đào tạo một sinh viên một năm, đơn vị %. Chỉ tính
+          được khi trường công bố học phí theo năm. Dưới 100% nghĩa là nguồn khác đang
+          gánh phần chênh — con số này là mẫu số thật khi bàn dư địa tăng học phí.
+      - name: boc_sach
+        description: Không có cảnh báo nào trong lúc bóc.
+        tests: [not_null]
+      - name: duong_dan_tai_lieu
+        description: Đường dẫn đề án gốc, để hội đồng nghiệm thu mở lại từ con số.
+        tests: [not_null]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ma_truong, nam, he_dao_tao]
+

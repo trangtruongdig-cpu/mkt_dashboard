@@ -23,6 +23,16 @@
 		reverse_proxy metabase:3000
 	}
 
+	# Matomo đo lưu lượng website của Học viện.
+	#
+	# `handle_path` cắt tiền tố trước khi chuyển tiếp, vì Matomo tự dựng đường dẫn tương
+	# đối từ gốc tài liệu của nó. Chạy dưới đường dẫn con như vậy đủ dùng cho bản tự dựng;
+	# nếu cần nhúng mã theo dõi lên nhiều tên miền thì chuyển Matomo sang tên miền con
+	# riêng (matomo.ptit.edu.vn) rồi đổi khối này thành một site riêng.
+	handle_path /matomo/* {
+		reverse_proxy matomo:80
+	}
+
 	# Còn lại là giao diện Next.js.
 	handle {
 		reverse_proxy web:3000

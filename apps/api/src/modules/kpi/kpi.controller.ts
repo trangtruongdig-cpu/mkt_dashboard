@@ -2,8 +2,10 @@ import { Controller, Get } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import {
   KpiCascadeResponseSchema,
+  KpiTargetOverrideListSchema,
   ShareOfSearchResponseSchema,
   type KpiCascadeResponse,
+  type KpiTargetOverrideList,
   type ShareOfSearchResponse,
 } from "@ptit/shared";
 import { ZodOkResponse } from "../../common/openapi";
@@ -44,5 +46,22 @@ export class KpiController {
   )
   getShareOfSearch(): Promise<ShareOfSearchResponse> {
     return this.kpiService.getShareOfSearch();
+  }
+
+  @Get("kpi-targets")
+  @ApiOperation({
+    summary: "Các mức cần đạt đã được sửa từ giao diện",
+    description:
+      "Chỉ liệt kê những chỉ số có mức cần đạt khác mặc định trong mã nguồn, kèm căn cứ, " +
+      "người sửa và thời điểm sửa. Mở cho người xem không đăng nhập: mức cần đạt là cam kết " +
+      "công khai, và giá trị của nó đã hiện trong cây mục tiêu — che danh sách này chỉ làm " +
+      "mất phần căn cứ. Việc SỬA thì cần đăng nhập, xem nhóm Quản trị.",
+  })
+  @ZodOkResponse(
+    KpiTargetOverrideListSchema,
+    "Danh sách bản ghi đè mức cần đạt, sắp theo khoá chỉ số",
+  )
+  listTargets(): Promise<KpiTargetOverrideList> {
+    return this.kpiService.listTargets();
   }
 }

@@ -153,3 +153,21 @@ def test_nhan_dien_de_an_viet_tat() -> None:
 
 def test_khong_nhan_nham_quyet_dinh_thuong_thanh_de_an() -> None:
     assert classify_kind("/QD-1240.pdf", "File đính kèm: QD 1240") == "khac"
+
+
+def test_phu_luc_de_an_khong_co_chu_tuyen_sinh_van_duoc_nhan() -> None:
+    """Hai tệp này là nguồn học phí máy đọc được DUY NHẤT của Học viện — bản chính là scan."""
+    assert (
+        classify_kind(
+            "https://apiquanlydaotao.ptit.edu.vn/data/fileUpload-1712748874019-mau_1_vlvh___de_an_.pdf",
+            "",
+        )
+        == "de_an_tuyen_sinh"
+    )
+    assert (
+        classify_kind(
+            "https://apiquanlydaotao.ptit.edu.vn/data/fileUpload-1712748890427-mau_2_tu_xa___de_an_.pdf",
+            "",
+        )
+        == "de_an_tuyen_sinh"
+    )

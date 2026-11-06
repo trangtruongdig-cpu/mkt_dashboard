@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { z } from "zod";
 import type { Env } from "../../config/env";
 
 /**
@@ -19,18 +18,16 @@ import type { Env } from "../../config/env";
  * và MẤT khi khởi động lại. Muốn giữ lâu dài thì chép vào `.env` rồi dựng lại
  * container. Xem `apps/api/.env.example`.
  */
-const StoredCredentialsSchema = z.object({
-  clientId: z.string(),
-  clientSecret: z.string(),
-  refreshToken: z.string().nullable(),
-  accountEmail: z.string().nullable(),
-  propertyId: z.string().nullable(),
-  propertyDisplayName: z.string().nullable(),
-  accountDisplayName: z.string().nullable(),
-  connectedAt: z.string().nullable(),
-});
-
-export type StoredCredentials = z.infer<typeof StoredCredentialsSchema>;
+export interface StoredCredentials {
+  clientId: string;
+  clientSecret: string;
+  refreshToken: string | null;
+  accountEmail: string | null;
+  propertyId: string | null;
+  propertyDisplayName: string | null;
+  accountDisplayName: string | null;
+  connectedAt: string | null;
+}
 
 /** Biến môi trường để trống nghĩa là chưa có, không phải chuỗi rỗng hợp lệ. */
 function rongThanhNull(gia_tri: string): string | null {

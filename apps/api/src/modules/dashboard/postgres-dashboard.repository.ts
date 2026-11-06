@@ -4,6 +4,7 @@ import {
   MIN_CONFIDENCE,
   MIN_MONTHLY_SAMPLE,
   type ChannelsResponse,
+  type MentionFunnelStage,
   type OverviewResponse,
   type ReachResponse,
   type SentimentByMonth,
@@ -168,10 +169,19 @@ export class PostgresDashboardRepository extends DashboardRepository {
       sac_thai: string;
       do_chac_chan: string | number;
       da_bi_cat: boolean;
+      diem_tich_cuc: string | number;
+      diem_trung_tinh: string | number;
+      diem_tieu_cuc: string | number;
+      ma_tac_gia: string | null;
+      cach_phat_hien: string;
+      tu_khoa_tim: string | null;
+      lan_dau_thay: string;
     }>(sql`
       select ma_thao_luan, nen_tang, ten_nguon, hat_du_lieu, duong_dan, noi_dung,
              thoi_diem, thoi_diem_la_uoc_luong, so_luot_thich, phien_ban_model,
-             sac_thai, do_chac_chan, da_bi_cat
+             sac_thai, do_chac_chan, da_bi_cat,
+             diem_tich_cuc, diem_trung_tinh, diem_tieu_cuc,
+             ma_tac_gia, cach_phat_hien, tu_khoa_tim, lan_dau_thay
       from mart.mart__social_mention
       ${loc}
       order by thu_tu_uu_tien, so_luot_thich desc, thoi_diem desc
@@ -212,9 +222,22 @@ export class PostgresDashboardRepository extends DashboardRepository {
       sentiment: r.sac_thai as SocialMention["sentiment"],
       confidence: Number(r.do_chac_chan),
       truncated: r.da_bi_cat,
+      provenance: {
+        mentionKey: r.ma_thao_luan,
+        authorRef: r.ma_tac_gia,
+        discoveredVia: r.cach_phat_hien,
+        searchTerm: r.tu_khoa_tim,
+        firstSeenAt: new Date(r.lan_dau_thay).toISOString(),
+        scores: {
+          positive: Number(r.diem_tich_cuc),
+          neutral: Number(r.diem_trung_tinh),
+          negative: Number(r.diem_tieu_cuc),
+        },
+      },
     }));
 
     const moc = rows.map((r) => new Date(r.thoi_diem).getTime());
+    const funnel = await this.docPhezLoc();
 
     return {
       period: {
@@ -231,6 +254,62 @@ export class PostgresDashboardRepository extends DashboardRepository {
       counts,
       mentions,
       confidenceThreshold: MIN_CONFIDENCE,
+      funnel,
     };
+  }
+
+  /**
+   * Phễu từ dữ liệu thô tới danh sách đang hiển thị, đếm SỐNG trên kho.
+   *
+   * Không hằng hoá bốn con số trong mã: chúng đổi mỗi lần worker chạy, và một phễu ghi
+   * số cũ còn tệ hơn không có phễu — người xem tin vào nó rồi kết luận sai về độ phủ.
+   *
+   * Đếm không phụ thuộc bộ lọc người dùng đang chọn: đây là phễu của CẢ KHO, trả lời câu
+   * "hệ thống thu được bao nhiêu và loại đi những gì".
+   */
+  private async docPhezLoc(): Promise<MentionFunnelStage[]> {
+    const kq = await this.db.execute<{
+      thu_ve: string | number;
+      mang_y_kien: string | number;
+      da_cham: string | number;
+      con_lai: string | number;
+    }>(sql`
+      select
+        (select count(*) from raw.raw_social_mention)                        as thu_ve,
+        (select count(*) from raw.raw_social_mention
+          where content_type in ('comment', 'post', 'thread'))               as mang_y_kien,
+        (select count(*) from raw.social_sentiment)                          as da_cham,
+        (select count(*) from mart.mart__social_mention)                     as con_lai
+    `);
+
+    const r = Array.from(kq as Iterable<(typeof kq)[number]>)[0];
+    if (!r) throw new Error("không đếm được phễu xử lý");
+
+    return [
+      {
+        key: "thu_ve",
+        label: "Thu về từ nền tảng",
+        count: Number(r.thu_ve),
+        note: null,
+      },
+      {
+        key: "mang_y_kien",
+        label: "Hạt mang ý kiến",
+        count: Number(r.mang_y_kien),
+        note: "Bỏ video: tiêu đề và mô tả là lời giới thiệu của người làm nội dung, không phải nhận xét về Học viện.",
+      },
+      {
+        key: "da_cham",
+        label: "Đã chấm sắc thái",
+        count: Number(r.da_cham),
+        note: "Bỏ bản ghi quá ngắn — một emoji hay chữ “ok” không đủ ngữ liệu để chấm.",
+      },
+      {
+        key: "con_lai",
+        label: "Vào báo cáo dư luận",
+        count: Number(r.con_lai),
+        note: "Bỏ nội dung do chính kênh đăng: bình luận của chủ kênh dưới video của mình là lời người làm video, không phải khán giả.",
+      },
+    ];
   }
 }

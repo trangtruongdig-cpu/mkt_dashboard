@@ -4,6 +4,7 @@ import {
   type CascadeKpi,
   type Objective,
 } from "@ptit/shared";
+import { InfoHint } from "@/components/ui/InfoHint";
 
 interface ObjectiveHeadCellProps {
   objective: Objective;
@@ -51,9 +52,23 @@ export function ObjectiveHeadCell({
         ) : null}
       </div>
 
-      <h3 className="text-sm leading-snug font-semibold text-ink">
-        {objective.statement}
-      </h3>
+      <div className="flex items-start gap-1.5">
+        <h3 className="text-sm leading-snug font-semibold text-ink">
+          {objective.statement}
+        </h3>
+        {/* Cùng quy tắc với ObjectiveCard: cảnh báo lý thuyết đứng cạnh mục tiêu, và
+            chỉ dựng nút khi có nội dung thật. */}
+        {objective.theory.caveat ? (
+          <InfoHint
+            label={`Giới hạn lý thuyết của mục tiêu ${objective.statement}`}
+          >
+            <p className="mb-1.5 font-medium text-ink">
+              {objective.theory.concept} — {objective.theory.origin}
+            </p>
+            <p>{objective.theory.caveat}</p>
+          </InfoHint>
+        ) : null}
+      </div>
       <p className="mt-1.5 text-[11px] leading-relaxed text-ink-secondary">
         {objective.rationale}
       </p>

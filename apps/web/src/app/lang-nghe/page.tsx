@@ -6,8 +6,9 @@ import {
   type SocialPlatform,
 } from "@ptit/shared";
 import Link from "next/link";
-import { Card } from "@/components/Card";
 import { MentionCard } from "@/components/MentionCard";
+import { PipelineFunnel } from "@/components/PipelineFunnel";
+import { Panel } from "@/components/home/Panel";
 import { getSocialMentions } from "@/lib/api";
 
 /**
@@ -101,9 +102,6 @@ export default async function TrangLangNghe({ searchParams }: TrangProps) {
           Sắp theo mức ưu tiên đọc: ý kiến tiêu cực trước.
         </p>
         <nav className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-          <Link className="text-series-1 underline underline-offset-2" href="/">
-            ← Bảng điều khiển mục tiêu
-          </Link>
           <Link className="text-series-1 underline underline-offset-2" href="/kenh">
             → Biểu đồ sắc thái theo tháng
           </Link>
@@ -111,7 +109,7 @@ export default async function TrangLangNghe({ searchParams }: TrangProps) {
       </header>
 
       {mentions === null ? (
-        <Card title="Chưa đọc được kho ý kiến">
+        <Panel title="Chưa đọc được kho ý kiến">
           <p className="text-sm text-ink-secondary">{reason}</p>
           <p className="mt-3 text-xs text-ink-muted">
             Danh sách này cố ý KHÔNG có bản giả lập. Các khối số liệu tổng hợp bịa được vì
@@ -119,7 +117,7 @@ export default async function TrangLangNghe({ searchParams }: TrangProps) {
             những câu như thể có người thật đã viết chúng về Học viện thì khác hẳn — đó là
             dựng lời cho người không nói.
           </p>
-        </Card>
+        </Panel>
       ) : (
         <>
           <div className="mb-5 flex flex-col gap-3">
@@ -162,6 +160,25 @@ export default async function TrangLangNghe({ searchParams }: TrangProps) {
             </div>
           </div>
 
+          {mentions.funnel.length > 0 && (
+            <details className="mb-5 rounded-xl border border-hairline bg-surface p-5">
+              <summary className="cursor-pointer text-sm font-semibold text-ink">
+                Dữ liệu thô đi qua những bước nào
+              </summary>
+              <p className="mt-1 mb-4 text-xs text-ink-muted">
+                Từ số bản ghi thu về tới số ý kiến vào báo cáo. Mỗi bước loại một thứ, và
+                nói rõ loại vì sao — để đánh giá được là lọc đúng hay lọc quá tay.
+              </p>
+              <PipelineFunnel stages={mentions.funnel} />
+              <p className="mt-4 border-t border-hairline pt-3 text-[11px] leading-relaxed text-ink-muted">
+                Bảng nguồn: <code>raw_social_mention</code> →{" "}
+                <code>social_sentiment</code> → <code>int__social_conversation</code> →{" "}
+                <code>mart__social_mention</code>. Mỗi ý kiến bên dưới mở được ra bản ghi
+                thô đã sinh ra nó.
+              </p>
+            </details>
+          )}
+
           <p className="mb-4 text-xs text-ink-muted">
             {mentions.mentions.length} / {mentions.totalMatching} ý kiến · mô hình{" "}
             {mentions.modelVersion} · tài khoản người viết đã ẩn danh bằng mã băm ngay từ
@@ -169,11 +186,11 @@ export default async function TrangLangNghe({ searchParams }: TrangProps) {
           </p>
 
           {mentions.mentions.length === 0 ? (
-            <Card title="Không có ý kiến nào khớp bộ lọc">
+            <Panel title="Không có ý kiến nào khớp bộ lọc">
               <p className="text-sm text-ink-secondary">
                 Thử bỏ bớt bộ lọc. Kho hiện có {mentions.totalMatching} ý kiến.
               </p>
-            </Card>
+            </Panel>
           ) : (
             <div className="flex flex-col gap-3">
               {mentions.mentions.map((m) => (

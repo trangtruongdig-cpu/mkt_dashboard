@@ -29,6 +29,15 @@ sources:
         description: >
           Số liệu bóc từ Biểu mẫu 18 của từng trường. Cột `warnings` ghi mọi chỗ đáng
           ngờ trong lúc bóc — phải đọc trước khi so sánh chéo giữa các trường.
+      - name: raw_de_an_figure
+        description: >
+          Học phí, tổng nguồn thu và chi phí đào tạo bình quân một sinh viên, bóc từ
+          đề án tuyển sinh của từng trường (Thông tư 08/2022/TT-BGDĐT Điều 11 buộc công
+          khai). Đây là nguồn DUY NHẤT trong toàn hệ thống có con số học phí — chiều
+          giá trị của cặp sản lượng/giá trị mà Biểu mẫu 18 không có.
+          Cột `hoc_phi_don_vi` bắt buộc đọc kèm `hoc_phi`: các trường công bố theo
+          đồng/tín chỉ, đồng/năm hoặc đồng/tháng, so thẳng trị số giữa hai đơn vị khác
+          nhau sai lệch hàng chục lần.
       - name: raw_admission_score
         description: >
           Điểm chuẩn trúng tuyển từng ngành, bóc từ trang công bố của mỗi trường. Chỉ

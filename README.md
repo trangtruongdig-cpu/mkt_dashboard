@@ -41,61 +41,32 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 
 Kiểm tra trước khi đẩy code: `pnpm typecheck && pnpm lint && pnpm build`.
 
-## Triển khai lên Vercel
+## Triển khai
 
-Repo này chưa phải git repository. Khởi tạo và đẩy lên GitHub trước:
+Hệ thống chạy trên máy chủ của Học viện, dựng bằng Docker Compose. Không có nhánh triển
+khai nào khác: ràng buộc tự chủ hạ tầng ở mục 1 CLAUDE.md loại cả serverless lẫn SaaS khỏi
+luồng chính, và `api` còn phải chạy migration lúc khởi động cùng với `worker` chạy nền theo
+lịch — serverless không giữ được cả hai.
 
 ```bash
-git init && git add -A && git commit -m "Khởi tạo dashboard marketing PTIT"
-git branch -M main
-git remote add origin git@github.com:<tài-khoản>/<tên-repo>.git
-git push -u origin main
+cp .env.example .env     # rồi sửa ba mật khẩu bắt buộc
+docker compose up -d --build
 ```
 
-`.gitignore` đã loại các file tài liệu nhiệm vụ (`*.doc`, `*.docx`, `*.pdf`, `*.xlsx`) và
-mọi file `.env` — kiểm tra lại bằng `git status` trước khi commit.
+Xong thì mọi thứ nằm sau Caddy ở một cổng duy nhất (mặc định `8080`):
 
-Tạo **hai project Vercel từ cùng một repo**. Cả hai đều cần bật
-_Include files outside of the Root Directory in the Build Step_ (mặc định đã bật với monorepo).
-
-### Project 1 — `api`
-
-| Thiết lập | Giá trị |
+| Đường dẫn | Dịch vụ |
 |---|---|
-| Root Directory | `apps/api` |
-| Framework Preset | **Other** |
-| Build / Install Command | để trống — đã khai trong `apps/api/vercel.json` |
+| `/` | giao diện dashboard (Next.js) |
+| `/api/docs` | tài liệu OpenAPI của NestJS |
+| `/metabase/` | Metabase cho cán bộ tự truy vấn ad-hoc |
+| `/matomo/` | Matomo đo lưu lượng website (lần đầu phải chạy trình cài đặt trên giao diện) |
 
-Environment Variables:
+Chỉ `caddy` publish cổng ra ngoài. Khi có tên miền thật, đổi `:80` trong `docker/Caddyfile`
+thành tên miền của Học viện là Caddy tự xin chứng chỉ Let's Encrypt.
 
-```
-NODE_ENV=production
-DATA_SOURCE=demo
-CORS_ORIGINS=https://<tên-project-web>.vercel.app
-```
-
-Deploy xong kiểm tra: `https://<tên-project-api>.vercel.app/api/docs`
-
-### Project 2 — `web`
-
-| Thiết lập | Giá trị |
-|---|---|
-| Root Directory | `apps/web` |
-| Framework Preset | Next.js (tự nhận) |
-| Build / Install Command | để trống — đã khai trong `apps/web/vercel.json` |
-
-Environment Variables:
-
-```
-NEXT_PUBLIC_API_URL=https://<tên-project-api>.vercel.app
-```
-
-Deploy `api` trước để lấy tên miền, rồi mới điền biến cho `web`. Nếu chưa có API, cứ deploy
-`web` trước — trang tự hiển thị dữ liệu mẫu và ghi rõ trên giao diện là đang dùng dữ liệu mẫu.
-
-> Vercel chỉ phục vụ giai đoạn demo và xem trước. Hệ thống hoàn chỉnh (PostgreSQL, Airbyte,
-> worker PhoBERT, Metabase, Matomo) chạy bằng Docker Compose trên máy chủ của Học viện —
-> serverless không giữ được tiến trình chạy nền và kết nối cơ sở dữ liệu lâu dài.
+Mặc định `DATA_SOURCE=demo` — giao diện dựng được ngay và tự ghi rõ "Nguồn: số liệu giả lập".
+Chuyển sang `postgres` sau khi đã chạy worker thu thập và `dbt build`.
 
 ## Các bước tiếp theo
 

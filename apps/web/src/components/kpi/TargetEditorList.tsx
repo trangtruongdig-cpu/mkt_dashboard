@@ -7,12 +7,13 @@ import {
   type KpiTargetOverride,
   type TargetBasis,
 } from "@ptit/shared";
-import { useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { authApi, ChuaDangNhapError, kpiTargetApi } from "@/lib/admin-api";
 
 interface TargetEditorListProps {
   kpis: readonly CascadeKpi[];
   overrides: readonly KpiTargetOverride[];
-  editable: boolean;
 }
 
 interface DangSua {
@@ -24,16 +25,29 @@ interface DangSua {
 /**
  * Sửa mức cần đạt ngay trên giao diện.
  *
- * Hai ràng buộc được ép ở đây chứ không nhắc suông:
+ * Ba ràng buộc được ép ở đây chứ không nhắc suông:
  *   - Không lưu được nếu chưa viết căn cứ. Sửa cam kết mà không nói vì sao thì người
  *     sau chỉ thấy con số, không tranh luận lại được.
  *   - Trạng thái đúng/chệch hướng KHÔNG sửa tay. Máy chủ tính lại từ giá trị và mức
  *     mới, nên không ai hạ mục tiêu xuống rồi vẫn giữ nhãn cũ.
+ *   - Phải đăng nhập quản trị. Trước đây quyền sửa do biến môi trường `KPI_TARGET_EDIT`
+ *     quyết định, nên bản ghi chỉ nói "chưa xác thực" — không truy được ai đổi cam kết.
  */
-export function TargetEditorList({ kpis, overrides, editable }: TargetEditorListProps) {
+export function TargetEditorList({ kpis, overrides }: TargetEditorListProps) {
   const [dangSua, setDangSua] = useState<Record<string, DangSua>>({});
   const [dangLuu, setDangLuu] = useState<string | null>(null);
   const [loi, setLoi] = useState<string | null>(null);
+  /** `null` = đang hỏi máy chủ. Chưa biết thì chưa hiện nút Sửa, để khỏi nhá lên rồi tắt. */
+  const [nguoiSua, setNguoiSua] = useState<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    authApi
+      .me()
+      .then((phien) => setNguoiSua(phien.user.displayName))
+      .catch(() => setNguoiSua(null));
+  }, []);
+
+  const editable = typeof nguoiSua === "string";
 
   const daSua = new Map(overrides.map((o) => [o.kpiKey, o]));
 
@@ -61,30 +75,16 @@ export function TargetEditorList({ kpis, overrides, editable }: TargetEditorList
     setDangLuu(kpiKey);
     setLoi(null);
     try {
-      const phan_hoi = await fetch("/api/muc-tieu/targets", {
-        method: "PATCH",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          kpiKey,
-          target: form.target.trim() === "" ? null : Number(form.target),
-          targetRationale: { basis: form.basis, note: form.note.trim() },
-        }),
+      await kpiTargetApi.update(kpiKey, {
+        target: form.target.trim() === "" ? null : Number(form.target),
+        targetRationale: { basis: form.basis, note: form.note.trim() },
       });
-
-      if (!phan_hoi.ok) {
-        const noi_dung: unknown = await phan_hoi.json().catch(() => null);
-        const thong_diep =
-          typeof noi_dung === "object" && noi_dung !== null && "message" in noi_dung
-            ? String((noi_dung as { message: unknown }).message)
-            : `Máy chủ trả về HTTP ${phan_hoi.status}`;
-        setLoi(thong_diep);
-        return;
-      }
 
       // Tải lại trang để trạng thái đúng/chệch hướng được tính lại từ máy chủ.
       window.location.reload();
-    } catch {
-      setLoi("Không gọi được máy chủ. Kiểm tra pnpm dev còn chạy không.");
+    } catch (error) {
+      setLoi(thongDiepLoi(error));
+      setNguoiSua(error instanceof ChuaDangNhapError ? null : nguoiSua);
     } finally {
       setDangLuu(null);
     }
@@ -92,11 +92,12 @@ export function TargetEditorList({ kpis, overrides, editable }: TargetEditorList
 
   const khoiPhuc = async (kpiKey: string): Promise<void> => {
     setDangLuu(kpiKey);
+    setLoi(null);
     try {
-      await fetch(`/api/muc-tieu/targets?kpiKey=${encodeURIComponent(kpiKey)}`, {
-        method: "DELETE",
-      });
+      await kpiTargetApi.reset(kpiKey);
       window.location.reload();
+    } catch (error) {
+      setLoi(thongDiepLoi(error));
     } finally {
       setDangLuu(null);
     }
@@ -104,6 +105,20 @@ export function TargetEditorList({ kpis, overrides, editable }: TargetEditorList
 
   return (
     <div className="space-y-3">
+      {nguoiSua === null ? (
+        <p
+          className="rounded-lg border px-3 py-2 text-sm"
+          style={{ borderColor: "var(--status-warning)", color: "var(--status-warning)" }}
+          role="status"
+        >
+          Đang ở chế độ chỉ xem.{" "}
+          <Link href="/dang-nhap" className="underline underline-offset-2">
+            Đăng nhập quản trị
+          </Link>{" "}
+          để sửa mức cần đạt — mỗi lần sửa được ghi lại kèm tên người sửa.
+        </p>
+      ) : null}
+
       {loi ? (
         <p
           className="rounded-lg border px-3 py-2 text-sm"
@@ -250,4 +265,12 @@ export function TargetEditorList({ kpis, overrides, editable }: TargetEditorList
       })}
     </div>
   );
+}
+
+/** Lỗi 401 nói một câu khác: vấn đề không nằm ở dữ liệu người dùng vừa nhập. */
+function thongDiepLoi(error: unknown): string {
+  if (error instanceof ChuaDangNhapError) {
+    return "Phiên đăng nhập đã hết hạn. Đăng nhập lại rồi lưu lần nữa.";
+  }
+  return error instanceof Error ? error.message : "Không gọi được máy chủ.";
 }

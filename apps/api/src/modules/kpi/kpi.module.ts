@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import type { Env } from "../../config/env";
 import { DB, type Database } from "../../db/db.module";
+import { KpiTargetRepository } from "./kpi-target.repository";
 import { KpiController } from "./kpi.controller";
 import { DemoKpiRepository, KpiRepository } from "./kpi.repository";
 import { KpiService } from "./kpi.service";
@@ -11,6 +12,11 @@ import { PostgresKpiRepository } from "./postgres-kpi.repository";
   controllers: [KpiController],
   providers: [
     KpiService,
+    /**
+     * Mức cần đạt do người dùng sửa KHÔNG đi theo cần gạt `DATA_SOURCE`: đó là cam kết
+     * người dùng nhập vào, không phải số liệu dbt dựng. Bảng này luôn đọc từ PostgreSQL.
+     */
+    KpiTargetRepository,
     /**
      * Nguồn dữ liệu chọn theo biến môi trường `DATA_SOURCE`:
      *
@@ -32,5 +38,7 @@ import { PostgresKpiRepository } from "./postgres-kpi.repository";
           : new DemoKpiRepository(),
     },
   ],
+  // KpiAdminModule dùng lại đúng service này để hai đường đọc/ghi không lệch logic.
+  exports: [KpiService],
 })
 export class KpiModule {}

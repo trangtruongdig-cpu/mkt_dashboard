@@ -36,6 +36,16 @@ const MOT_Y_KIEN: SocialMentionsResponse["mentions"][number] = {
   sentiment: "negative",
   confidence: 0.91,
   truncated: false,
+  // Vết truy nguyên đi kèm MỌI ý kiến: hội đồng nghiệm thu phải mở được từ một câu
+  // trích dẫn ra đúng bản ghi thô đã sinh ra nó, không cần mở cơ sở dữ liệu.
+  provenance: {
+    mentionKey: "yt:abc123",
+    authorRef: "anon:0123456789abcdef",
+    discoveredVia: "youtube:comment",
+    searchTerm: null,
+    firstSeenAt: "2026-07-27T23:23:08.313Z",
+    scores: { positive: 0.04, neutral: 0.05, negative: 0.91 },
+  },
 };
 
 /** Kho giả lập: trả đúng hợp đồng và ghi lại truy vấn nhận được để kiểm bộ lọc. */
@@ -53,6 +63,15 @@ class KhoGiaLap extends DemoDashboardRepository {
       counts: { positive: 0, neutral: 0, negative: 1 },
       mentions: [MOT_Y_KIEN],
       confidenceThreshold: 0.7,
+      funnel: [
+        { key: "thu_ve", label: "Thu về từ nền tảng", count: 208, note: null },
+        {
+          key: "con_lai",
+          label: "Vào báo cáo dư luận",
+          count: 90,
+          note: "Bỏ nội dung do chính kênh đăng.",
+        },
+      ],
     };
   }
 }

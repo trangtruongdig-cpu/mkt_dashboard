@@ -17,7 +17,6 @@ import {
   STATUS_GLYPH,
   TIER_ICON,
 } from "@/components/kpi/glyphs";
-import { TopBar } from "@/components/layout/TopBar";
 import { InfoHint } from "@/components/ui/InfoHint";
 import {
   IconArrowDown,
@@ -49,9 +48,9 @@ export const dynamic = "force-dynamic";
 /** Diễn giải từng tầng — nằm sau nút (i) ở đầu cột, không chiếm chỗ trên màn hình. */
 const TIER_NOTE: Record<ObjectiveTier, string> = {
   business:
-    "Học viện lớn lên bằng nguồn nào. Mọi mục tiêu bên dưới đều là hệ quả của lựa chọn ở tầng này.",
+    "Số liệu của chính Học viện: nhập học, thị phần, tăng trưởng so với ngành, hiệu quả đồng tiền. Đây là thứ cuối cùng phải đạt.",
   marketing:
-    "Phải làm gì với thị trường để mục tiêu kinh doanh ở tầng trước thành hiện thực.",
+    "Hành vi người học phải đổi thế nào để mục tiêu kinh doanh ở tầng trước thành hiện thực — Học viện lớn lên bằng nguồn tăng trưởng nào.",
   communication:
     "Truyền thông phải đạt điều gì để mục tiêu marketing ở tầng trước thành hiện thực.",
 };
@@ -109,8 +108,6 @@ export default async function TrangChu() {
 
   return (
     <>
-      <TopBar active="/" />
-
       <main className="mx-auto w-full max-w-[92rem] flex-1 px-4 py-5 sm:px-6">
         {/* Dải bối cảnh: kỳ báo cáo, thời điểm cập nhật, nguồn dữ liệu đang dùng. */}
         <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px]">

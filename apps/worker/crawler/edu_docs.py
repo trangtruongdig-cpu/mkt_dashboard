@@ -101,6 +101,18 @@ _KIND_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
             "noi dung de an",
             "noi_dung_de_an",
             "dats",
+            # Cụm "đề án" trần, cố ý để LỎNG. Phụ lục đề án của Học viện đặt tên
+            # `mau_1_vlvh___de_an_.pdf` và `mau_2_tu_xa___de_an_.pdf` — không có chữ
+            # "tuyển sinh" nào, nên mọi mẫu chặt hơn đều bỏ sót. Mà đó lại là hai tài
+            # liệu DUY NHẤT có học phí của Học viện ở dạng máy đọc được: bản đề án
+            # chính là ảnh scan.
+            #
+            # Lọt nhầm ("đề án vị trí việc làm"…) chỉ tốn một lượt tải: `boc_de_an`
+            # kiểm nội dung và trả về rỗng kèm lý do nếu không thấy mục 1.10 / 1.14.
+            "đề án",
+            "de an",
+            "de-an",
+            "de_an",
         ),
     ),
     ("bao_cao_thuong_nien", ("thường niên", "thuong nien", "thuong-nien")),

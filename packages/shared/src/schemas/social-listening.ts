@@ -63,6 +63,39 @@ export const MIN_CONFIDENCE = 0.6;
  */
 export const MIN_MONTHLY_SAMPLE = 10;
 
+/**
+ * VẾT TRUY NGUYÊN — mở từ một câu trích dẫn ra đúng bản ghi thô đã sinh ra nó.
+ *
+ * Đây là yêu cầu của hồ sơ nghiệm thu chứ không phải tính năng phụ: hội đồng phải kiểm
+ * được một con số trên màn hình mà không cần mở cơ sở dữ liệu. Không có khối này thì
+ * "80% tích cực" là một khẳng định không ai phản bác được, và một khẳng định không phản
+ * bác được thì cũng không đáng tin.
+ */
+export const MentionProvenanceSchema = z.object({
+  /** Khoá tự nhiên: băm của (nền tảng, định danh gốc). Tra thẳng được trong kho. */
+  mentionKey: z.string().min(1),
+  /** Tài khoản người viết, đã băm ngay từ lúc thu thập. `null` khi nguồn không cho biết. */
+  authorRef: z.string().nullable(),
+  /** Cách hệ thống tìm ra bản ghi này, ví dụ "youtube:comment", "reddit:search". */
+  discoveredVia: z.string().min(1),
+  /** Từ khoá đã dẫn tới bản ghi. `null` với bình luận — chúng đi kèm video, không tự tìm. */
+  searchTerm: z.string().nullable(),
+  /** Lần đầu hệ thống nhìn thấy, ISO. Khác `occurredAt` là ngày đăng trên nền tảng. */
+  firstSeenAt: z.string(),
+  /**
+   * CẢ BA điểm, không chỉ nhãn thắng.
+   *
+   * Chỉ hiện nhãn thắng là giấu mất thông tin: một câu 0,34/0,33/0,33 và một câu
+   * 0,99/0,01/0,00 đều ra "tích cực", nhưng mức độ chắc chắn khác hẳn nhau.
+   */
+  scores: z.object({
+    positive: z.number().min(0).max(1),
+    neutral: z.number().min(0).max(1),
+    negative: z.number().min(0).max(1),
+  }),
+});
+export type MentionProvenance = z.infer<typeof MentionProvenanceSchema>;
+
 export const SocialMentionSchema = z.object({
   key: z.string().min(1),
   platform: SocialPlatformSchema,
@@ -87,8 +120,30 @@ export const SocialMentionSchema = z.object({
   confidence: z.number().min(0).max(1),
   /** Nội dung dài quá giới hạn token, model chỉ chấm phần đầu. */
   truncated: z.boolean(),
+  /** Bằng chứng đi kèm mỗi câu. Xem `MentionProvenanceSchema`. */
+  provenance: MentionProvenanceSchema,
 });
 export type SocialMention = z.infer<typeof SocialMentionSchema>;
+
+/**
+ * MỘT BƯỚC trong phễu LỌC BẢN GHI, kèm số bản ghi còn lại sau bước đó.
+ *
+ * Khác hẳn `PipelineStage` ở `data-lineage.ts`, và hai thứ bổ sung cho nhau:
+ *   · `PipelineStage`      — dữ liệu đi qua NHỮNG BẢNG NÀO (raw → staging → int → mart)
+ *   · `MentionFunnelStage` — mỗi bước lọc còn lại BAO NHIÊU bản ghi, và vì sao rơi
+ *
+ * Hiện phễu chứ không chỉ hiện con số cuối: người xem thấy 90 ý kiến mà không biết hệ
+ * thống đã thu 208 thì sẽ tưởng độ phủ chỉ có vậy. Thấy cả 208 → 90 kèm lý do từng bước
+ * thì mới đánh giá được là lọc đúng hay lọc quá tay.
+ */
+export const MentionFunnelStageSchema = z.object({
+  key: z.string().min(1),
+  label: z.string().min(1),
+  count: z.number().int().nonnegative(),
+  /** Vì sao bước này loại bớt bản ghi. Bước đầu tiên không loại gì nên để `null`. */
+  note: z.string().nullable(),
+});
+export type MentionFunnelStage = z.infer<typeof MentionFunnelStageSchema>;
 
 export const SocialMentionsResponseSchema = z.object({
   period: PeriodSchema,
@@ -105,6 +160,13 @@ export const SocialMentionsResponseSchema = z.object({
   mentions: z.array(SocialMentionSchema),
   /** Ngưỡng dùng chung, gửi kèm để giao diện không tự đặt một ngưỡng khác. */
   confidenceThreshold: z.number().min(0).max(1),
+  /**
+   * Phễu xử lý từ dữ liệu thô tới danh sách đang hiển thị.
+   *
+   * KHÔNG phụ thuộc bộ lọc người dùng đang chọn: đây là phễu của cả kho, trả lời câu
+   * "hệ thống thu được bao nhiêu và loại đi những gì", không phải "bộ lọc này còn mấy dòng".
+   */
+  funnel: z.array(MentionFunnelStageSchema),
 });
 export type SocialMentionsResponse = z.infer<typeof SocialMentionsResponseSchema>;
 

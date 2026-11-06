@@ -1,0 +1,35 @@
+Tôi tin là các bạn đã có những đáp án của mình rất là dễ dàng thô nhỉ. Hoặc nếu các bạn làm
+sai, các bạn cũng có thể dễ dàng xem câu trả lời của tôi ở phần giải đáp. Qua ví dụ này, tôi hy
+vọng các bạn đã hiểu được hai khái niệm đầu tiên về doanh số. Đó là doanh số về sản lượng
+volume sale và doanh số về giá trị value. Ví dụ, Tigmen có thể đạt cái mục tiêu doanh số là
+1000 tỷ đồng mỗi năm hoặc Vinamil có thể đạt mục tiêu 10 triệu tấn sữa tươi mỗi năm. Đây chỉ là
+ví dụ. Tôi cũng không biết chính xác tổng sản lượng của Vinamil lớn đến mức nào. Như vậy, Volum
+Siưu là tổng doanh thu về mặt sản lượng mà doanh nghiệp bán được. Đơn vị tính thường là kg, lít
+hoặc tấn vì theo ngành hàng. Còn value sư là tổng doanh thu về giá trị của doanh nghiệp tính
+bằng đơn vị tiền tệ. Ví dụ như Việt Nam Đổng, USD hoặc Euro. Ví dụ trong các ngành hàng như
+nước giải khát thay sữa, họ thường đặt mục tiêu doanh số sàn lượng là l hoặc cách tol. Ngành
+hàng chăm sóc cá nhân như dầu ội, sữa tắm, bột giặt thì thường đạt mục tiêu là tấn hoặc ngàn
+tấn. Còn các ngành hàng điện tử như điện thoại, đồ gia dụng thì thường dùng đơn vị là unit hoặc
+SKU, tức là cái ngành dịch vụ như giáo dục thì có thể đạt volume sale là số lượng học viên,
+luật học vân vân. Một lưu ý nhỏ về volume sale đặc biệt trong các ngành hàng tiêu dùng nhanh đó
+là đơn vị tính không thể là chai, hộp, gói hay bình. Bởi vì khi phân tích doanh thu của các
+thương hiệu sẽ có sự khác biệt về thể tích hoặc trọng lượng. Ví dụ, Vinamil có thể bán hộp sữa
+có dung tích 180 ml trong khi cô gái hạ lặn lại là 200 ml. Nếu chỉ tính số lượng hộp thì
+Vinamil có thể bán 10 triệu hộp và cô gái Hà Lan bán 9,5 triệu hộp. Nhưng tính ra sản lượng sữa
+thì có thể cô gái Hà Lan lại cao hơn. Vì vậy khi tính volume sơ phải tính bằng đơn vị thể tích
+như lí hoặc ml hoặc các đơn vị khối lượng như tần kg. Một ví dụ khác, với 10 triệu hộp Vinamil
+bán với giá 6.000đ mỗi hộp và trong khi đó chỉ có 9,5 triệu hộp cô gái Hà Lan được bán ra với
+giá 6200 đồng mỗi hộp thì dù sản lượng nhiều hơn nhưng doanh số giá trị của cô gái Hà Lan vẫn
+có thể cao hơn. Điều này cho thấy rằng dẫn đầu về sản lượng chưa chắc đã dẫn đầu về giá trị và
+ngược lại. Một ví dụ tương tự dù bia Sài Gòn bán nhiều hơn về sản lượng nhưng lại thua kém
+Heniken về doanh số giá trị. Công ty nào cũng muốn doanh số của mình càng cao càng tốt. Nhưng
+doanh số bán có giới hạn vì năng lực sản xuất của công ty. Bán hết hàng sản xuất ra là một
+thành công. Nhưng trên thị trường để đạt mục tiêu kinh doanh không đơn giản như vậy. Giả sử bạn
+có thể đầu tư để nâng cao năng lực sản xuất thì độ lớn của thị trường mà bạn phục vụ sẽ là bao
+nhiêu và chúng ta có bán nhiều hơn đối thủ hay không. Để trả lời được điều này, chúng ta cần
+biết đến mục tiêu kinh doanh thứ hai đó chính là thị phần. Trước khi đi vào phần này, hãy giúp
+tôi giải bài tập nhỏ thứ hai. Vẫn là thương hiệu A bán được 10.000 chai dầu gộn 180 g với giá
+bán lẻ 30.000đ. Lúc này thương hiệu Bán được 7000 chai 200 g với giá bán lẻ lên đến 50.000đ.
+Giả sử toàn thị trường chỉ có hai thương hiệu này thì thị phần sản lượng và thị phần giá trị
+của mỗi thương hiệu là bao nhiêu và ai đang dẫn đầu thị trường. Cũng giống như bài tập trước,
+bạn hãy qua sao tiếp theo để trả lời và xem đáp án.

@@ -12,11 +12,12 @@ interface GrowthSourceStripProps {
 }
 
 /**
- * Năm nguồn tăng trưởng của mục tiêu kinh doanh, đặt ngay đầu trang.
+ * Năm nguồn tăng trưởng, đặt ngay đầu trang.
  *
  * Đây là câu hỏi phải trả lời trước mọi câu khác: Học viện đang lớn lên bằng nguồn
- * nào. Mọi mục tiêu marketing và truyền thông phía dưới đều là hệ quả của lựa chọn
- * ở hàng này — thứ tự trên màn hình lặp lại đúng thứ tự suy diễn.
+ * nào. Nguồn tăng trưởng là MỤC TIÊU MARKETING — chúng mô tả thay đổi trong hành vi
+ * người học, không phải số liệu của Học viện; tầng kinh doanh là sale, share, growth,
+ * profit.
  */
 export function GrowthSourceStrip({
   objectives,
@@ -24,9 +25,11 @@ export function GrowthSourceStrip({
 }: GrowthSourceStripProps) {
   // Duyệt theo thứ tự khai trong enum để hàng thẻ không đổi chỗ giữa các lần tải.
   const cards = GrowthSourceSchema.options.map((source) => {
-    const objective = objectives.find(
-      (o) => o.tier === "business" && o.growthSource === source,
-    );
+    // Nhận diện bằng CHÍNH `growthSource`, không bằng tầng. Lọc kèm `tier` là giả
+    // định thừa: nó đã từng đúng khi nguồn tăng trưởng nằm ở tầng kinh doanh, và khi
+    // chúng chuyển xuống tầng marketing thì cả dải thẻ lặng lẽ render rỗng — kiểu dữ
+    // liệu vẫn hợp lệ nên tsc không bắt được.
+    const objective = objectives.find((o) => o.growthSource === source);
     return { source, objective };
   });
 

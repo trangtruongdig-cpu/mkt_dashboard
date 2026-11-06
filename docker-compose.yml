@@ -66,6 +66,18 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      # Dùng fetch sẵn có của Node thay vì curl/wget: ảnh node:24-slim không có cả hai,
+      # và thêm chúng vào chỉ để kiểm tra sức khoẻ là phình ảnh runtime vô ích.
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3002/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     networks: [ptit_dashboard_net]
 
   web:
@@ -152,6 +164,43 @@ services:
       - metabase_data:/metabase-data
     networks: [ptit_dashboard_net]
 
+  # Matomo CHỈ chạy được trên MySQL/MariaDB — không có bản hỗ trợ PostgreSQL. Đây là lý do
+  # duy nhất hệ thống có engine cơ sở dữ liệu thứ hai; kho dữ liệu phân tích và toàn bộ bảng
+  # mart__* vẫn nằm hoàn toàn trong PostgreSQL, Matomo không đọc vào đó.
+  matomo_db:
+    image: mariadb:11.4
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${MATOMO_DB:-matomo}
+      MARIADB_USER: ${MATOMO_DB_USER:-matomo}
+      MARIADB_PASSWORD: ${MATOMO_DB_PASSWORD:?Thiếu MATOMO_DB_PASSWORD trong .env}
+      MARIADB_RANDOM_ROOT_PASSWORD: "yes"
+    volumes:
+      - matomo_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks: [ptit_dashboard_net]
+
+  matomo:
+    image: matomo:5-apache
+    restart: unless-stopped
+    environment:
+      MATOMO_DATABASE_HOST: matomo_db
+      MATOMO_DATABASE_ADAPTER: mysql
+      MATOMO_DATABASE_DBNAME: ${MATOMO_DB:-matomo}
+      MATOMO_DATABASE_USERNAME: ${MATOMO_DB_USER:-matomo}
+      MATOMO_DATABASE_PASSWORD: ${MATOMO_DB_PASSWORD}
+    depends_on:
+      matomo_db:
+        condition: service_healthy
+    volumes:
+      - matomo_data:/var/www/html
+    networks: [ptit_dashboard_net]
+
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
@@ -166,12 +215,15 @@ services:
     depends_on:
       - api
       - web
+      - matomo
     networks: [ptit_dashboard_net]
 
 volumes:
   pgdata:
   redisdata:
   metabase_data:
+  matomo_data:
+  matomo_db_data:
   caddy_data:
   caddy_config:
 

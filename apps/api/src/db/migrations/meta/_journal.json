@@ -8,6 +8,13 @@
       "when": 1785167836707,
       "tag": "0000_shocking_earthquake",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793962995041,
+      "tag": "0001_eager_the_hand",
+      "breakpoints": true
     }
   ]
 }

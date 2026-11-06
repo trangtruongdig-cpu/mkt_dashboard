@@ -6,6 +6,7 @@ import {
   type Objective,
 } from "@ptit/shared";
 import type { ReactNode } from "react";
+import { InfoHint } from "@/components/ui/InfoHint";
 import { KpiRow } from "./KpiRow";
 
 interface ObjectiveCardProps {
@@ -21,6 +22,11 @@ interface ObjectiveCardProps {
  * Thứ tự hiển thị là cố ý: phát biểu mục tiêu trước, lý do tồn tại ngay sau, rồi mới
  * tới chỉ số. Người xem phải đọc được "vì sao đo cái này" trước khi nhìn thấy con số,
  * chứ không phải ngược lại.
+ *
+ * `theory.caveat` đứng ngay cạnh phát biểu mục tiêu chứ không nằm riêng ở trang Lý
+ * thuyết: nó là thứ làm người đọc đổi cách DIỄN GIẢI con số bên dưới. "Thị phần tìm
+ * kiếm là proxy hành vi, không phải top of mind" mà đọc sau khi đã kết luận thì đã
+ * muộn. Bốn thuộc tính còn lại của `theory` thuộc về trang /khung, không nhét vào đây.
  */
 export function ObjectiveCard({
   objective,
@@ -59,9 +65,23 @@ export function ObjectiveCard({
           ) : null}
         </div>
 
-        <h3 className="text-sm leading-snug font-semibold text-ink">
-          {objective.statement}
-        </h3>
+        <div className="flex items-start gap-1.5">
+          <h3 className="text-sm leading-snug font-semibold text-ink">
+            {objective.statement}
+          </h3>
+          {/* Chỉ dựng nút khi THẬT SỰ có cảnh báo — nút (i) rỗng làm người xem mất
+              công bấm để đọc một bảng trống. */}
+          {objective.theory.caveat ? (
+            <InfoHint
+              label={`Giới hạn lý thuyết của mục tiêu ${objective.statement}`}
+            >
+              <p className="mb-1.5 font-medium text-ink">
+                {objective.theory.concept} — {objective.theory.origin}
+              </p>
+              <p>{objective.theory.caveat}</p>
+            </InfoHint>
+          ) : null}
+        </div>
         <p className="mt-1.5 text-xs leading-relaxed text-ink-secondary">
           {objective.rationale}
         </p>

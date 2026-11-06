@@ -1,0 +1,71 @@
+Tôi tin rằng các bạn đã có câu trả lời cho bài tập ở slide trước và tôi muốn bắt đầu giải bài
+tập này bằng cách nói sơ qua về hệ thống phân phối. Những công ty hàng tiêu dùng nhanh ở Việt
+Nam trong việc phân phối và đưa sản phẩm ra thị trường. Lúc nào họ cũng cần có những đối tác
+hoặc là những nhà phân phối để hỗ trợ họ đưa hàng hóa ra thi trường. 5% trên tổng doanh số bán
+ra có thể được xem là tiền công mà công ty trả cho nhà phân phối. Ví dụ một nhà phân phối bán
+doanh số 1 tỷ đồng thì công ty sẽ trả cho họ khoảng 50 triệu. Đây là để trả cho những chi phí
+về kho bãi, giao nhận, quản lý hàng hóa, lưu kho, tổ chức đội ngũ bán hàng và đi giao hàng đến
+những cửa hàng tạp hóa, nhà bán lẻ, siêu thị. Ở đây, việc quản lý đội ngũ bán hàng thường được
+thực hiện chung giữa nhà phân phối và công ty. Công ty sẽ gửi một nhân viên S đến làm việc ở
+nhà phân phối và nhân viên S này sẽ leck toàn bộ team bán hàng ở nhà phân phối. Nhân viên S này
+là người của công ty, còn nhà phân phối sẽ quản lý đội ngũ nhân viên bán hàng bên dưới. Đội ngũ
+nhân viên này là của nhà phân phối mặc dù lương của họ thường là do công ty trả. Còn bước tiếp
+theo là khi hàng hóa đã vào đến tiệm tạp hóa thì giá bán ra từ tiệm tạp hóa đến người tiêu dùng
+rất là chênh lệch. có nghĩa là chúng ta chỉ có thể gợi ý được lợi nhuận mà tạp hóa nên bán với
+giá khuy nghị là 20% tương đương là 16.000đ. Nhưng mà thực tế thì không như vậy bởi vì giá bán
+và tiệm tạp hóa bán ra cho người tiêu dùng tùy thuộc vào rất là nhiều yếu tố. Có thể là do cung
+cầu ở thời điểm đó. Ví dụ như vào một thời gian mà nước tăng lực number one hoặc là C2 đang rất
+là hot thì những người bán họ thường bán giá cao hơn bình thường mà người tiêu dùng vẫn mua.
+hoặc là đôi khi tiệm tạp hóa nhận được một chương trình chiếc khấu cao, ví dụ như là mua 10
+tặng 20 hay là giảm 20% trên một đơn hàng thì đôi khi tiệm tạp hóa sẽ bỏ tiền ra mua một đơn
+hàng lớn rồi họ dùng chiếc khấu phần trăm để bớt trực tiếp vào giá bán cho người tiêu dùng.
+Thành ra họ sẵn sàng bán thấp hơn giá niêm yết trên bao bì để hàng đi được nhanh hơn và nhiều
+hơn. Họ cũng được lợi mà người tiêu dùng cũng được lợi. Tuy nhiên thì việc này nếu mà làm quá
+giá giảm quá mạnh và lại đồng loạt nữa sẽ dẫn tới phá giá thị trường. Và đó là lý do tại sao
+khi tôi đưa ra đề cho các bạn, tôi cho giá video tức là đây cũng là cách mà bên team sẽ xác
+định giá trong các kế hoạch marketing của mình và họ sẽ xác định từ giá bán lệ đi ngược lên giá
+consumer và đi ngược xuống doanh thu thực tế mà công ty nhận được sau khi trừ đi chiếc khấu cho
+nhà phân phối. Và nếu bạn chia cho 1,1 tức là 10% thuế P thì bạn sẽ được con số thực sự mà công
+ty thu về. Nhưng mà ở đây tôi sẽ bỏ qua thuế vát vì tôi chỉ muốn các bạn hiểu được bản chất của
+vấn đề. Nếu bây giờ các bạn cộng các chi phí giá thành sản xuất một chai dầu gội, ví dụ như giá
+nắp, giá chai, giá dung dịch dầu gội, giá tem nhẫn thì con số sẽ là 12.000đ. Các bạn lưu ý ở
+đây đó là số tiền sản xuất nắp, chai, dầu gội, tem nhãn như thế này được tính trên trung bình
+một đơn hàng rất là lớn. Ví dụ như là 1 triệu nắp, 1 triệu chai, 1 triệu cánh tem nhãn hoặc là
+1 tấn hương. Lấy tiền tổng đơn hàng đó chia cho số lượng thì ra đơn giá của từng cái là như
+vậy. Và số liệu này sẽ do bên mua hàng cung cấp cho phòng marketing để phòng marketing đánh giá
+và ước tính được lợi nhuận của mỗi đơn vị hàng bán. Thì ở đây các bạn sẽ thấy chúng ta có tổng
+chi phí trung bình của một chai dầu gội là 12.000đ. Còn mức mà công ty thu về trên mỗi chai dầu
+gội sẽ là 28.500 đồng. Từ đó tính được lợi nhuận mà marketing đóng góp trên mỗi đơn vị hàng bán
+sẽ là 16.500 đồng. Bạn chia con số này cho giá bán thì bạn sẽ ra được Mar contribution là 58%.
+Đối với một số ngành hàng nhãn hiệu ví dụ như nước giải khác, bạn sẽ không được phép tung hàng
+nếu ước tính mức lợi nhuận trên mỗi đơn vị hàng bán này dưới 40%. Còn đối với những ngành hàng
+khác có thể cao hơn là 50 đến 60%. Và đối với những ngành hàng như là thời trang, mỹ phẩm hoặc
+là những ngành hàng cao cấp thì con số này có thể lên đến hơn 100%. Dĩ nhiên con số này không
+thể tính chính xác được nhưng mà vẫn có thể tính tương đối được. Nếu một năm tôi bán được hàng
+hóa như vậy thì mức lợi nhuận marketing đóng góp cho công ty là bao nhiêu? Và từ mức lợi nhuận
+trong đó chúng ta mới trừ đi thêm những chi phí ví dụ như là tiền nhân viên, chi phí vận hành
+văn phòng, chi phí marketing, chi phí show thì chúng ta sẽ ra được lợi nhuận của công ty. Và
+thông thường thì bạn sẽ xin được khoảng từ 5 đến 10% tổng doanh số hoặc là 30% lợi nhuận để làm
+marketing. Con số phần trăm này có thể khác nhau tùy thuộc vào chiến lược của công ty và tình
+hình cạnh tranh trên thị trường. Chẳng hạn là khi công ty của bạn đang muốn thâm nhập vào một
+thị trường mới nào đó hoặc muốn tấn công một đối thủ thì công ty của bạn có thể sẽ cho bạn mức
+chi cao hơn bình thường để bạn có thể làm các hoạt động cần thiết. Còn ở đây các bạn thấy chúng
+ta xin được 50% lợi nhuận đóng góp thì chúng ta sẽ có số tiền là 82.5 triệu00000đ. Tới đây tôi
+hy vọng là các bạn đã hiểu được cách tính PNL hay còn gọi là lời lỗ cho một thương hiệu. Đối
+với phần lớn những công ty đa quốc gia và tiêu dùng nhanh thì Ben tin phải chịu trách nhiệm đến
+cả PNL của sản phẩm và luôn luôn phải đảm bảo con số này không được giảm xuống dưới một mức quy
+định nào đó. Như các bạn được biết, để đảm bảo con số này cho mọi năm, không năm nào được giảm
+xuống quá một mức cho phép khi mà giá thành nguyên vật liệu tăng. Ví dụ như giá nhựa tăng, giá
+hương liệu tăng, giá dầu gội cũng tăng, giá khoai tây cũng tăng. Khi đó nếu các bạn là người
+làm ven, các bạn phải chú ý đến giá nguyên vật liệu bao bì để có những điều chỉnh phù hợp. Ví
+dụ, nếu tôi là người làm chai thì tôi sẽ phải chú ý đến giá nhợn thế giới. Nếu tôi làm mì gói
+thì tôi phải chú ý đến giá khoai tây. Tôi làm tem nhãn thì tôi phải chú ý đến giá thành của
+giấy. Để tôi biết rằng là nếu những nguyên vật liệu đã tăng giá thì nhiều khả năng bên phòng
+mua hàng bắt buộc phải update cho phòng marketing để tăng giá vốn hàng bán. Và như vậy, để giữ
+cho mức lợi nhuận bên này không bị giảm thưởng thì marketing sẽ phải thường xuyên thay đổi, cải
+tiến bao bì để giữ nguyên mức phần trăm này. Ví dụ như hiện giờ đang làm nhãn từ full giáp, tức
+là che nguyên chai thì mình có thể chuyển sang nhãn chlap, tức là chỉ che 1/3 của chai để giảm
+đi 1/3 số tiền giấy dán thành nhãn. Và bạn có thể tưởng tượng là con số này nếu bạn nhân cho
+hàng triệu chai mỗi năm thì số tiền có thể sẽ ra rất là lớn. hoặc là các bạn có thể giảm tỉ
+trọng nhựa trong chai, giảm số lượng màu trên ba bì và mỗi một cái giảm nhỏ như vậy thì nó có
+thể giúp cho bạn tiết kiệm rất lớn. Đến đây chắc bạn đã hiểu. Hẹn các bạn vào buổi tiếp theo.

@@ -51,12 +51,17 @@ export default async function TrangMucTieu() {
         <p className="mt-1.5 text-sm text-ink-secondary">
           {cascade.period.label} · Cập nhật {formatUpdatedAt(cascade.updatedAt)}
         </p>
-        <nav className="mt-3 text-sm">
+        <nav className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          {/* Nhãn cũ ghi "hiệu quả theo kênh" nhưng href trỏ về "/" — trang chủ là bản
+              đồ mục tiêu, hiệu quả theo kênh nằm ở /kenh. */}
+          <Link className="text-series-1 underline underline-offset-2" href="/kenh">
+            → Xem dashboard hiệu quả theo kênh
+          </Link>
           <Link
             className="text-series-1 underline underline-offset-2"
-            href="/"
+            href="/muc-tieu/sua"
           >
-            → Xem dashboard hiệu quả theo kênh
+            → Sửa mức cần đạt
           </Link>
         </nav>
       </header>

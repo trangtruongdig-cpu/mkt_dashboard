@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { ConnectFlow } from "@/components/connect/ConnectFlow";
 
 export const metadata: Metadata = {
@@ -17,13 +16,7 @@ export default async function TrangKetNoi({ searchParams }: PageProps) {
   return (
     <div className="mx-auto w-full max-w-2xl flex-1 px-5 py-8 sm:px-8 sm:py-12">
       <header className="mb-8">
-        <Link
-          href="/"
-          className="text-xs text-ink-muted underline decoration-hairline underline-offset-2 hover:text-ink-secondary"
-        >
-          ← Về dashboard
-        </Link>
-        <h1 className="mt-3 text-xl font-semibold text-ink sm:text-2xl">
+        <h1 className="text-xl font-semibold text-ink sm:text-2xl">
           Kết nối dữ liệu
         </h1>
         <p className="mt-1.5 text-sm text-ink-secondary">
