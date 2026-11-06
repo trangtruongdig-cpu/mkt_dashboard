@@ -1,6 +1,23 @@
 import { z } from "zod";
 
 /**
+ * Coi chuỗi rỗng là KHÔNG KHAI.
+ *
+ * Biến môi trường không có khái niệm "vắng mặt" khi đi qua docker-compose hay một
+ * tệp `.env`: nơi nào không điền thì giá trị là chuỗi rỗng. Mọi biến tuỳ chọn có ràng
+ * buộc độ dài đều phải đi qua đây, nếu không ràng buộc đó sẽ bắn vào đúng người chọn
+ * không dùng tính năng.
+ */
+function rong_thanh_thieu<T extends z.ZodTypeAny>(
+  schema: T,
+): z.ZodOptional<T> | z.ZodPipe<z.ZodTransform<unknown, unknown>, z.ZodOptional<T>> {
+  return z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+    schema.optional(),
+  ) as never;
+}
+
+/**
  * Biến môi trường của API. Kiểm tra ngay lúc khởi động — thiếu hoặc sai thì
  * tiến trình dừng luôn, không chạy tiếp với cấu hình nửa vời.
  */
@@ -25,7 +42,21 @@ export const EnvSchema = z.object({
   API_PUBLIC_URL: z.string().default("http://localhost:3002"),
 
   ADMIN_USERNAME: z.string().min(1).default("admin"),
-  ADMIN_PASSWORD: z.string().min(12, "Mật khẩu quản trị phải từ 12 ký tự").optional(),
+  /**
+   * Bỏ trống = TẮT phần quản trị, không phải cấu hình sai.
+   *
+   * `rong_thanh_thieu` chứ không phải `.optional()` trần: biến môi trường đặt bằng
+   * chuỗi rỗng là chuyện bình thường — `.env.example` để trống, và docker-compose
+   * truyền `ADMIN_PASSWORD=` khi người dùng chưa điền. Với `.optional()` trần thì
+   * chuỗi rỗng KHÔNG phải `undefined` nên nó rơi vào `.min(12)` và api ngã ngay lúc
+   * khởi động với "Mật khẩu quản trị phải từ 12 ký tự" — một thông điệp khiến người
+   * đọc đi đặt mật khẩu dài hơn, trong khi thứ họ muốn là không bật quản trị.
+   *
+   * Quy ước này giống hệt các biến GOOGLE_* bên dưới: chuỗi rỗng nghĩa là "chưa có".
+   */
+  ADMIN_PASSWORD: rong_thanh_thieu(
+    z.string().min(12, "Mật khẩu quản trị phải từ 12 ký tự"),
+  ),
   ADMIN_DISPLAY_NAME: z.string().default("Quản trị viên"),
   SESSION_TTL_HOURS: z.coerce.number().int().positive().max(720).default(12),
   SESSION_COOKIE_SECURE: z

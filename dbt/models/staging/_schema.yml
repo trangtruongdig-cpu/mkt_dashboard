@@ -1,8 +1,7 @@
 version: 2
 
-# Mục 7 CLAUDE.md buộc mọi model có schema.yml. File này hiện mới mô tả model staging
-# được thêm gần nhất; 11 model staging còn lại vẫn chưa có mô tả và test khoá — đó là
-# việc còn thiếu đã biết, không phải quy ước mới.
+# Mục 7 CLAUDE.md buộc mọi model có schema.yml: mô tả model, mô tả cột, và test
+# unique + not_null cho khoá. Mọi model staging đều có mặt ở đây.
 models:
   - name: stg__de_an__finance
     description: >
@@ -65,3 +64,188 @@ models:
           arguments:
             combination_of_columns: [mention_key, ma_thuoc_tinh]
 
+  - name: stg__ga4__traffic_acquisition
+    description: Phiên truy cập theo ngày, chia theo nguồn/phương tiện và nhóm kênh của GA4.
+    columns:
+      - name: ngay
+        tests: [not_null]
+      - name: nhom_kenh
+        description: Nhóm kênh mặc định của GA4. Phiên không quy được về kênh nào rơi vào Direct.
+        tests: [not_null]
+      - name: so_phien
+        tests: [not_null]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ngay, nguon_phien, phuong_tien_phien, nhom_kenh]
+
+  - name: stg__ga4__pages
+    description: >
+      Lượt xem theo ngày, theo tên máy chủ và đường dẫn. Bảng lớn nhất của kho — nền
+      của phễu tuyển sinh và nhu cầu ngành.
+    columns:
+      - name: ngay
+        tests: [not_null]
+      - name: duong_dan_gop
+        description: >
+          Đường dẫn đã bỏ tham số truy vấn. Dùng cột này để gộp, không dùng `duong_dan`
+          thô — cùng một trang với UTM khác nhau sẽ bị đếm thành nhiều trang.
+        tests: [not_null]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ngay, ten_may_chu, duong_dan]
+
+  - name: stg__ga4__campaigns
+    description: Phiên theo ngày, theo tên chiến dịch UTM. Nền của chỉ số tuân thủ gắn thẻ.
+    columns:
+      - name: ngay
+        tests: [not_null]
+      - name: co_gan_utm
+        description: Phiên có tên chiến dịch khác "(not set)". Mẫu số của tỷ lệ gắn thẻ.
+        tests: [not_null]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ngay, ten_chien_dich, nguon_phien, phuong_tien_phien]
+
+  - name: stg__ga4__geo
+    description: Phiên theo ngày, theo quốc gia và thành phố. Nền của chỉ số mở rộng ngoài lõi.
+    columns:
+      - name: ngay
+        tests: [not_null]
+      - name: thanh_pho_an_danh
+        description: GA4 ẩn danh thành phố khi lượng phiên quá nhỏ; cột này đánh dấu các dòng đó.
+        tests: [not_null]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ngay, quoc_gia, thanh_pho]
+
+  - name: stg__wiki__brand_pageviews
+    description: >
+      Lượt xem trang Wikipedia theo tuần của nhóm sáu trường — thước đo MỨC ĐỘ CHÚ Ý,
+      không phải nhận biết. Nguồn công khai thay cho Google Trends đang chặn truy cập.
+    columns:
+      - name: ma_truong
+        tests: [not_null]
+      - name: tuan
+        tests: [not_null]
+      - name: so_luot_xem
+        tests: [not_null]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ma_truong, tuan]
+
+  - name: stg__scores__admission
+    description: >
+      Điểm chuẩn trúng tuyển từng ngành, bóc từ trang công bố của mỗi trường. Chỉ chứa
+      điểm thang 30; điểm SAT và đánh giá năng lực bị loại ngay ở bước bóc vì không
+      cùng thang thì không so được.
+    columns:
+      - name: ma_truong
+        tests: [not_null]
+      - name: nam
+        tests: [not_null]
+      - name: diem
+        tests: [not_null]
+      - name: duong_dan_nguon
+        description: Trang công bố gốc, để hội đồng nghiệm thu mở lại từ con số.
+        tests: [not_null]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ma_truong, nam, ma_nganh]
+
+  - name: stg__disclosure__figure
+    description: >
+      Số liệu bóc từ Biểu mẫu 18 của từng trường. Cột `canh_bao` giữ mọi chỗ đáng ngờ
+      trong lúc bóc — PHẢI đọc trước khi so sánh chéo, vì bố cục biểu mẫu khác nhau
+      giữa các trường và các năm.
+    columns:
+      - name: duong_dan_tai_lieu
+        description: Khoá tự nhiên — mỗi bản Biểu 18 một dòng.
+        tests: [unique, not_null]
+      - name: ma_truong
+        tests: [not_null]
+      - name: boc_sach
+        description: Không có cảnh báo nào. False thì phải đọc `canh_bao` trước khi dùng số.
+        tests: [not_null]
+
+  - name: stg__news__brand_mention
+    description: >
+      Tin bài đã gán nhãn thương hiệu, TRẢI mỗi nhãn thành một dòng. Một bài so sánh
+      điểm chuẩn nhắc cả sáu trường thì sinh sáu dòng — đúng như thế, vì thị phần thảo
+      luận đếm số lần một trường được nhắc tới, không đếm số bài thuộc về ai.
+    columns:
+      - name: mention_key
+        tests: [not_null]
+      - name: ma_truong
+        tests: [not_null]
+      - name: la_kenh_cua_ta
+        description: Bài do chính Học viện đăng. Phải loại khi đo tiếng nói của người ngoài.
+        tests: [not_null]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [mention_key, ma_truong]
+
+  - name: stg__news__sentiment
+    description: >
+      Điểm sắc thái tin bài do PhoBERT chấm. Khoá là CẶP (bài, phiên bản model): một
+      bài có nhiều dòng nếu đã chấm bằng nhiều phiên bản — join thẳng vào bảng tin bài
+      mà quên lọc phiên bản sẽ nhân đôi số lượt nhắc.
+    columns:
+      - name: ma_tin_bai
+        tests: [not_null]
+      - name: phien_ban_model
+        description: Truy vết được điểm nào do phiên bản model nào sinh ra.
+        tests: [not_null]
+      - name: sac_thai
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [positive, neutral, negative]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ma_tin_bai, phien_ban_model]
+
+  - name: stg__social__mention
+    description: >
+      Thảo luận công khai của NGƯỜI NGOÀI về Học viện: bình luận YouTube, bài Reddit,
+      chủ đề diễn đàn. Tài khoản người viết lưu dưới dạng mã băm, không lưu tên hiển thị.
+    columns:
+      - name: ma_thao_luan
+        tests: [unique, not_null]
+      - name: nen_tang
+        tests: [not_null]
+      - name: la_kenh_cua_hoc_vien
+        description: Nội dung do chính Học viện đăng. Phải loại khi đo tiếng nói người ngoài.
+        tests: [not_null]
+      - name: tac_gia_da_an_danh
+        description: Đánh dấu bản ghi đã băm danh tính tác giả.
+        tests: [not_null]
+
+  - name: stg__social__sentiment
+    description: >
+      Điểm sắc thái thảo luận do ViSoBERT chấm. Cùng khuôn với `stg__news__sentiment`:
+      khoá là cặp (thảo luận, phiên bản model). Dùng ViSoBERT chứ không PhoBERT vì đây
+      là văn bản mạng xã hội — teencode, chữ không dấu, emoji.
+    columns:
+      - name: ma_thao_luan
+        tests: [not_null]
+      - name: phien_ban_model
+        tests: [not_null]
+      - name: sac_thai
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [positive, neutral, negative]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ma_thao_luan, phien_ban_model]

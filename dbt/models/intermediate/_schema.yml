@@ -1,0 +1,56 @@
+version: 2
+
+# Tầng trung gian không expose ra ngoài — backend không đọc trực tiếp. Nhưng vẫn phải
+# có schema.yml theo mục 7 CLAUDE.md: đây là chỗ hai kho thô được ghép với điểm sắc
+# thái, và một lỗi nhân dòng ở đây sẽ lặng lẽ thổi phồng mọi mart phía sau.
+models:
+  - name: int__news_coverage
+    description: >
+      Tin bài nói về Học viện, do NGƯỜI NGOÀI viết, đã ghép với điểm sắc thái mới nhất.
+
+      Hai phép lọc quan trọng nằm ở đây chứ không ở mart: chỉ giữ `ma_truong = 'ptit'`
+      và loại bài do chính Học viện đăng. Đo tiếng nói của mình rồi gọi đó là dư luận
+      là cách nhanh nhất để có một biểu đồ sắc thái đẹp và vô nghĩa.
+
+      Chỉ ghép điểm của PHIÊN BẢN MODEL mới nhất cho mỗi bài — ghép tất cả sẽ nhân đôi
+      số bài theo số lần đã chấm.
+    columns:
+      - name: ma_tin_bai
+        description: Khoá tự nhiên — mỗi bài một dòng sau khi đã lọc.
+        tests: [unique, not_null]
+      - name: thoi_diem
+        description: >
+          Thời điểm đăng. Nguồn không cho biết ngày đăng thì lùi về lần đầu hệ thống
+          nhìn thấy — muộn hơn thực tế, nhưng không bao giờ sớm hơn.
+        tests: [not_null]
+      - name: thoi_diem_la_uoc_luong
+        description: True khi `thoi_diem` là lần đầu thấy chứ không phải ngày đăng thật.
+        tests: [not_null]
+      - name: sac_thai
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [positive, neutral, negative]
+
+  - name: int__social_conversation
+    description: >
+      Thảo luận của NGƯỜI NGOÀI trên mạng xã hội, đã ghép điểm sắc thái mới nhất.
+
+      Cùng nguyên tắc với `int__news_coverage`: loại nội dung do Học viện đăng, và chỉ
+      giữ ba hạt dữ liệu là bình luận, bài đăng, chủ đề diễn đàn — các hạt khác không
+      phải tiếng nói của người dùng.
+    columns:
+      - name: ma_thao_luan
+        description: Khoá tự nhiên — mỗi thảo luận một dòng.
+        tests: [unique, not_null]
+      - name: thoi_diem
+        tests: [not_null]
+      - name: thoi_diem_la_uoc_luong
+        tests: [not_null]
+      - name: sac_thai
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [positive, neutral, negative]

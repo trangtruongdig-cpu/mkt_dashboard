@@ -88,22 +88,6 @@ models:
           arguments:
             combination_of_columns: [ngay, khoa_nganh]
 
-seeds:
-  - name: nhom_nganh_dao_tao
-    description: >
-      Danh mục ngành và cách phân nhóm. Sinh từ apps/worker/config/programs.json để
-      worker và dbt dùng chung một cách phân loại. Mở ngành mới thì sửa file JSON đó
-      rồi sinh lại seed, đừng sửa CSV bằng tay.
-    columns:
-      - name: khoa_nganh
-        tests: [unique, not_null]
-      - name: nhom
-        tests:
-          - not_null
-          - accepted_values:
-              arguments:
-                values: [ict_core, media_creative, business_econ]
-
   - name: mart__brand_attention
     description: >
       Thị phần chú ý theo tuần, đo bằng lượt xem trang Wikipedia của nhóm sáu trường
@@ -486,3 +470,36 @@ seeds:
           arguments:
             combination_of_columns: [thang, ma_thuoc_tinh]
 
+  - name: mart__utm_compliance
+    description: >
+      Mức tuân thủ gắn thẻ UTM theo tháng. Đây là chỉ số về CHẤT LƯỢNG ĐO LƯỜNG, không
+      phải về marketing: tỷ lệ gắn thẻ càng thấp thì càng nhiều phiên rơi vào Direct và
+      càng nhiều kết quả không quy được về kênh nào. Mọi con số hiệu quả kênh đều đứng
+      trên con số này.
+    columns:
+      - name: thang
+        description: Tháng báo cáo, cắt về ngày đầu tháng.
+        tests: [unique, not_null]
+      - name: so_phien
+        description: Mẫu số — tổng phiên trong tháng.
+        tests: [not_null]
+      - name: so_phien_co_utm
+        tests: [not_null]
+      - name: ty_le_gan_the_pct
+        tests: [not_null]
+
+seeds:
+  - name: nhom_nganh_dao_tao
+    description: >
+      Danh mục ngành và cách phân nhóm. Sinh từ apps/worker/config/programs.json để
+      worker và dbt dùng chung một cách phân loại. Mở ngành mới thì sửa file JSON đó
+      rồi sinh lại seed, đừng sửa CSV bằng tay.
+    columns:
+      - name: khoa_nganh
+        tests: [unique, not_null]
+      - name: nhom
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [ict_core, media_creative, business_econ]
