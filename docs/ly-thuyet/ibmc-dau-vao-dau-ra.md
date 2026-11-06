@@ -193,8 +193,16 @@ Không có nó thì **ba mức nhận biết của bài 5.1 không đo được*
 awareness, message recall, purchase intent đều cần phỏng vấn. Mọi chỉ số nhận biết hiện tại
 là proxy hành vi tìm kiếm, và nhãn trên giao diện phải nói đúng điều đó.
 
-*Đường lấy:* một đợt khảo sát thí sinh mỗi mùa, có thể làm cùng khâu nhập học. Rẻ nếu gắn
-vào quy trình đã có, đắt nếu làm riêng.
+*Đường lấy:* hai đợt khảo sát mỗi mùa — một đợt NỀN trước khi mở cổng đăng ký, một đợt
+sau khi kết thúc. Rẻ nếu gắn vào quy trình đã có (ngày hội tư vấn và khâu xác nhận nhập
+học), đắt gấp nhiều lần nếu làm riêng.
+
+**Bảng hỏi đã soạn sẵn:** [`ibmc-khao-sat-nhan-biet.md`](ibmc-khao-sat-nhan-biet.md) — khi
+Học viện đồng ý chạy thì chỉ việc phát, không phải thiết kế lại. Trong đó có phần quan
+trọng nhất và cũng dễ hỏng nhất: **thứ tự câu hỏi**. Ba mức nhận biết chỉ khác nhau ở chỗ
+đáp viên đã nhìn thấy gì trước khi trả lời, nên hỏi sai thứ tự là đo nhầm mức mà kết quả
+vẫn trông hợp lý. Tài liệu cũng nêu cỡ mẫu cụ thể: với 600 đáp viên, mục tiêu "tăng top of
+mind thêm 3 điểm %" là mục tiêu **không kiểm chứng được** vì nằm trong sai số.
 
 ---
 

@@ -17,6 +17,7 @@ từng khái niệm ở [`ibmc-xuat-xu-ly-thuyet.md`](../../../docs/ly-thuyet/ib
 | [`ibmc-anh-xa-ptit.md`](../../../docs/ly-thuyet/ibmc-anh-xa-ptit.md) | cần biết một khái niệm FMCG tương đương gì ở Học viện |
 | [`ibmc-dau-vao-dau-ra.md`](../../../docs/ly-thuyet/ibmc-dau-vao-dau-ra.md) | cần biết chỉ số phục vụ quyết định nào, cần nguồn nào, còn thiếu gì |
 | [`ibmc-xuat-xu-ly-thuyet.md`](../../../docs/ly-thuyet/ibmc-xuat-xu-ly-thuyet.md) | cần dẫn tác giả gốc, hoặc cần biết lý thuyết gốc có chỗ nào phản bác bài giảng |
+| [`ibmc-khao-sat-nhan-biet.md`](../../../docs/ly-thuyet/ibmc-khao-sat-nhan-biet.md) | khi bàn tới đo nhận biết hoặc thuộc tính bằng khảo sát — bảng hỏi đã soạn sẵn, kèm quy tắc thứ tự câu hỏi và cỡ mẫu |
 | [`ibmc-doi-chieu-cascade.md`](../../../docs/ly-thuyet/ibmc-doi-chieu-cascade.md) | trước khi đề xuất đổi cấu trúc cây mục tiêu |
 | [`ibmc-nguon/`](../../../docs/ly-thuyet/ibmc-nguon/00-danh-muc-bai.md) | cần tra lại nguyên văn một câu trong bài giảng |
 
