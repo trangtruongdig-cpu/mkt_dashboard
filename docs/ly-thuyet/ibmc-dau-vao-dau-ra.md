@@ -25,6 +25,18 @@ khác nhau.** Đây là đầu ra thật của hệ thống; biểu đồ chỉ 
 minh được hệ thống *dựng lại được* và *mọi con số truy được xuất xứ* — nên provenance và
 `docs/` là sản phẩm, không phải phụ kiện.
 
+### Những câu hỏi đó nằm ở đâu trên dashboard
+
+| Câu hỏi | Trang | Ghi chú |
+|---|---|---|
+| Chỉ số của ta đang ở đâu so với mục tiêu của ta | `/` · `/muc-tieu` | cây mục tiêu ba tầng |
+| **Ta đang ở đâu so với đối thủ** | **`/doi-sanh`** | `GET /api/v1/benchmark` — xếp hạng từng chiều trong nhóm sáu trường |
+| Vì sao lại đo đúng những thứ này | `/khung` | nền tảng → IBMC → 12 mục tiêu con → đầu vào |
+| Con số này ở đâu ra | `/du-lieu` | bảng thô và đường ống |
+
+Hai trang `/doi-sanh` và `/khung` trả lời đúng hai câu mà một dashboard chỉ số không trả
+lời được, và đó là hai câu hội đồng nghiệm thu hỏi trước tiên.
+
 ### Quy tắc phân nhịp, suy từ lý thuyết
 
 Ba tầng **không cùng nhịp**, và trộn nhịp là một lỗi có thật:
@@ -143,6 +155,13 @@ Kết quả: **học phí mới có số ở 3 trên 7 dòng đối sánh**. B�
 không cho máy đọc*, không phải vì chưa viết mã. Cách xử lý đã chọn: seed nhập tay kèm
 `nguon_url` bắt buộc, gộp vào `mart__value_benchmark` với cột `cach_lay` (tự động / nhập
 tay) để người đọc luôn phân biệt được số nào do máy lấy.
+
+Còn một trở ngại nữa, nặng hơn việc thiếu dòng: **ba dòng đã có số lại khác đơn vị nhau** —
+một tính theo tín chỉ, hai tính theo năm — và cả hai dòng theo năm đều không phải hệ chính
+quy. Nên mặt GIÁ TRỊ của thị phần hiện **chưa so sánh được**, dù đã có số. Trang `/doi-sanh`
+hiện chiều này ra với toàn ô trống kèm câu giải thích, cố ý: bài 2.1 đòi đọc doanh số ở cả
+hai mặt sản lượng và giá trị, nên một mặt không đo được thì phải nhìn thấy trên bảng điều
+khiển. Mở khoá bằng đúng một việc: điền học phí mỗi năm của **hệ chính quy** cho từng trường.
 
 Không dựng trình duyệt không đầu cho việc này: đó là sáu con số đổi một lần mỗi năm, nên
 thêm Playwright vào worker vừa không tương xứng, vừa là thay đổi ngăn xếp phải hỏi người

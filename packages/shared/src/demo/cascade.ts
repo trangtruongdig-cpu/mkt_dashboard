@@ -1261,7 +1261,7 @@ const KPI_SPECS: readonly KpiSpec[] = [
     higherIsBetter: true,
     cadence: "daily",
     provenance: SOURCE_NEWS_CRAWLER,
-    hint: "Chưa đặt mức cần đạt: cần một mùa dữ liệu làm gốc, và mức của từng thuộc tính phải đặt cùng lúc với hai thuộc tính kia để không tự đánh đổi.",
+    hint: "Chưa đặt mức cần đạt: cần một mùa dữ liệu làm gốc, và mức của từng thuộc tính phải đặt cùng lúc với hai thuộc tính kia để không tự đánh đổi. Hiện chưa tháng nào đủ mẫu — đọc tỷ lệ phải đọc kèm số bài xét.",
   },
   {
     key: "attribute_industry_link",
@@ -1580,20 +1580,20 @@ const REQUIREMENTS: Record<string, KpiRequirement> = {
   attribute_national_key: {
     platform: "Kho tin bài của worker",
     fields: ["nội dung bài", "nhãn thuộc tính", "ngày xuất bản"],
-    readiness: "needs_build",
-    todo: "Cần bước trích thuộc tính trong apps/worker/nlp — nhận diện cụm nói về vị thế trọng điểm quốc gia, trường trọng điểm, nhiệm vụ quốc gia",
+    readiness: "public_ready",
+    todo: "Bước trích thuộc tính đã chạy và mart__brand_attribute đã có; nút thắt nay là MẪU — chỉ 76 trên 1.748 tin bài có toàn văn, 1.526 bài từ nhánh google_news không có url để lấy lại, nên chưa tháng nào đủ mẫu",
   },
   attribute_industry_link: {
     platform: "Kho tin bài của worker",
     fields: ["nội dung bài", "nhãn thuộc tính", "ngày xuất bản"],
-    readiness: "needs_build",
-    todo: "Cần bước trích thuộc tính trong apps/worker/nlp — nhận diện hợp tác doanh nghiệp, thực tập, tài trợ phòng lab, tuyển dụng tại trường",
+    readiness: "public_ready",
+    todo: "Bước trích thuộc tính đã chạy; chờ kho đủ bài có toàn văn để tháng nào đó đạt ngưỡng mẫu",
   },
   attribute_employability: {
     platform: "Kho tin bài của worker",
     fields: ["nội dung bài", "nhãn thuộc tính", "ngày xuất bản"],
-    readiness: "needs_build",
-    todo: "Cần bước trích thuộc tính trong apps/worker/nlp — nhận diện việc làm sau tốt nghiệp, mức lương, tỷ lệ có việc làm",
+    readiness: "public_ready",
+    todo: "Bước trích thuộc tính đã chạy; chờ kho đủ bài có toàn văn để tháng nào đó đạt ngưỡng mẫu",
   },
 };
 

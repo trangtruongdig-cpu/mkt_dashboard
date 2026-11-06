@@ -146,7 +146,11 @@ function DimensionCard({ dimension }: { dimension: BenchmarkDimension }) {
 
         <p className="mt-1 text-xs leading-snug text-ink-secondary">
           {hang === null ? (
-            <span className="font-medium text-ink">Chưa xếp hạng được.</span>
+            <>
+              <span className="font-medium text-ink">
+                Chưa xếp hạng được.
+              </span>{" "}
+            </>
           ) : (
             <>
               <span className="font-medium text-ink">

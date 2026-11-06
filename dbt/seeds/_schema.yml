@@ -47,3 +47,40 @@ seeds:
                 quote: true
               config:
                 where: "don_vi_hoc_phi is not null"
+
+  - name: quy_mo_nganh
+    description: >
+      Quy mô lĩnh vực Máy tính & CNTT toàn quốc — MẪU SỐ của tầng tăng trưởng.
+
+      Khung IBMC bài 2.3: tăng trưởng của thương hiệu chỉ có nghĩa khi đặt cạnh tăng
+      trưởng của ngành. Tăng chậm hơn ngành là ĐANG MẤT thị phần dù số tuyệt đối vẫn
+      tăng. Không có bảng này thì `category_enrolment_growth` và `growth_vs_category_gap`
+      không bao giờ có số, và bảng điều khiển có thể xanh toàn bộ trong khi Học viện
+      đang mất thị phần.
+
+      Để trống có chủ ý: con số 154.016 đang được trích trong rationale của mục tiêu
+      biz_choice nhưng tôi KHÔNG xác minh được tại nguồn báo chí được dẫn — trang tải
+      về không chứa con số nào. Ghi số chưa kiểm vào kho còn tệ hơn để trống, vì nó
+      trông y hệt số đã kiểm.
+    config:
+      column_types:
+        ma_chi_so: varchar
+        nam: integer
+        gia_tri: bigint
+        don_vi: varchar
+        nguon_url: varchar
+        ngay_kiem_nguon: date
+        ghi_chu: varchar
+    columns:
+      - name: ma_chi_so
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [category_registrations, category_admissions]
+      - name: nam
+        tests: [not_null]
+      - name: ghi_chu
+        description: Bắt buộc — nói rõ con số đến từ đâu, hoặc vì sao còn trống.
+        tests: [not_null]
+

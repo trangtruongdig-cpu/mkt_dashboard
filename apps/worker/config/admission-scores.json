@@ -36,22 +36,22 @@
     {
       "key": "hust",
       "pages": [],
-      "note": "ts.hust.edu.vn không truy cập được từ môi trường thu thập (fetch failed). Cần thử lại từ mạng khác hoặc tìm trang công bố trên hust.edu.vn."
+      "note": "Kiểm lại 06/11/2026. Nguyên nhân thật KHÔNG phải mạng mà là CHUỖI CHỨNG CHỈ SSL của ts.hust.edu.vn thiếu chứng chỉ trung gian: curl nhận (HTTP 200) nhưng Python urllib/requests từ chối với CERTIFICATE_VERIFY_FAILED. Trang hust.edu.vn/vi/dao-tao/tuyen-sinh-dai-hoc/diem-chuan/ thì trả đúng cùng khung 90.048 ký tự như mọi trang khác — site dựng bằng JavaScript, không có thẻ <table> nào trong HTML thô. Hai đường đều tắc với crawler HTTP."
     },
     {
       "key": "uit",
       "pages": [],
-      "note": "tuyensinh.uit.edu.vn dựng bảng điểm chuẩn bằng JavaScript, không có <table> trong HTML thô."
+      "note": "Kiểm lại 06/11/2026, vẫn đúng: tuyensinh.uit.edu.vn dựng bảng điểm chuẩn bằng JavaScript, HTML thô không có <table>. Cùng nguyên nhân với bảng học phí — xem dbt/seeds/hoc_phi_doi_sanh.csv."
     },
     {
       "key": "actvn",
       "pages": [],
-      "note": "Công bố dạng danh sách trúng tuyển, không có bảng điểm chuẩn theo ngành."
+      "note": "Công bố dạng danh sách trúng tuyển, không có bảng điểm chuẩn theo ngành. Đây là cách công bố của trường, không phải lỗi kỹ thuật."
     },
     {
       "key": "fpt",
       "pages": [],
-      "note": "Xét tuyển theo học bạ và xếp hạng THPT, không công bố điểm chuẩn thang 30 nên chỉ số này không áp dụng."
+      "note": "KHÔNG ÁP DỤNG, không phải thiếu dữ liệu: trường xét theo học bạ và xếp hạng THPT nên không tồn tại điểm chuẩn thang 30. Đừng để ô trống này vào mẫu số của phép so sánh điểm."
     }
   ]
 }

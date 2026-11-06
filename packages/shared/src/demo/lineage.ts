@@ -1,4 +1,8 @@
-import type { Dataset, LineageEdge, KpiSourceLink } from "../schemas/data-lineage";
+import type {
+  Dataset,
+  LineageEdge,
+  KpiSourceLink,
+} from "../schemas/data-lineage";
 
 /**
  * DANH MỤC ĐƯỜNG ỐNG — phần tĩnh, khai bằng tay.
@@ -92,7 +96,8 @@ const RAW: Dataset[] = [
     name: "raw_admission_score",
     stage: "raw",
     rowCount: null,
-    description: "Điểm chuẩn trúng tuyển theo ngành, bóc từ trang công bố của từng trường.",
+    description:
+      "Điểm chuẩn trúng tuyển theo ngành, bóc từ trang công bố của từng trường.",
     producedBy: "uv run python -m crawler diem-chuan",
     sensitivity: "public",
   },
@@ -129,7 +134,8 @@ const STAGING: Dataset[] = [
     name: "stg__wiki__brand_pageviews",
     stage: "staging",
     rowCount: null,
-    description: "Lượt xem Wikipedia theo tuần, chỉ giữ tuần trọn vẹn bảy ngày.",
+    description:
+      "Lượt xem Wikipedia theo tuần, chỉ giữ tuần trọn vẹn bảy ngày.",
     producedBy: null,
     sensitivity: "public",
   },
@@ -146,7 +152,8 @@ const STAGING: Dataset[] = [
     name: "stg__disclosure__figure",
     stage: "staging",
     rowCount: null,
-    description: "Số liệu Biểu 18 đã đổi tên cột, giữ nguyên cột cảnh báo từ bước bóc.",
+    description:
+      "Số liệu Biểu 18 đã đổi tên cột, giữ nguyên cột cảnh báo từ bước bóc.",
     producedBy: null,
     sensitivity: "public",
   },
@@ -165,7 +172,8 @@ const MART: Dataset[] = [
     name: "mart__channel_performance",
     stage: "mart",
     rowCount: null,
-    description: "Hiệu quả từng kênh theo ngày. Cột `la_direct` chính là mức thất thoát quy kết.",
+    description:
+      "Hiệu quả từng kênh theo ngày. Cột `la_direct` chính là mức thất thoát quy kết.",
     producedBy: null,
     sensitivity: "internal",
   },
@@ -182,7 +190,8 @@ const MART: Dataset[] = [
     name: "mart__admission_funnel",
     stage: "mart",
     rowCount: null,
-    description: "Phễu tuyển sinh ba bậc, đo bằng lượt xem trang. Bậc sâu nhất là ý định nhập học.",
+    description:
+      "Phễu tuyển sinh ba bậc, đo bằng lượt xem trang. Bậc sâu nhất là ý định nhập học.",
     producedBy: null,
     sensitivity: "internal",
   },
@@ -214,20 +223,46 @@ const MART: Dataset[] = [
     sensitivity: "public",
   },
   {
+    name: "mart__brand_attribute",
+    stage: "mart",
+    rowCount: null,
+    description:
+      "Tỷ lệ tin bài gắn TỪNG thuộc tính thương hiệu theo tháng — không gộp, vì quy tắc cặp tăng–giữ chỉ đọc được khi ba chuỗi nằm cạnh nhau. Cột `du_mau` hiện chưa tháng nào bật: mới 76 trên 1.748 bài có toàn văn.",
+    producedBy: null,
+    sensitivity: "public",
+  },
+  {
+    name: "mart__value_benchmark",
+    stage: "mart",
+    rowCount: null,
+    description:
+      "Học phí và chi phí đào tạo của nhóm đối sánh. Cột `cach_lay` phân biệt số máy bóc với số người nhập tay, và `da_co_hoc_phi` đánh dấu dòng còn là hàng đợi.",
+    producedBy: null,
+    sensitivity: "public",
+  },
+  {
     name: "mart__admission_score_benchmark",
     stage: "mart",
     rowCount: null,
-    description: "Điểm chuẩn bình quân theo trường và năm, để tính chênh lệch so với nhóm.",
+    description:
+      "Điểm chuẩn bình quân theo trường và năm, để tính chênh lệch so với nhóm.",
     producedBy: null,
     sensitivity: "public",
   },
 ];
 
-export const LINEAGE_DATASETS: readonly Dataset[] = [...RAW, ...STAGING, ...MART];
+export const LINEAGE_DATASETS: readonly Dataset[] = [
+  ...RAW,
+  ...STAGING,
+  ...MART,
+];
 
 export const LINEAGE_EDGES: readonly LineageEdge[] = [
   { from: "ga4_pages_daily", to: "stg__ga4__pages" },
-  { from: "ga4_traffic_acquisition_daily", to: "stg__ga4__traffic_acquisition" },
+  {
+    from: "ga4_traffic_acquisition_daily",
+    to: "stg__ga4__traffic_acquisition",
+  },
   { from: "raw_brand_pageviews", to: "stg__wiki__brand_pageviews" },
   { from: "raw_news_mention", to: "stg__news__brand_mention" },
   { from: "raw_disclosure_figure", to: "stg__disclosure__figure" },
@@ -253,7 +288,10 @@ export const LINEAGE_KPI_LINKS: readonly KpiSourceLink[] = [
   { kpiKey: "social_engagement_rate", dataset: "mart__channel_performance" },
   { kpiKey: "ai_assistant_sessions", dataset: "mart__channel_performance" },
   { kpiKey: "returning_user_share", dataset: "mart__channel_performance" },
-  { kpiKey: "admission_consideration_views", dataset: "mart__admission_funnel" },
+  {
+    kpiKey: "admission_consideration_views",
+    dataset: "mart__admission_funnel",
+  },
   { kpiKey: "application_intent_views", dataset: "mart__admission_funnel" },
   { kpiKey: "program_mix_beyond_core", dataset: "mart__program_demand" },
   { kpiKey: "high_value_program_interest", dataset: "mart__program_demand" },
