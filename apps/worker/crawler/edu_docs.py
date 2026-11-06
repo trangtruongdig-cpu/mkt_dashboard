@@ -38,6 +38,7 @@ MAX_YEAR = 2035
 DocumentKind = Literal[
     "bm17_cam_ket_chat_luong",
     "bm18_chat_luong_thuc_te",
+    "bm18_bieu_con",
     "bm19_co_so_vat_chat",
     "de_an_tuyen_sinh",
     "bao_cao_thuong_nien",
@@ -49,6 +50,7 @@ DocumentKind = Literal[
 DOCUMENT_KIND_LABELS: dict[str, str] = {
     "bm17_cam_ket_chat_luong": "Biểu 17 — cam kết chất lượng đào tạo",
     "bm18_chat_luong_thuc_te": "Biểu 18 — chất lượng đào tạo thực tế",
+    "bm18_bieu_con": "Biểu 18 phụ (18A/18C/18E/18I…) — không có số quy mô",
     "bm19_co_so_vat_chat": "Biểu 19 — điều kiện cơ sở vật chất",
     "de_an_tuyen_sinh": "Đề án tuyển sinh",
     "bao_cao_thuong_nien": "Báo cáo thường niên",
@@ -192,6 +194,22 @@ def is_followable(link: Link, seed_url: str) -> bool:
     return any(_bo_dau(mau) in chu for mau in _FOLLOW_PATTERNS)
 
 
+# Biểu mẫu con của bộ Ba công khai: 18A, 18C, 18E, 18I… Chữ cái dính ngay sau số 18,
+# có thể cách bằng một dấu gạch hoặc gạch dưới.
+#
+# Phải tách khỏi Biểu 18 chính vì chúng KHÔNG chứa số quy mô đào tạo: 18E là danh sách
+# đề tài đồ án và luận văn, 18C là đề cương học phần. Gộp chung thì bước bóc số sẽ tải
+# về rồi báo "không tìm thấy dòng Tổng số" ở mọi bản — mười lăm bản như vậy trong kho,
+# và chúng làm hàng đợi công việc trông như mười lăm chỗ hỏng cần sửa.
+#
+# `(?![a-z0-9])` chứ không phải `\b`, và phải chặn CẢ CHỮ SỐ:
+#   · `\b` không khớp trước dấu gạch dưới nên bỏ sót "BM_18_HI_2021";
+#   · chỉ chặn chữ cái thì "Bieu_mau_18_c672850266.pdf" khớp nhầm "18_c" — đó là chuỗi
+#     băm do CMS sinh, và bản đó là Biểu 18 CHÍNH của Trường ĐH Công nghệ. Hạ nhầm nó
+#     xuống biểu phụ là mất đúng con số quy mô vừa bóc được.
+_BIEU_CON_18 = re.compile(r"18[_-]?[a-z]{1,2}(?![a-z0-9])")
+
+
 def classify_kind(url: str, title: str) -> str:
     """Đoán loại tài liệu từ tên tệp và nhan đề liên kết.
 
@@ -201,6 +219,9 @@ def classify_kind(url: str, title: str) -> str:
     van_ban = _bo_dau(f"{urlparse(url).path} {title}")
     for kind, mau in _KIND_RULES:
         if any(_bo_dau(m) in van_ban for m in mau):
+            # Chỉ hạ cấp khi chính quy tắc Biểu 18 khớp — "de_an_ts_18a" không liên quan.
+            if kind == "bm18_chat_luong_thuc_te" and _BIEU_CON_18.search(van_ban):
+                return "bm18_bieu_con"
             return kind
     return "khac"
 

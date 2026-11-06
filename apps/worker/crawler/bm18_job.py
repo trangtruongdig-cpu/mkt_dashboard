@@ -195,8 +195,26 @@ def run() -> None:
             for canh_bao in f.warnings:
                 print(f"      ! {canh_bao}")
 
+        # Dọn dòng mồ côi: bản từng được bóc nhưng nay KHÔNG còn là Biểu 18 chính.
+        #
+        # Bảng này hoàn toàn dẫn xuất, nên nguồn sự thật là danh mục tài liệu. Khi bước
+        # phân loại siết lại — như lần tách 18E/18I/18L ra khỏi Biểu 18 — những dòng cũ
+        # vẫn nằm lại và chảy xuống mart thành các hàng rỗng theo (trường, năm). Upsert
+        # không bao giờ xoá được chúng.
+        giu = [u for u, _, _ in can_boc]
+        if giu:
+            cho = ", ".join([ph] * len(giu))
+            truoc = con.execute(f"SELECT COUNT(*) FROM {bang}").fetchone()
+            con.execute(f"DELETE FROM {bang} WHERE doc_url NOT IN ({cho})", giu)
+            sau = con.execute(f"SELECT COUNT(*) FROM {bang}").fetchone()
+            da_don = (truoc[0] if truoc else 0) - (sau[0] if sau else 0)
+        else:
+            da_don = 0
+
         con.commit()
     finally:
         con.close()
 
     print(f"\nBóc được {thanh_cong} bản, thất bại {that_bai} bản.")
+    if da_don:
+        print(f"Dọn {da_don} dòng mồ côi của tài liệu không còn là Biểu 18 chính.")

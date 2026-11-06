@@ -171,3 +171,31 @@ def test_phu_luc_de_an_khong_co_chu_tuyen_sinh_van_duoc_nhan() -> None:
         )
         == "de_an_tuyen_sinh"
     )
+
+
+def test_bieu_mau_con_18e_18i_khong_phai_bieu_18_chinh() -> None:
+    """18E là danh sách đề tài luận văn, 18I là biểu khác — không có số quy mô đào tạo."""
+    for nhan in ("Biểu mẫu 18E", "2.3 Biểu mẫu 18I", "– Biểu mẫu 18L"):
+        assert classify_kind("https://x/tai-lieu.pdf", nhan) == "bm18_bieu_con", nhan
+
+    # Dạng thật trong kho: nhan đề có dấu cách, tên tệp có gạch nối.
+    assert classify_kind("https://x/2.Bieu-mau-18E-1.pdf", "2.Bieu mau 18E") == "bm18_bieu_con"
+    # Dấu gạch dưới chen giữa: `\b` không khớp ở đây nên phải dùng lookahead.
+    assert classify_kind("https://x/5_NCKH_BM_18_HI_2021.pdf", "") == "bm18_bieu_con"
+
+
+def test_chuoi_bam_cua_cms_khong_bi_coi_la_bieu_mau_con() -> None:
+    """
+    Hồi quy: `Bieu_mau_18_c672850266.pdf` là Biểu 18 CHÍNH của Trường ĐH Công nghệ.
+
+    Phần `_c672850266` là chuỗi băm do CMS sinh. Mẫu chỉ chặn chữ cái sẽ khớp nhầm
+    "18_c" và hạ nó xuống biểu phụ — mất đúng bản vừa bóc ra được quy mô 7.343.
+    """
+    assert (
+        classify_kind("https://uetapi.aclould.vn/uploads/Bieu_mau_18_c672850266.pdf", "Biểu mẫu 18")
+        == "bm18_chat_luong_thuc_te"
+    )
+    assert (
+        classify_kind("https://www.uit.edu.vn/media/bieu_mau_18_be0483907e.pdf", "Biểu mẫu 18")
+        == "bm18_chat_luong_thuc_te"
+    )
