@@ -1,10 +1,12 @@
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import {
   applyTargetOverrides,
+  BenchmarkScorecardResponseSchema,
   findOrphanOverrides,
   KpiCascadeResponseSchema,
   KpiTargetOverrideListSchema,
   ShareOfSearchResponseSchema,
+  type BenchmarkScorecardResponse,
   type KpiCascadeResponse,
   type KpiTargetOverrideList,
   type ShareOfSearchResponse,
@@ -58,8 +60,17 @@ export class KpiService {
     );
   }
 
+  /** Bảng đối sánh. `parse` ở đây chặn luôn tổ hợp "khai đủ nhóm mà còn trường trống". */
+  async getBenchmark(): Promise<BenchmarkScorecardResponse> {
+    return BenchmarkScorecardResponseSchema.parse(
+      await this.repository.getBenchmark(),
+    );
+  }
+
   async listTargets(): Promise<KpiTargetOverrideList> {
-    return KpiTargetOverrideListSchema.parse({ overrides: await this.targets.list() });
+    return KpiTargetOverrideListSchema.parse({
+      overrides: await this.targets.list(),
+    });
   }
 
   /**
@@ -85,7 +96,9 @@ export class KpiService {
   async removeTarget(kpiKey: string): Promise<KpiTargetOverrideList> {
     const da_xoa = await this.targets.remove(kpiKey);
     if (!da_xoa) {
-      throw new NotFoundException(`Chỉ số "${kpiKey}" vốn chưa có bản ghi đè nào`);
+      throw new NotFoundException(
+        `Chỉ số "${kpiKey}" vốn chưa có bản ghi đè nào`,
+      );
     }
     return this.listTargets();
   }

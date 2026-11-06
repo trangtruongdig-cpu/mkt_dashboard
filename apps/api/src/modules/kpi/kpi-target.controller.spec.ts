@@ -1,5 +1,8 @@
 import { INestApplication } from "@nestjs/common";
-import { FastifyAdapter, NestFastifyApplication } from "@nestjs/platform-fastify";
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from "@nestjs/platform-fastify";
 import { Test } from "@nestjs/testing";
 import {
   buildDemoCascade,
@@ -31,7 +34,10 @@ import { KpiService } from "./kpi.service";
 /** Chỉ số đầu tiên của cây cascade, lấy động để test không mục khi cây đổi tên chỉ số. */
 function chiSoDau() {
   const kpi = buildDemoCascade().kpis[0];
-  if (!kpi) throw new Error("Cây cascade không có chỉ số nào — bộ dữ liệu demo đã hỏng");
+  if (!kpi)
+    throw new Error(
+      "Cây cascade không có chỉ số nào — bộ dữ liệu demo đã hỏng",
+    );
   return kpi;
 }
 
@@ -39,7 +45,10 @@ const KHOA_THAT = chiSoDau().key;
 
 const CAN_CU: UpdateKpiTarget = {
   target: 42,
-  targetRationale: { basis: "internal_benchmark", note: "Mức đã đạt cùng kỳ 2025." },
+  targetRationale: {
+    basis: "internal_benchmark",
+    note: "Mức đã đạt cùng kỳ 2025.",
+  },
 };
 
 /** Thay cho bảng `kpi_target_override` — giữ trong bộ nhớ để test không cần PostgreSQL. */
@@ -55,7 +64,9 @@ class KhoGiaLap extends KpiTargetRepository {
   }
 
   async list(): Promise<KpiTargetOverride[]> {
-    return [...this.luu.values()].sort((a, b) => a.kpiKey.localeCompare(b.kpiKey));
+    return [...this.luu.values()].sort((a, b) =>
+      a.kpiKey.localeCompare(b.kpiKey),
+    );
   }
 
   async save(
@@ -100,7 +111,11 @@ describe("Mức cần đạt của chỉ số", () => {
           switchToHttp: () => { getRequest: () => RequestWithSession };
         }) => {
           context.switchToHttp().getRequest().session = {
-            user: { username: "ptit_admin", displayName: "Quản trị viên", lastLoginAt: null },
+            user: {
+              username: "ptit_admin",
+              displayName: "Quản trị viên",
+              lastLoginAt: null,
+            },
             expiresAt: new Date(Date.now() + 3_600_000).toISOString(),
           };
           return true;
@@ -108,7 +123,9 @@ describe("Mức cần đạt của chỉ số", () => {
       })
       .compile();
 
-    app = module.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
+    app = module.createNestApplication<NestFastifyApplication>(
+      new FastifyAdapter(),
+    );
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
   });
@@ -120,7 +137,9 @@ describe("Mức cần đạt của chỉ số", () => {
   beforeEach(() => kho.xoaSach());
 
   it("chưa sửa gì thì danh sách rỗng", async () => {
-    const res = await request(app.getHttpServer()).get("/v1/kpi-targets").expect(200);
+    const res = await request(app.getHttpServer())
+      .get("/v1/kpi-targets")
+      .expect(200);
     expect(res.body).toEqual({ overrides: [] });
   });
 
@@ -144,7 +163,9 @@ describe("Mức cần đạt của chỉ số", () => {
       .send(CAN_CU)
       .expect(200);
 
-    const res = await request(app.getHttpServer()).get("/v1/kpi-cascade").expect(200);
+    const res = await request(app.getHttpServer())
+      .get("/v1/kpi-cascade")
+      .expect(200);
     const kpi = res.body.kpis.find((k: { key: string }) => k.key === KHOA_THAT);
     expect(kpi.target).toBe(42);
     expect(kpi.targetRationale.note).toBe(CAN_CU.targetRationale.note);
@@ -158,14 +179,19 @@ describe("Mức cần đạt của chỉ số", () => {
         .expect(200);
     }
 
-    const res = await request(app.getHttpServer()).get("/v1/kpi-targets").expect(200);
+    const res = await request(app.getHttpServer())
+      .get("/v1/kpi-targets")
+      .expect(200);
     expect(res.body.overrides).toHaveLength(1);
   });
 
   it("thiếu căn cứ thì 400, không phải 500", async () => {
     const res = await request(app.getHttpServer())
       .patch(`/v1/admin/kpi-targets/${KHOA_THAT}`)
-      .send({ target: 42, targetRationale: { basis: "internal_benchmark", note: "" } })
+      .send({
+        target: 42,
+        targetRationale: { basis: "internal_benchmark", note: "" },
+      })
       .expect(400);
 
     expect(res.body.message).toContain("không hợp lệ");
@@ -195,7 +221,9 @@ describe("Mức cần đạt của chỉ số", () => {
       .delete(`/v1/admin/kpi-targets/${KHOA_THAT}`)
       .expect(200);
 
-    const res = await request(app.getHttpServer()).get("/v1/kpi-cascade").expect(200);
+    const res = await request(app.getHttpServer())
+      .get("/v1/kpi-cascade")
+      .expect(200);
     const kpi = res.body.kpis.find((k: { key: string }) => k.key === KHOA_THAT);
     expect(kpi.target).toBe(mac_dinh);
   });

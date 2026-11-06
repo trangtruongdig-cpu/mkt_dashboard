@@ -1,9 +1,13 @@
 import {
+  BenchmarkScorecardResponseSchema,
+  buildDemoBenchmark,
   buildDemoCascade,
   CommunicationGoalSchema,
   GrowthSourceSchema,
   KpiCascadeResponseSchema,
   ObjectiveTierSchema,
+  rankedCount,
+  rankRows,
   type KpiCascadeResponse,
   type Objective,
 } from "@ptit/shared";
@@ -137,6 +141,82 @@ describe("Cây mục tiêu tuân thủ khung IBMC", () => {
         k.requirement.readiness !== "public_ready",
     );
     expect(bia_so.map((k) => k.key)).toEqual([]);
+  });
+});
+
+describe("Bảng đối sánh với nhóm trường cạnh tranh", () => {
+  const benchmark = buildDemoBenchmark();
+
+  it("qua được schema, và mỗi chiều trỏ về một mục tiêu có thật trong cây", () => {
+    const ket_qua = BenchmarkScorecardResponseSchema.safeParse(benchmark);
+    const vi_pham = ket_qua.success
+      ? []
+      : ket_qua.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`);
+    expect(vi_pham).toEqual([]);
+
+    // Bảng đối sánh phải nối được về cây mục tiêu, nếu không nó chỉ là một bảng số rời.
+    const khoaMucTieu = new Set(
+      buildDemoCascade().objectives.map((o) => o.key),
+    );
+    const mo_coi = benchmark.dimensions
+      .filter((d) => !khoaMucTieu.has(d.objectiveKey))
+      .map((d) => `${d.key} → ${d.objectiveKey}`);
+    expect(mo_coi).toEqual([]);
+  });
+
+  it("trường chưa có số bị loại khỏi xếp hạng chứ KHÔNG bị coi là bằng 0 (bài 2.2)", () => {
+    // Đây là cái bẫy chính của mọi phép so sánh thiếu mẫu số: gán 0 cho trường chưa đo
+    // được sẽ đẩy Học viện lên hạng cao hơn thực tế.
+    for (const chieu of benchmark.dimensions) {
+      for (const row of chieu.rows) {
+        if (row.value === null) expect(row.rank).toBeNull();
+        else expect(row.rank).not.toBeNull();
+      }
+
+      const coSo = chieu.rows.filter((r) => r.value !== null);
+      expect(new Set(coSo.map((r) => r.rank)).size).toBe(coSo.length);
+      expect(rankedCount(chieu)).toBe(coSo.length);
+    }
+  });
+
+  it("rankRows xếp giảm dần và đẩy trường chưa có số xuống cuối", () => {
+    const brand = (key: string, isUs = false) => ({ key, label: key, isUs });
+    const rows = rankRows([
+      { brand: brand("a"), value: 10 },
+      { brand: brand("b", true), value: 30 },
+      { brand: brand("c"), value: null },
+      { brand: brand("d"), value: 20 },
+    ]);
+
+    expect(rows.map((r) => r.brand.key)).toEqual(["b", "d", "a", "c"]);
+    expect(rows.map((r) => r.rank)).toEqual([1, 2, 3, null]);
+  });
+
+  it("schema TỪ CHỐI chiều khai phủ đủ nhóm mà vẫn còn trường trống", () => {
+    // Lỗi nguy hiểm nhất của bảng này: một con số tính trên 2 trong 6 trường trông y
+    // hệt một con số tính trên cả 6.
+    const sai = {
+      ...benchmark,
+      dimensions: benchmark.dimensions.map((d, i) =>
+        i === 0
+          ? {
+              ...d,
+              coverage: "full" as const,
+              rows: d.rows.map((r, j) =>
+                j === 1 ? { ...r, value: null, rank: null } : r,
+              ),
+            }
+          : d,
+      ),
+    };
+
+    const ket_qua = BenchmarkScorecardResponseSchema.safeParse(sai);
+    expect(ket_qua.success).toBe(false);
+    if (!ket_qua.success) {
+      expect(
+        ket_qua.error.issues.some((i) => i.path.includes("coverage")),
+      ).toBe(true);
+    }
   });
 });
 

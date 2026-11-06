@@ -1,9 +1,11 @@
 import { Controller, Get } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import {
+  BenchmarkScorecardResponseSchema,
   KpiCascadeResponseSchema,
   KpiTargetOverrideListSchema,
   ShareOfSearchResponseSchema,
+  type BenchmarkScorecardResponse,
   type KpiCascadeResponse,
   type KpiTargetOverrideList,
   type ShareOfSearchResponse,
@@ -46,6 +48,24 @@ export class KpiController {
   )
   getShareOfSearch(): Promise<ShareOfSearchResponse> {
     return this.kpiService.getShareOfSearch();
+  }
+
+  @Get("benchmark")
+  @ApiOperation({
+    summary: "Bảng đối sánh với nhóm trường cạnh tranh",
+    description:
+      "Học viện đứng thứ mấy trong nhóm sáu trường đối sánh, theo từng chiều đo được. " +
+      "Khác với cây mục tiêu: cây mục tiêu nói chỉ số của Học viện so với mục tiêu của " +
+      "Học viện, còn bảng này nói phần của Học viện trong nhóm. Mỗi chiều kèm mức phủ " +
+      "nhóm đối sánh — trường chưa có số được trả về với giá trị null chứ không phải 0, " +
+      "và chiều nào chưa đủ mẫu số thì nói rõ thay vì xếp hạng như đã đủ.",
+  })
+  @ZodOkResponse(
+    BenchmarkScorecardResponseSchema,
+    "Bảng đối sánh theo từng chiều, mỗi chiều xếp hạng giảm dần",
+  )
+  getBenchmark(): Promise<BenchmarkScorecardResponse> {
+    return this.kpiService.getBenchmark();
   }
 
   @Get("kpi-targets")

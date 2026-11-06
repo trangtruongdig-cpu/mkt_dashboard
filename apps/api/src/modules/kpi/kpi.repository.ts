@@ -1,7 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import {
+  buildDemoBenchmark,
   buildDemoCascade,
   buildDemoShareOfSearch,
+  type BenchmarkScorecardResponse,
   type KpiCascadeResponse,
   type ShareOfSearchResponse,
 } from "@ptit/shared";
@@ -17,6 +19,14 @@ import {
 export abstract class KpiRepository {
   abstract getCascade(): Promise<KpiCascadeResponse>;
   abstract getShareOfSearch(): Promise<ShareOfSearchResponse>;
+  /**
+   * Bảng đối sánh — Học viện đứng ở đâu so với nhóm trường cạnh tranh.
+   *
+   * Tách khỏi `getCascade` vì trả lời một câu khác: cascade nói chỉ số của TA so với
+   * mục tiêu của TA, còn bảng này nói phần của ta trong nhóm. Dữ liệu vốn đã nằm sẵn
+   * theo từng trường trong các bảng mart; trước đây tầng đọc lọc lấy mỗi dòng `ptit`.
+   */
+  abstract getBenchmark(): Promise<BenchmarkScorecardResponse>;
 }
 
 /**
@@ -34,5 +44,9 @@ export class DemoKpiRepository extends KpiRepository {
 
   async getShareOfSearch(): Promise<ShareOfSearchResponse> {
     return buildDemoShareOfSearch();
+  }
+
+  async getBenchmark(): Promise<BenchmarkScorecardResponse> {
+    return buildDemoBenchmark();
   }
 }

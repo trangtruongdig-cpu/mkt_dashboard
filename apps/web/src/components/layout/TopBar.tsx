@@ -5,9 +5,10 @@ import { usePathname } from "next/navigation";
 import type { ComponentType } from "react";
 import {
   IconBarChart,
+  IconBook,
   IconDatabase,
   IconGauge,
-  IconBook,
+  IconGitCompare,
   IconLayers,
   IconMegaphone,
   IconPlug,
@@ -24,8 +25,11 @@ interface NavItem {
 
 /**
  * Nhóm ĐỌC KẾT QUẢ, xếp theo đúng chuỗi suy diễn của bảng điều khiển: tổng quan →
- * cây mục tiêu → bằng chứng từ kênh của Học viện → bằng chứng từ bên ngoài → xuất xứ
- * số liệu → xuất xứ của chính cây mục tiêu.
+ * cây mục tiêu → vị trí so với đối thủ → bằng chứng từ kênh của Học viện → bằng chứng
+ * từ bên ngoài → xuất xứ số liệu → xuất xứ của chính cây mục tiêu.
+ *
+ * "Đối sánh" đứng ngay sau "Mục tiêu" vì khung IBMC đòi đọc theo thứ tự đó: một con số
+ * của Học viện không có nghĩa cho tới khi đặt cạnh cùng con số đó của nhóm cạnh tranh.
  *
  * Hai mục cuối là một cặp và vì thế đứng cạnh nhau: "Dữ liệu" trả lời con số đến từ
  * đâu, "Lý thuyết" trả lời mục tiêu đến từ đâu. Hội đồng nghiệm thu sẽ hỏi cả hai.
@@ -33,6 +37,7 @@ interface NavItem {
 const NAV_DOC: readonly NavItem[] = [
   { href: "/", label: "Tổng quan", icon: IconGauge },
   { href: "/muc-tieu", label: "Mục tiêu", icon: IconLayers },
+  { href: "/doi-sanh", label: "Đối sánh", icon: IconGitCompare },
   { href: "/kenh", label: "Kênh", icon: IconBarChart },
   { href: "/lang-nghe", label: "Lắng nghe", icon: IconMegaphone },
   { href: "/du-lieu", label: "Dữ liệu", icon: IconDatabase },
@@ -118,7 +123,10 @@ interface NavLinkProps {
  * 1400px là chỗ hàng nhãn vừa khít; dưới ngưỡng thì chỉ còn hình, không bao giờ xuống
  * dòng. `whitespace-nowrap` chặn nốt khả năng ngắt từ ở cỡ màn hình chưa lường trước.
  *
- * Thêm một mục nữa thì PHẢI đo lại — mỗi nhãn tiếng Việt chiếm khoảng 85px.
+ * Số đo hiện tại, 10 mục: hàng nhãn cần 910px, khối thương hiệu 323px, tổng 1.293px
+ * trong ngưỡng 1.400 — còn dư khoảng 107px, tức vừa đúng một mục nữa. Thêm mục thứ
+ * mười hai thì PHẢI nâng ngưỡng, và PHẢI đo chứ đừng đoán: lần trước đoán 1280px
+ * đủ thì thanh tràn mất hai mục cuối.
  */
 function NavLink({ item, active }: NavLinkProps) {
   // Trang con làm nổi mục cha: ở `/muc-tieu/sua` thì mục "Mục tiêu" vẫn sáng.

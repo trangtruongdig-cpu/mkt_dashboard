@@ -1,9 +1,12 @@
 import {
+  BenchmarkScorecardResponseSchema,
+  buildDemoBenchmark,
   buildDemoCascade,
   buildDemoDataset,
   buildDemoShareOfSearch,
   ChannelsResponseSchema,
   DataLineageResponseSchema,
+  type BenchmarkScorecardResponse,
   KpiCascadeResponseSchema,
   KpiTargetOverrideListSchema,
   OverviewResponseSchema,
@@ -79,10 +82,20 @@ export async function getDashboardData(): Promise<DashboardData> {
       fetchJson("/api/v1/channels", ChannelsResponseSchema),
       fetchJson("/api/v1/sentiment", SentimentResponseSchema),
     ]);
-    return { source: "api", apiUrl: API_URL, overview, reach, channels, sentiment };
+    return {
+      source: "api",
+      apiUrl: API_URL,
+      overview,
+      reach,
+      channels,
+      sentiment,
+    };
   } catch (error) {
     // Không làm sập trang demo vì API chưa lên — nhưng phải nói rõ trên giao diện.
-    console.warn("[dashboard] Không gọi được API, quay về dữ liệu giả lập:", error);
+    console.warn(
+      "[dashboard] Không gọi được API, quay về dữ liệu giả lập:",
+      error,
+    );
     return { source: "demo", apiUrl: API_URL, ...demo };
   }
 }
@@ -207,10 +220,44 @@ export async function getDataLineage(): Promise<LineageData> {
   }
 
   try {
-    const lineage = await fetchJson("/api/v1/data-lineage", DataLineageResponseSchema);
+    const lineage = await fetchJson(
+      "/api/v1/data-lineage",
+      DataLineageResponseSchema,
+    );
     return { source: "api", apiUrl: API_URL, lineage };
   } catch (error) {
     console.warn("[lineage] Không đọc được bản đồ đường ống:", error);
     return { source: "demo", apiUrl: API_URL, lineage: null };
+  }
+}
+
+interface BenchmarkData {
+  source: DataSource;
+  apiUrl: string | null;
+  benchmark: BenchmarkScorecardResponse;
+}
+
+/**
+ * Bảng đối sánh với nhóm trường cạnh tranh.
+ *
+ * KHÁC với bản đồ đường ống: ở đây có bản giả lập thay thế, vì phần thật của bảng này
+ * là CẤU TRÚC — chiều nào phủ đủ nhóm, chiều nào mới một phần, trường nào chưa có số —
+ * và cấu trúc đó đúng kể cả khi chưa gọi được API. Nhãn nguồn dữ liệu trên trang nói rõ
+ * người xem đang nhìn số thật hay số giả lập.
+ */
+export async function getBenchmark(): Promise<BenchmarkData> {
+  if (!API_URL) {
+    return { source: "demo", apiUrl: null, benchmark: buildDemoBenchmark() };
+  }
+
+  try {
+    const benchmark = await fetchJson(
+      "/api/v1/benchmark",
+      BenchmarkScorecardResponseSchema,
+    );
+    return { source: "api", apiUrl: API_URL, benchmark };
+  } catch (error) {
+    console.warn("[benchmark] Không đọc được bảng đối sánh:", error);
+    return { source: "demo", apiUrl: API_URL, benchmark: buildDemoBenchmark() };
   }
 }

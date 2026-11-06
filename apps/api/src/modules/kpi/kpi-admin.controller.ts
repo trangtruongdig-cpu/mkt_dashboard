@@ -1,4 +1,11 @@
-import { Body, Controller, Delete, Param, Patch, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  Patch,
+  UseGuards,
+} from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import {
   KpiTargetOverrideListSchema,
@@ -53,7 +60,9 @@ export class KpiAdminController {
     description: "Trả 404 nếu chỉ số đó vốn chưa từng bị sửa.",
   })
   @ZodOkResponse(KpiTargetOverrideListSchema, "Toàn bộ bản ghi đè còn lại")
-  removeTarget(@Param("kpiKey") kpiKey: string): Promise<KpiTargetOverrideList> {
+  removeTarget(
+    @Param("kpiKey") kpiKey: string,
+  ): Promise<KpiTargetOverrideList> {
     return this.kpiService.removeTarget(kpiKey);
   }
 }

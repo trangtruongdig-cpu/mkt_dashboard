@@ -77,7 +77,8 @@ export class KpiTargetRepository {
 
     // `returning()` của một lệnh insert ... on conflict do update luôn trả đúng một dòng.
     // Rỗng nghĩa là lệnh không chạy như hiểu — nói ra thay vì trả về một bản ghi rỗng.
-    if (!dong) throw new Error(`Ghi mức cần đạt của "${kpiKey}" không trả về dòng nào`);
+    if (!dong)
+      throw new Error(`Ghi mức cần đạt của "${kpiKey}" không trả về dòng nào`);
 
     return thanhBanGhi(dong);
   }

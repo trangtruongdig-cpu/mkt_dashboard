@@ -192,6 +192,18 @@ export function IconCode(props: IconProps) {
   );
 }
 
+/** Đối sánh — hai cột cạnh nhau, vì một con số chỉ có nghĩa khi đặt cạnh đối thủ. */
+export function IconGitCompare(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <rect height="7" rx="1" width="6" x="3" y="4" />
+      <rect height="11" rx="1" width="6" x="15" y="9" />
+      <path d="M6 11v5a2 2 0 0 0 2 2h4" />
+      <path d="M18 9V6a2 2 0 0 0-2-2h-4" />
+    </BaseIcon>
+  );
+}
+
 /** Khung lý thuyết — xuất xứ của cây mục tiêu, đặt cạnh xuất xứ của số liệu. */
 export function IconBook(props: IconProps) {
   return (

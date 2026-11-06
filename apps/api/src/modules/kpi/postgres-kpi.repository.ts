@@ -2,9 +2,12 @@ import { Inject, Injectable, Logger } from "@nestjs/common";
 import {
   applyMeasuredValues,
   BENCHMARK_BRANDS,
+  buildDemoBenchmark,
   buildDemoCascade,
   buildDemoShareOfSearch,
   MIN_MONTHLY_SAMPLE,
+  rankRows,
+  type BenchmarkScorecardResponse,
   type KpiCascadeResponse,
   type KpiMeasuredValue,
   type ShareOfSearchResponse,
@@ -168,7 +171,9 @@ export class PostgresKpiRepository extends KpiRepository {
       .map((s) => ({
         brand: s.brand,
         sharePct: s.values[cuoi] ?? 0,
-        deltaPoints: Number(((s.values[cuoi] ?? 0) - (s.values[0] ?? 0)).toFixed(2)),
+        deltaPoints: Number(
+          ((s.values[cuoi] ?? 0) - (s.values[0] ?? 0)).toFixed(2),
+        ),
       }))
       .sort((a, b) => b.sharePct - a.sharePct);
 
@@ -485,6 +490,156 @@ export class PostgresKpiRepository extends KpiRepository {
     `);
 
     return this.thanhChiSo(ket_qua);
+  }
+
+  /**
+   * Bảng đối sánh, đọc giá trị của TỪNG TRƯỜNG chứ không riêng Học viện.
+   *
+   * Vẫn theo đúng lối của `getCascade`: cấu trúc lấy từ bản giả lập trong
+   * `@ptit/shared` — chiều nào tồn tại, chiều đó đo mục tiêu nào, diễn giải ra sao đều
+   * là quyết định của con người — rồi chỉ thay các con số. Mỗi chiều đọc riêng và tự
+   * chịu lỗi của mình: ba bảng mart do ba job khác nhau đổ vào, thiếu một bảng không
+   * được kéo sập hai bảng còn lại.
+   */
+  async getBenchmark(): Promise<BenchmarkScorecardResponse> {
+    const goc = buildDemoBenchmark();
+
+    const [chu_y, thao_luan, diem] = await Promise.all([
+      this.docDoiSanhAnToan("thị phần chú ý", () => this.docDoiSanhChuY()),
+      this.docDoiSanhAnToan("thị phần thảo luận", () =>
+        this.docDoiSanhThaoLuan(),
+      ),
+      this.docDoiSanhAnToan("điểm chuẩn", () => this.docDoiSanhDiemChuan()),
+    ]);
+
+    const theoChieu: Record<string, Map<string, number | null>> = {
+      attention: chu_y,
+      voice: thao_luan,
+      score: diem,
+    };
+
+    return {
+      ...goc,
+      updatedAt: new Date().toISOString(),
+      dimensions: goc.dimensions.map((chieu) => {
+        const do_duoc = theoChieu[chieu.key];
+        // Không đọc được bảng mart của chiều này thì GIỮ NGUYÊN bản giả lập, chứ không
+        // xoá trắng: trang vẫn cần hình dạng để dựng, và nhãn nguồn dữ liệu ở tầng trên
+        // đã nói rõ đang hiển thị số giả lập hay số thật.
+        if (do_duoc === undefined || do_duoc.size === 0) return chieu;
+
+        const rows = rankRows(
+          chieu.rows.map((r) => ({
+            brand: r.brand,
+            value: do_duoc.get(r.brand.key) ?? null,
+          })),
+          chieu.higherIsBetter,
+        );
+
+        // Mức phủ phải tính LẠI từ số thật, không được giữ mức đã khai: khai "đủ nhóm"
+        // trong khi mart còn trống vài trường chính là cái bẫy khiến một con số tính
+        // trên 2 trong 6 trường trông như tính trên cả 6. Schema cũng từ chối tổ hợp đó.
+        const thieu = rows.filter((r) => r.value === null).length;
+        return {
+          ...chieu,
+          rows,
+          coverage: thieu === 0 ? ("full" as const) : ("partial" as const),
+          note:
+            thieu === 0
+              ? chieu.note
+              : `${chieu.note} Hiện ${rows.length - thieu}/${rows.length} trường có số trong kho.`,
+        };
+      }),
+    };
+  }
+
+  private async docDoiSanhAnToan(
+    ten: string,
+    doc: () => Promise<Map<string, number | null>>,
+  ): Promise<Map<string, number | null>> {
+    try {
+      return await doc();
+    } catch (loi) {
+      this.logger.warn(
+        `Không đọc được bảng đối sánh ${ten}: ${
+          loi instanceof Error ? loi.message : String(loi)
+        }`,
+      );
+      return new Map();
+    }
+  }
+
+  /** Thị phần chú ý của từng trường, tuần gần nhất. */
+  private async docDoiSanhChuY(): Promise<Map<string, number | null>> {
+    const ket_qua = await this.db.execute<{
+      ma_truong: string;
+      gia_tri: string | number | null;
+    }>(sql`
+      with moc as (select max(tuan) as cuoi from mart.mart__brand_attention)
+      select a.ma_truong, a.thi_phan_pct as gia_tri
+      from mart.mart__brand_attention a cross join moc m
+      where a.tuan = m.cuoi
+    `);
+    return this.thanhBangTruong(ket_qua);
+  }
+
+  /**
+   * Thị phần thảo luận của từng trường, tháng gần nhất ĐỦ MẪU.
+   *
+   * Lọc `du_mau` trước khi lấy tháng lớn nhất: tháng mới nhất thường là tháng đang
+   * chạy dở, và một tháng chỉ có vài bài cho ra tỷ trọng nhảy loạn.
+   */
+  private async docDoiSanhThaoLuan(): Promise<Map<string, number | null>> {
+    const ket_qua = await this.db.execute<{
+      ma_truong: string;
+      gia_tri: string | number | null;
+    }>(sql`
+      with du_mau as (
+        select distinct thang from mart.mart__share_of_voice where du_mau
+      ),
+      moc as (select max(thang) as nay from du_mau)
+      select s.ma_truong, s.thi_phan_pct as gia_tri
+      from mart.mart__share_of_voice s cross join moc m
+      where s.thang = m.nay
+    `);
+    return this.thanhBangTruong(ket_qua);
+  }
+
+  /** Điểm chuẩn bình quân của từng trường, mùa gần nhất, chỉ trường đủ số ngành. */
+  private async docDoiSanhDiemChuan(): Promise<Map<string, number | null>> {
+    const ket_qua = await this.db.execute<{
+      ma_truong: string;
+      gia_tri: string | number | null;
+    }>(sql`
+      with moc as (
+        select max(nam) as nam
+        from mart.mart__admission_score_benchmark
+        where du_nganh
+      )
+      select b.ma_truong, b.diem_binh_quan as gia_tri
+      from mart.mart__admission_score_benchmark b cross join moc m
+      where b.nam = m.nam and b.du_nganh
+    `);
+    return this.thanhBangTruong(ket_qua);
+  }
+
+  private thanhBangTruong(ket_qua: unknown): Map<string, number | null> {
+    const dong = Array.isArray(ket_qua)
+      ? (ket_qua as { ma_truong: string; gia_tri: string | number | null }[])
+      : [];
+
+    // Chỉ nhận mã trường nằm trong nhóm đối sánh đã chốt. Mart có thêm trường lạ thì đó
+    // là dữ liệu trôi, và nhận bừa sẽ làm mẫu số của mọi tỷ trọng lệch đi.
+    const trong_nhom = new Set(BENCHMARK_BRANDS.map((b) => b.key));
+
+    return new Map(
+      dong
+        .filter((r) => trong_nhom.has(r.ma_truong))
+        .map((r) => [
+          r.ma_truong,
+          r.gia_tri === null ? null : Number(r.gia_tri),
+        ]),
+    );
   }
 
   private thanhChiSo(ket_qua: unknown): KpiMeasuredValue[] {
