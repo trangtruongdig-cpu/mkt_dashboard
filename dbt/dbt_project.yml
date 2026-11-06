@@ -26,3 +26,10 @@ models:
     marts:
       +schema: mart
       +materialized: table
+
+# Seed là dữ liệu do NGƯỜI nhập, không phải do job thu thập. Mỗi dòng bắt buộc có
+# `nguon_url` để hội đồng nghiệm thu mở lại được — seed không có trích dẫn thì không
+# phân biệt được với số bịa.
+seeds:
+  ptit_dashboard:
+    +schema: seed

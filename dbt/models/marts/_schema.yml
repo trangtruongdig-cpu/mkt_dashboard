@@ -416,11 +416,33 @@ seeds:
           Học phí một năm trên chi phí đào tạo một sinh viên một năm, đơn vị %. Chỉ tính
           được khi trường công bố học phí theo năm. Dưới 100% nghĩa là nguồn khác đang
           gánh phần chênh — con số này là mẫu số thật khi bàn dư địa tăng học phí.
-      - name: boc_sach
-        description: Không có cảnh báo nào trong lúc bóc.
+      - name: cach_lay
+        description: >
+          `tu_dong` = bóc từ đề án bằng crawler; `nhap_tay` = người nhập từ seed
+          `hoc_phi_doi_sanh` kèm đường dẫn nguồn. Giao diện phải hiện cột này: hai cách
+          lấy có mức tin cậy và nhịp cập nhật khác nhau.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [tu_dong, nhap_tay]
+      - name: da_co_hoc_phi
+        description: >
+          False nghĩa là dòng mới chỉ có đường dẫn nguồn, chưa có số — đó là một việc
+          trong hàng đợi, không phải một ô khuyết.
         tests: [not_null]
+      - name: boc_sach
+        description: >
+          Không có cảnh báo nào trong lúc bóc. `null` ở dòng nhập tay vì không có bước
+          bóc nào để mà sạch hay hỏng — gán `false` sẽ nói dối là bóc thất bại.
+        tests:
+          - not_null:
+              config:
+                where: "cach_lay = 'tu_dong'"
       - name: duong_dan_tai_lieu
-        description: Đường dẫn đề án gốc, để hội đồng nghiệm thu mở lại từ con số.
+        description: >
+          Đường dẫn tài liệu gốc để hội đồng nghiệm thu mở lại từ con số. Với dòng
+          nhập tay, đây chính là `nguon_url` của seed.
         tests: [not_null]
     tests:
       - dbt_utils.unique_combination_of_columns:

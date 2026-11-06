@@ -1,0 +1,49 @@
+version: 2
+
+seeds:
+  - name: hoc_phi_doi_sanh
+    description: >
+      Học phí nhóm trường đối sánh, NHẬP TAY kèm đường dẫn nguồn.
+
+      Tồn tại vì ba trường (Bách khoa, Công nghệ ĐHQGHN, FPT) để bảng học phí cho
+      JavaScript dựng — HTML tĩnh không có thẻ <table> nào và không có con số tiền nào,
+      nên crawler HTTP không lấy được. UIT thì để trong bảng nhiều năm trong PDF.
+      Dựng trình duyệt không đầu để lấy sáu con số đổi một lần mỗi năm là không tương
+      xứng; nhập tay kèm trích dẫn vừa rẻ hơn vừa kiểm chứng lại được.
+
+      Dòng để trống giá trị là HÀNG ĐỢI CÔNG VIỆC: nó đã mang sẵn đường dẫn nguồn để
+      người điền mở ra và chép đúng một con số, không phải đi tìm lại.
+    config:
+      # Mọi cột tiền khai tường minh. Để dbt tự đoán thì cột toàn ô trống bị suy ra
+      # thành integer, và phép so sánh chuỗi ở model phía sau hỏng ngay.
+      column_types:
+        ma_truong: varchar
+        nam: integer
+        he_dao_tao: varchar
+        hoc_phi: bigint
+        hoc_phi_can_tren: bigint
+        don_vi_hoc_phi: varchar
+        nguon_url: varchar
+        ngay_kiem_nguon: date
+        ghi_chu: varchar
+    columns:
+      - name: ma_truong
+        description: Khoá thương hiệu trong nhóm sáu trường đối sánh.
+        tests: [not_null]
+      - name: nguon_url
+        description: >
+          BẮT BUỘC. Seed không có trích dẫn thì không phân biệt được với số bịa — hội
+          đồng nghiệm thu phải mở lại được từ con số về trang công bố.
+        tests: [not_null]
+      - name: ngay_kiem_nguon
+        description: Ngày người nhập mở đường dẫn và xác nhận nó còn sống.
+        tests: [not_null]
+      - name: don_vi_hoc_phi
+        description: Để trống khi chưa điền giá trị.
+        tests:
+          - accepted_values:
+              arguments:
+                values: [chinh_quy, tin_chi, nam, thang, hoc_ky]
+                quote: true
+              config:
+                where: "don_vi_hoc_phi is not null"

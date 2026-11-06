@@ -62,8 +62,14 @@
           "kind": "ba_cong_khai",
           "url": "https://hust.edu.vn/ba-cong-khai",
           "note": "Liệt kê PDF trực tiếp, đặt tên theo biểu mẫu (bm17/bm18/bm19) và có năm trong đường dẫn."
+        },
+        {
+          "kind": "de_an_tuyen_sinh",
+          "url": "https://hust.edu.vn/vi/dao-tao/tuyen-sinh-dai-hoc/de-an-tuyen-sinh/",
+          "note": "Trang đề án tuyển sinh, đã xác minh trả 200."
         }
-      ]
+      ],
+      "note": "Học phí công bố ở hust.edu.vn/vi/sinh-vien/hoc-bong-hoc-phi/hoc-phi-654580.html nhưng bảng do JavaScript dựng: HTML tĩnh không có thẻ <table> nào và không có con số tiền nào. Crawler HTTP không lấy được — nhập tay."
     },
     {
       "key": "uit",
@@ -73,8 +79,14 @@
           "kind": "ba_cong_khai",
           "url": "https://www.uit.edu.vn/cong-bo-ba-cong-khai",
           "note": "Trang tổng — nội dung công khai nằm sâu hơn một tầng."
+        },
+        {
+          "kind": "de_an_tuyen_sinh",
+          "url": "https://tuyensinh.uit.edu.vn/de-an-tuyen-sinh",
+          "note": "Trang đề án. Tệp PDF không nằm trong thẻ <a> mà trong dữ liệu JSON nhúng; đường dẫn đã xác minh sống: /sites/default/files/uploads/files/202607/dean_moi.pdf"
         }
-      ]
+      ],
+      "note": "Seed cũ uit.edu.vn/cong-bo-ba-cong-khai dẫn sang trang kiểm định — 35 tài liệu thu được đều là chứng nhận ASIIN/Euro-Inf, không có Biểu 18 nào. Đề án 2026 đọc được bằng máy nhưng học phí nằm trong BẢNG nhiều năm × nhiều lần đóng, không phải một số trong câu, nên phải nhập tay (xem dbt/seeds/hoc_phi_doi_sanh.csv)."
     },
     {
       "key": "uet",
@@ -90,13 +102,20 @@
           "url": "https://qac.uet.vnu.edu.vn/bai-viet/cong-khai-csgd",
           "note": "Trang riêng của Phòng Đảm bảo chất lượng."
         }
-      ]
+      ],
+      "note": "Trang chủ tuyensinh.uet.vnu.edu.vn không có liên kết đề án nào; qac.uet.vnu.edu.vn/bai-viet/cong-khai-csgd cho 25 tài liệu nhưng chỉ có Biểu 18, và bộ bóc Biểu 18 trả 0 dòng sản lượng vì trường đổi bố cục bảng. Học phí nhập tay."
     },
     {
       "key": "fpt",
       "label": "Trường Đại học FPT",
-      "seeds": [],
-      "note": "Không dò ra trang công khai chuyên biệt trên daihoc.fpt.edu.vn. Trường tư thục vẫn thuộc diện bắt buộc công khai theo Thông tư 09/2024 — cần liên hệ trực tiếp hoặc tra cứu qua cổng của Bộ GD&ĐT."
+      "seeds": [
+        {
+          "kind": "de_an_tuyen_sinh",
+          "url": "https://daihoc.fpt.edu.vn/tuyen-sinh/",
+          "note": "Trang tuyển sinh. Mục học phí ở neo #fee."
+        }
+      ],
+      "note": "Không có trang Ba công khai chuyên biệt. Bảng học phí do JavaScript dựng, HTML tĩnh rỗng số. Trường tư thục vẫn thuộc diện công khai theo Thông tư 09/2024 — nhập tay cho tới khi dò ra tệp công bố."
     },
     {
       "key": "actvn",
