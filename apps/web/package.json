@@ -4,12 +4,13 @@
   "private": true,
   "description": "Giao diện dashboard marketing số & thương hiệu PTIT (Next.js)",
   "scripts": {
-    "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "clean": "rm -rf .next .turbo",
+    "dev": "next dev",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit",
-    "clean": "rm -rf .next .turbo"
+    "start": "next start",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@ptit/shared": "workspace:*",
@@ -29,6 +30,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
     "tailwindcss": "^4",
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "vitest": "^4.1.10"
   }
 }
