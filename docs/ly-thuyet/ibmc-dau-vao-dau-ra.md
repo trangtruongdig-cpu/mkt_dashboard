@@ -96,15 +96,35 @@ Hai ràng buộc giữ chuỗi này không trôi:
 
 Xếp theo mức thiệt hại nếu không lấp.
 
-### 4.1 Thống kê nguyện vọng theo lĩnh vực của Bộ GD&ĐT — thiếu nghiêm trọng nhất
+### 4.1 Thống kê đăng ký theo lĩnh vực của Bộ GD&ĐT — còn thiếu MỘT mùa
 
 Không có nó thì **không tính được tăng trưởng ngành**, và theo bài 2.3 thì tăng trưởng
 thương hiệu đứng một mình là con số gây hiểu sai. Đây là lý do tầng `biz_growth` hiện có
 bốn chỉ số mà chưa chỉ số nào có số.
 
-*Đường lấy:* số liệu được Bộ công bố rải trong các bản tin và họp báo tuyển sinh, không có
-bảng ổn định theo năm. Việc cần làm là bóc tay một lần cho các mùa đã qua, lưu thành chuỗi,
-rồi cập nhật mỗi mùa. Không cần xin phép ai.
+**Mùa 2026 đã xác minh được** (06/11/2026), nguồn là chính trang của Bộ:
+
+| | Mùa 2026 |
+|---|---|
+| Máy tính và công nghệ thông tin | **154.016 thí sinh**, hơn 415.000 nguyện vọng, gần 18% tổng thí sinh |
+| Nhóm STEM | 467.590 thí sinh (53,4%), 2.368.179 nguyện vọng |
+| Tổng xét tuyển đại học | hơn 874.000 thí sinh, 7.180.860 nguyện vọng (bình quân 8,2 nguyện vọng/thí sinh) |
+
+Nguồn: [moet.gov.vn — "Hơn một nửa tổng số thí sinh đăng ký xét tuyển đại học năm 2026 lựa
+chọn ngành STEM"](https://moet.gov.vn/tin-tuc/tin-tong-hop2/hon-mot-nua-tong-so-thi-sinh-dang-ky-xet-tuyen-dai-hoc-nam-2026-lua-chon-nganh-stem.html),
+dẫn lời Vụ trưởng Vụ Giáo dục Đại học.
+
+**Hai cái bẫy phải tránh khi dùng con số này:**
+
+1. **Đơn vị.** 154.016 là số THÍ SINH, không phải số nguyện vọng (415.000 mới là nguyện
+   vọng). Thị phần nhập học đếm người, nên mẫu số phải là thí sinh. Trộn hai đơn vị là sai
+   mẫu số ở ngay bước đầu.
+2. **Cách đo đổi giữa hai mùa.** Bộ công bố 2024 theo tỷ trọng **nhập học** (hơn 10%), còn
+   2026 theo tỷ trọng **đăng ký** (gần 18%). Đọc 10% lên 18% thành tăng trưởng là kết luận
+   sai — khác mẫu số.
+
+*Còn thiếu:* con số mùa trước **cùng cách đo**. Có nó là tính được tăng trưởng ngành, và cả
+tầng `biz_growth` mở khoá. Không cần xin phép ai, chỉ cần tra đúng bản công bố.
 
 ### 4.2 Dự toán truyền thông tuyển sinh nội bộ
 
@@ -205,7 +225,7 @@ truyền thông là tầng xa quyết định kinh doanh nhất.
 | | Việc | Mở khoá được gì | Cần ai |
 |---|---|---|---|
 | 1 | Bóc bảng kết quả tuyển sinh trong đề án của **cả 6 trường** | mẫu số của `enrolment_share`, và số thật cho `enrolment_growth`. Hiện chỉ 2/6 trường có sản lượng nên mọi con số thị phần đều sai mẫu số | chỉ cần lập trình |
-| 2 | Bóc thống kê nguyện vọng theo lĩnh vực của Bộ GD&ĐT | mốc ngành cho cả tầng `biz_growth` — quy tắc chịu lực nhất của khung | chỉ cần lập trình |
+| 2 | Tra con số mùa TRƯỚC của Bộ, cùng cách đo với mùa 2026 | mốc ngành cho cả tầng `biz_growth` — quy tắc chịu lực nhất của khung. Mùa 2026 đã có số đã xác minh | chỉ cần tra cứu |
 | 3 | Bước trích thuộc tính trong `apps/worker/nlp` | ba chuỗi `attribute_*`, tức quy tắc cặp tăng–giữ | chỉ cần lập trình |
 | 4 | Điền nốt học phí 4 dòng còn thiếu | value share và các chỉ số giá trị. Phần bóc tự động đã hết dư địa — 4 dòng này nguồn không cho máy đọc, chỉ còn nhập tay kèm đường dẫn | **người nhập**, mỗi dòng một con số |
 | 5 | Xin dự toán truyền thông tuyển sinh | cả tầng `biz_profit` | **Học viện quyết** |

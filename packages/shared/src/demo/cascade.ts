@@ -198,7 +198,7 @@ const SOURCE_GA4: DataProvenance = {
 const SOURCE_MINISTRY_STATS: DataProvenance = {
   label:
     "Thống kê nguyện vọng đăng ký xét tuyển theo lĩnh vực do Bộ Giáo dục và Đào tạo công bố hằng năm",
-  url: "https://moet.gov.vn/",
+  url: "https://moet.gov.vn/tin-tuc/tin-tong-hop2/hon-mot-nua-tong-so-thi-sinh-dang-ky-xet-tuyen-dai-hoc-nam-2026-lua-chon-nganh-stem.html",
   benchmark: {
     coverage: "full",
     note: "Số liệu Bộ công bố là của toàn lĩnh vực, tức là MẪU SỐ của mọi phép tính thị phần và là mốc tăng trưởng ngành. Chưa có bước thu thập nào.",
@@ -321,7 +321,7 @@ const OBJECTIVES: readonly Objective[] = [
     statement:
       "Mở rộng tập thí sinh cân nhắc Học viện ra ngoài lõi Hà Nội – TP. Hồ Chí Minh",
     rationale:
-      "Tập cầu của lĩnh vực máy tính và công nghệ thông tin là số có sẵn, bài toán là giành phần trong đó chứ không phải tạo thêm nhu cầu. Các ngành mở năm 2026 và địa bàn ngoài lõi là khoảng trống thâm nhập rẻ nhất vì chưa trường nào sở hữu chúng trong tâm trí thí sinh — đúng ô thâm nhập thấp, cạnh tranh cao của ma trận bài 3.4: vào bằng lợi ích thực sự khác biệt, không lặp thông điệp của trường dẫn đầu.",
+      "Mùa 2026 có 154.016 thí sinh đăng ký lĩnh vực máy tính và công nghệ thông tin, theo công bố của Bộ Giáo dục và Đào tạo. Đây là tập cầu có sẵn, bài toán là giành phần trong đó chứ không phải tạo thêm nhu cầu. Các ngành mở năm 2026 và địa bàn ngoài lõi là khoảng trống thâm nhập rẻ nhất vì chưa trường nào sở hữu chúng trong tâm trí thí sinh — đúng ô thâm nhập thấp, cạnh tranh cao của ma trận bài 3.4: vào bằng lợi ích thực sự khác biệt, không lặp thông điệp của trường dẫn đầu.",
     theory: {
       concept: "Penetration — tỷ lệ người đã tham gia ngành hàng",
       origin:
@@ -1146,7 +1146,7 @@ const KPI_SPECS: readonly KpiSpec[] = [
   {
     key: "category_enrolment_growth",
     label:
-      "Tăng trưởng nguyện vọng vào lĩnh vực máy tính và công nghệ thông tin",
+      "Tăng trưởng số thí sinh đăng ký lĩnh vực máy tính và công nghệ thông tin",
     objectiveKey: "biz_growth",
     tier: "business",
     value: null,
@@ -1159,7 +1159,12 @@ const KPI_SPECS: readonly KpiSpec[] = [
     higherIsBetter: true,
     cadence: "annual",
     provenance: SOURCE_MINISTRY_STATS,
-    hint: "Đây là MẪU SỐ của mọi phép tính thị phần, nên nó phải là số đã xác minh. Con số 154.016 từng được trích trong dự án CHƯA xác minh được — tải trang nguồn được dẫn thì không thấy nó — nên seed quy_mo_nganh đang để trống có chủ ý. Một manh mối khác, cũng chưa xác minh: báo chí dẫn khoảng 35.700 trúng tuyển nhóm ngành năm 2026, giảm hơn 10.000 so với năm trước; nếu đúng thì ngành đang CO LẠI chứ không nở ra, và điều đó đảo ngược cách đọc cả tầng tăng trưởng.",
+    comparability: {
+      basis: "admission_cycle",
+      caveat:
+        "Bộ công bố 2024 theo tỷ trọng NHẬP HỌC (hơn 10%), còn 2026 theo tỷ trọng ĐĂNG KÝ (gần 18%). Hai cách đo khác mẫu số — đọc 10% lên 18% thành tăng trưởng là kết luận sai. Chỉ so khi hai mùa cùng một cách đo.",
+    },
+    hint: "Mùa 2026: 154.016 THÍ SINH đăng ký lĩnh vực này (gần 18% tổng thí sinh xét tuyển), hơn 415.000 nguyện vọng — đã xác minh trên trang của Bộ. Đơn vị phải là THÍ SINH chứ không phải nguyện vọng: thị phần nhập học đếm người, trộn hai đơn vị là sai mẫu số. Còn thiếu đúng một thứ để tính được tăng trưởng: con số cùng cách đo của mùa trước.",
   },
   {
     key: "growth_vs_category_gap",
