@@ -223,3 +223,48 @@ def test_lay_nam_hoc_tu_noi_dung_bieu_mau() -> None:
     assert detect_year_from_text("Công khai ... thực tế năm học 2022-2023") == 2022
     assert detect_year_from_text("nam hoc 2019 – 2020") == 2019
     assert detect_year_from_text("Quyết định số 2168 ngày 07/10/2025") is None
+
+
+# Nguyên văn phần A và B từ Biểu 18 năm học 2023-2024 của Trường ĐH Công nghệ (ĐHQGHN).
+# Trường chỉ đào tạo một khối ngành nên biểu mẫu KHÔNG có dòng "Tổng số" ở phần A.
+THAT_UET_MOT_KHOI_NGANH = """A. Công khai thông tin về quy mô đào tạo hiện tại
+Quy mô sinh viên hiện tại
+STT Khối ngành
+Đại học
+Tiến sĩ Thạc sĩ
+chính quy
+1 Khối ngành V 70 280 6993
+B. Công khai thông tin về sinh viên tốt nghiệp và tỷ lệ sinh viên có việc làm
+sau 01 năm
+Phân loại tốt nghiệp (%) Tỷ lệ sinh viên tốt
+Số sinh
+Khối viên
+STT ngành tốt Loại giỏi Loại khá
+nghiệp
+1 Tổng số 1066 8,44 28,61 57,13 91,56
+"""
+
+
+def test_bieu_mau_mot_khoi_nganh_khong_co_dong_tong_so() -> None:
+    """Trường chỉ khai một khối ngành thì dòng đó CHÍNH LÀ tổng — đừng bỏ cả bản."""
+    f = parse_bm18(THAT_UET_MOT_KHOI_NGANH)
+
+    assert f.doctoral == 70
+    assert f.masters == 280
+    assert f.undergrad_regular == 6993
+    assert f.graduates == 1066
+    assert any("chỉ khai một khối ngành" in c for c in f.warnings)
+
+
+def test_nhieu_khoi_nganh_ma_khong_co_tong_so_thi_khong_doan() -> None:
+    """Từ hai khối ngành trở lên thì phải cộng, mà cộng sai cột còn tệ hơn không có số."""
+    f = parse_bm18(
+        "A. Công khai thông tin về quy mô đào tạo hiện tại\n"
+        "STT Khối ngành Tiến sĩ Thạc sĩ Đại học chính quy\n"
+        "1 Khối ngành III 10 40 1200\n"
+        "2 Khối ngành V 70 280 6993\n"
+        "B. Công khai thông tin về sinh viên tốt nghiệp\n"
+    )
+
+    assert f.undergrad_regular is None
+    assert any("Không tìm thấy dòng 'Tổng số'" in c for c in f.warnings)

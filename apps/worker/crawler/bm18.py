@@ -121,13 +121,48 @@ def parse_percent(chuoi: str) -> float | None:
         return None
 
 
+_STT_DAU_DONG = re.compile(r"^\s*\d+\s+")
+
+
 def _dong_tong_so(text: str, tu_dong: int = 0) -> tuple[int, str] | None:
-    """Tìm dòng bắt đầu bằng 'Tổng số' kể từ dòng `tu_dong`. Trả về (chỉ số dòng, nội dung)."""
+    """
+    Tìm dòng 'Tổng số' kể từ dòng `tu_dong`. Trả về (chỉ số dòng, nội dung đã bỏ STT).
+
+    Nhiều trường đánh số thứ tự cho cả dòng tổng — Trường ĐH Công nghệ khai
+    "1 Tổng số 1066 8,44 28,61 57,13 91,56". Bỏ phần STT ở ĐÂY chứ không để nơi gọi
+    tự xử lý: nơi gọi cắt hai từ đầu ("Tổng số") để lấy phần số, nên nếu còn STT thì
+    nó cắt nhầm và đọc chữ "số" thành một cột.
+    """
     dong = text.splitlines()
     for i in range(tu_dong, len(dong)):
-        if _bo_dau(dong[i]).strip().startswith("tong so"):
-            return i, dong[i]
+        noi_dung = _STT_DAU_DONG.sub("", dong[i])
+        if _bo_dau(noi_dung).strip().startswith("tong so"):
+            return i, noi_dung
     return None
+
+
+_KHOI_NGANH = re.compile(r"^\s*\d+\s+kh[oố]i\s+ng[aà]nh\b", re.IGNORECASE)
+
+
+def _dong_khoi_nganh_duy_nhat(text: str, vi_tri_b: int | None) -> tuple[int, str] | None:
+    """
+    Dòng khối ngành duy nhất của phần A, khi biểu mẫu KHÔNG có dòng 'Tổng số'.
+
+    Trường chỉ đào tạo một khối ngành thì không có gì để cộng, nên nhiều bản bỏ luôn
+    dòng tổng — Trường ĐH Công nghệ (ĐHQGHN) khai đúng một dòng "Khối ngành V". Trước
+    đây bộ bóc coi đó là bố cục lạ và bỏ cả bản, nên bốn bản Biểu 18 của trường này
+    không cho ra một con số quy mô nào.
+
+    CHỈ nhận khi có ĐÚNG MỘT dòng: từ hai dòng trở lên thì tổng phải cộng lại, mà cộng
+    sai cột còn tệ hơn không có số.
+    """
+    het = vi_tri_b if vi_tri_b is not None else len(text.splitlines())
+    tim = [
+        (i, dong)
+        for i, dong in enumerate(text.splitlines()[:het])
+        if _KHOI_NGANH.match(_bo_dau(dong))
+    ]
+    return tim[0] if len(tim) == 1 else None
 
 
 def _dong_so_lieu_phan_b(text: str, vi_tri_b: int) -> tuple[str, bool] | None:
@@ -233,6 +268,14 @@ def parse_bm18(text: str) -> Bm18Figures:
 
     dong_a = _dong_tong_so(text)
     if dong_a is None or (vi_tri_b is not None and dong_a[0] >= vi_tri_b):
+        dong_a = _dong_khoi_nganh_duy_nhat(text, vi_tri_b)
+        if dong_a is not None:
+            canh_bao.append(
+                "Biểu mẫu không có dòng 'Tổng số' ở phần quy mô vì trường chỉ khai một "
+                "khối ngành; lấy chính dòng khối ngành đó làm tổng."
+            )
+
+    if dong_a is None:
         canh_bao.append("Không tìm thấy dòng 'Tổng số' của phần quy mô đào tạo.")
     else:
         so: list[int] = [
