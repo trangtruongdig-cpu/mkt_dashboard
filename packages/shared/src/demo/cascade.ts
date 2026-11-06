@@ -321,7 +321,7 @@ const OBJECTIVES: readonly Objective[] = [
     statement:
       "Mở rộng tập thí sinh cân nhắc Học viện ra ngoài lõi Hà Nội – TP. Hồ Chí Minh",
     rationale:
-      "Mùa 2026 có 154.016 thí sinh đăng ký lĩnh vực máy tính và công nghệ thông tin. Đây là tập cầu có sẵn, bài toán là giành phần trong đó chứ không phải tạo thêm nhu cầu. Các ngành mở năm 2026 và địa bàn ngoài lõi là khoảng trống thâm nhập rẻ nhất vì chưa trường nào sở hữu chúng trong tâm trí thí sinh — đúng ô thâm nhập thấp, cạnh tranh cao của ma trận bài 3.4: vào bằng lợi ích thực sự khác biệt, không lặp thông điệp của trường dẫn đầu.",
+      "Tập cầu của lĩnh vực máy tính và công nghệ thông tin là số có sẵn, bài toán là giành phần trong đó chứ không phải tạo thêm nhu cầu. Các ngành mở năm 2026 và địa bàn ngoài lõi là khoảng trống thâm nhập rẻ nhất vì chưa trường nào sở hữu chúng trong tâm trí thí sinh — đúng ô thâm nhập thấp, cạnh tranh cao của ma trận bài 3.4: vào bằng lợi ích thực sự khác biệt, không lặp thông điệp của trường dẫn đầu.",
     theory: {
       concept: "Penetration — tỷ lệ người đã tham gia ngành hàng",
       origin:
@@ -1159,7 +1159,7 @@ const KPI_SPECS: readonly KpiSpec[] = [
     higherIsBetter: true,
     cadence: "annual",
     provenance: SOURCE_MINISTRY_STATS,
-    hint: "Mùa 2026 có 154.016 nguyện vọng vào lĩnh vực này. Lĩnh vực tăng cả lượng lẫn giá trị nên đang ở ô ngành khoẻ mạnh của bài 2.4.",
+    hint: "Đây là MẪU SỐ của mọi phép tính thị phần, nên nó phải là số đã xác minh. Con số 154.016 từng được trích trong dự án CHƯA xác minh được — tải trang nguồn được dẫn thì không thấy nó — nên seed quy_mo_nganh đang để trống có chủ ý. Một manh mối khác, cũng chưa xác minh: báo chí dẫn khoảng 35.700 trúng tuyển nhóm ngành năm 2026, giảm hơn 10.000 so với năm trước; nếu đúng thì ngành đang CO LẠI chứ không nở ra, và điều đó đảo ngược cách đọc cả tầng tăng trưởng.",
   },
   {
     key: "growth_vs_category_gap",

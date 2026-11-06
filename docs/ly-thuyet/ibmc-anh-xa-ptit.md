@@ -17,7 +17,7 @@ ba cách định nghĩa, cho ba con số hoàn toàn khác nhau:
 | Mức | Định nghĩa | Độ lớn | Dùng cho |
 |---|---|---|---|
 | **Rộng** | toàn bộ tuyển sinh đại học chính quy cả nước | ~ hàng trăm nghìn/năm | bối cảnh, không dùng để đặt mục tiêu — thị phần ra con số nhỏ vô nghĩa |
-| **Lĩnh vực** | thí sinh đăng ký lĩnh vực máy tính và công nghệ thông tin | 154.016 (mùa 2026) | **độ lớn tập cầu** và tăng trưởng ngành |
+| **Lĩnh vực** | thí sinh đăng ký lĩnh vực máy tính và công nghệ thông tin | **chưa xác minh** — xem ghi chú dưới bảng | **độ lớn tập cầu** và tăng trưởng ngành |
 | **Nhóm đối sánh** | nhóm trường kỹ thuật – công nghệ cạnh tranh trực tiếp | 5 trường | **thị phần, share of voice, share of search** |
 
 Quy tắc bắt buộc: **một chỉ số chỉ dùng một mức định nghĩa, và phải ghi rõ mức nào trên
@@ -112,7 +112,7 @@ Trong lĩnh vực đào tạo công nghệ thông tin, Học viện **không** p
 thuộc về nhóm trường kỹ thuật lâu năm hơn. Hai hệ quả bắt buộc:
 
 1. **Không đặt mục tiêu kiểu "giáo dục thị trường về giá trị của việc học công nghệ thông
-   tin".** Tập cầu 154.016 thí sinh đã có sẵn; mở rộng nó là tăng trưởng hộ trường dẫn đầu.
+   tin".** Tập cầu của lĩnh vực đã có sẵn; mở rộng nó là tăng trưởng hộ trường dẫn đầu.
 2. Mục tiêu phải là **choice và share lấy từ đối thủ cụ thể**, cộng với thâm nhập vào **phân
    khúc/địa bàn chưa ai sở hữu** — đúng ô "thâm nhập thấp, cạnh tranh cao" của ma trận bài
    3.4: vào bằng nhu cầu và lợi ích **thực sự khác biệt**, không lặp lại thông điệp của
