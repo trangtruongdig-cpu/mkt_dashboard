@@ -158,10 +158,51 @@ export const KPI_CADENCE_LABELS: Record<KpiCadence, string> = {
  * về tới văn bản hoặc nguồn công khai sinh ra nó; `legalBasis` ghi căn cứ pháp lý
  * buộc công khai (ví dụ Thông tư 09/2024/TT-BGDĐT) khi có.
  */
+/**
+ * Nguồn này có phủ NHÓM ĐỐI SÁNH không.
+ *
+ * Khung IBMC không chạy được mà không có số của đối thủ: thị phần cần mẫu số, tăng
+ * trưởng cần mốc ngành, premiumisation cần biết đối thủ định giá thế nào. Trường này
+ * nói thẳng mỗi nguồn đang ở đâu trên thang đó — vì một con số thị phần tính trên
+ * 2 trong 6 trường trông y hệt một con số tính trên cả 6.
+ */
+export const BenchmarkCoverageSchema = z.enum([
+  /** Đủ cả nhóm đối sánh — tính được thị phần và vị trí. */
+  "full",
+  /** Mới một phần nhóm — con số so sánh còn sai mẫu số, không được công bố như thật. */
+  "partial",
+  /** Chỉ có số của Học viện; không có đường lấy số đối thủ từ nguồn này. */
+  "us_only",
+  /** Chỉ số nội bộ, không tồn tại khái niệm đối thủ. */
+  "not_applicable",
+]);
+export type BenchmarkCoverage = z.infer<typeof BenchmarkCoverageSchema>;
+
+export const BENCHMARK_COVERAGE_LABELS: Record<BenchmarkCoverage, string> = {
+  full: "Đủ nhóm đối sánh",
+  partial: "Mới một phần nhóm",
+  us_only: "Chỉ có số của Học viện",
+  not_applicable: "Không có đối thủ",
+};
+
 export const DataProvenanceSchema = z.object({
   label: z.string().min(1),
   url: z.url().optional(),
   legalBasis: z.string().optional(),
+  /**
+   * Mức phủ đối thủ của nguồn này.
+   *
+   * Để `optional` ở tầng schema vì `brand-share` cũng dùng lại hình dạng này, nhưng
+   * MỌI chỉ số trong cascade bắt buộc phải khai — ràng buộc đó nằm ở
+   * `kpi-cascade-structure.spec.ts`.
+   */
+  benchmark: z
+    .object({
+      coverage: BenchmarkCoverageSchema,
+      /** Cụ thể là bao nhiêu trường có số, hoặc vì sao không lấy được. */
+      note: z.string().min(1),
+    })
+    .optional(),
 });
 export type DataProvenance = z.infer<typeof DataProvenanceSchema>;
 
@@ -409,6 +450,15 @@ export type CascadeKpi = z.infer<typeof CascadeKpiSchema>;
 export const ObjectiveSchema = z.object({
   key: z.string().min(1),
   tier: ObjectiveTierSchema,
+  /**
+   * Tên ngắn — một tới ba từ, đủ nhét vừa một ô bảng hoặc một nhãn biểu đồ.
+   *
+   * Đây là tên của mục tiêu trong khung IBMC (Doanh số, Thị phần, Thâm nhập, Nhận
+   * biết…). Nằm trong hợp đồng dữ liệu chứ không phải trong từng component: trước đây
+   * mỗi chỗ cần tên ngắn lại tự viết một bảng ánh xạ khoá → tên, và những bảng đó im
+   * lặng lệch đi khi cây mục tiêu đổi.
+   */
+  shortName: z.string().min(1),
   /** Phát biểu mục tiêu bằng tiếng Việt, đủ để đọc lên trong cuộc họp. */
   statement: z.string().min(1),
   /** Vì sao mục tiêu này tồn tại — hiện ra khi người xem hỏi "để làm gì". */

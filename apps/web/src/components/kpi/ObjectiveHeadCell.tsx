@@ -60,7 +60,7 @@ export function ObjectiveHeadCell({
             chỉ dựng nút khi có nội dung thật. */}
         {objective.theory.caveat ? (
           <InfoHint
-            label={`Giới hạn lý thuyết của mục tiêu ${objective.statement}`}
+            label={`Giới hạn lý thuyết của mục tiêu ${objective.shortName}`}
           >
             <p className="mb-1.5 font-medium text-ink">
               {objective.theory.concept} — {objective.theory.origin}

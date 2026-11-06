@@ -1,5 +1,7 @@
 import { kpisByObjective } from "@ptit/shared";
 import { CascadeDiagram } from "@/components/theory/CascadeDiagram";
+import { FrameworkObjectives } from "@/components/theory/FrameworkObjectives";
+import { InputMatrix } from "@/components/theory/InputMatrix";
 import { QuadrantMatrix } from "@/components/theory/QuadrantMatrix";
 import { TheoryFoundations } from "@/components/theory/TheoryFoundations";
 import { TheoryProvenanceList } from "@/components/theory/TheoryProvenanceList";
@@ -26,6 +28,8 @@ export default async function TrangKhungLyThuyet() {
   const co_canh_bao = cascade.objectives.filter(
     (o) => o.theory.caveat !== null,
   );
+  const nguon = new Set(cascade.kpis.map((k) => k.provenance.label));
+  const daCoSo = cascade.kpis.filter((k) => k.value !== null).length;
 
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6 sm:px-6">
@@ -62,9 +66,13 @@ export default async function TrangKhungLyThuyet() {
           Nền tảng — ai nói gì, nói thế nào
         </h2>
         <p className="mt-1 mb-3 max-w-2xl text-xs leading-snug text-ink-secondary">
-          Mười tám công trình, xếp theo thời gian. Khối viền vàng là chỗ công
-          trình đó phản bác điều khác trong khung, hoặc nêu một giới hạn phải
-          biết trước khi dùng.
+          Hai mươi mốt công trình, xếp theo thời gian. Mỗi mục ghi câu họ nói và{" "}
+          <strong className="text-ink">
+            câu đó sinh ra mục tiêu nào trong IBMC
+          </strong>{" "}
+          — đọc dòng mũi tên là thấy nền tảng chảy vào đâu. Khối viền vàng là
+          chỗ công trình đó phản bác điều khác trong khung, hoặc nêu giới hạn
+          phải biết trước khi dùng.
         </p>
         <TheoryFoundations />
       </section>
@@ -133,6 +141,29 @@ export default async function TrangKhungLyThuyet() {
             này kiểm ở tầng hợp đồng dữ liệu, không ở giao diện.
           </p>
         </div>
+
+        {/*
+          Chiều ngược lại của danh sách nền tảng. Danh sách trên đi từ tác giả sang mục
+          tiêu; bảng này đi từ mục tiêu sang tác giả, và đó mới là chiều kiểm được rằng
+          không mục tiêu nào đang đứng mà không có nền.
+        */}
+        <h3 className="mt-5 text-xs font-semibold text-ink">
+          Mười hai mục tiêu con, mười hai cơ sở
+        </h3>
+        <p className="mt-1 mb-2 max-w-2xl text-xs leading-snug text-ink-secondary">
+          Bảng này đọc ngược danh sách trên: từ mục tiêu về tác giả. Quy tắc giữ
+          nó đúng — thêm một mục tiêu vào khung thì phải thêm một dòng kèm cơ
+          sở; không nêu được cơ sở nghĩa là mục tiêu đó đặt ra vì{" "}
+          <em>có dữ liệu</em>, không phải vì <em>có lý do</em>.
+        </p>
+        <FrameworkObjectives />
+        <p className="mt-2 max-w-2xl text-[11px] leading-snug text-ink-muted">
+          Khung gốc có 12 mục tiêu con. Cây mục tiêu của Học viện ở dưới có 13,
+          vì tách Lựa chọn và Trung thành thành hai — với đào tạo, được chọn lúc
+          xét tuyển và giữ chân sau khi nhập học cách nhau 4–5 năm và dùng nguồn
+          dữ liệu khác nhau. Đây là chỗ cố ý đi khác bài giảng, không phải sai
+          sót.
+        </p>
       </section>
 
       {/* 3 · CHI TIẾT — từ đây trở xuống là cây mục tiêu thật của Học viện. */}
@@ -270,6 +301,40 @@ export default async function TrangKhungLyThuyet() {
           bị chặn ngay khi dựng.
         </p>
         <TheoryProvenanceList objectives={[...cascade.objectives]} />
+      </section>
+
+      {/*
+        Khép vòng: từ lý thuyết xuống tới đầu vào thật. Đặt cuối cùng vì chỉ đọc được
+        sau khi đã biết mục tiêu nào là mục tiêu gì.
+      */}
+      <section className="mt-8">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+          <h2 className="text-sm font-semibold text-ink">
+            Đầu vào nào nuôi mục tiêu nào
+          </h2>
+          <span className="text-[11px] text-ink-muted">
+            {nguon.size} nguồn · {cascade.kpis.length} chỉ số · {daCoSo} đã có
+            số
+          </span>
+        </div>
+        <p className="mt-1 mb-3 max-w-2xl text-xs leading-snug text-ink-secondary">
+          Mỗi nguồn dữ liệu, các chỉ số nó cấp, mục tiêu chúng nuôi, mức cần đạt
+          — và <strong className="text-ink">đối thủ đang ở đâu</strong>. Câu
+          cuối là tính chất của nguồn chứ không của chỉ số: một nguồn hoặc phủ
+          được cả nhóm sáu trường đối sánh, hoặc không. Nguồn so được với đối
+          thủ xếp lên trước.
+        </p>
+        <InputMatrix cascade={cascade} />
+        <p className="mt-2 max-w-2xl text-[11px] leading-snug text-ink-muted">
+          Thị phần, tăng trưởng và mọi phép so sánh chỉ có nghĩa khi mẫu số đủ.
+          Hiện phần lớn nguồn kinh doanh mới phủ một phần nhóm đối sánh — nút
+          thắt lớn nhất của dự án. Tài liệu nguồn đều buộc công khai nên không
+          phải xin phép ai, nhưng <em>công khai</em> không đồng nghĩa với{" "}
+          <em>máy đọc được</em>: học phí hiện có số ở 3 trên 7 dòng đối sánh,
+          bốn dòng còn lại thiếu vì đề án là ảnh scan hoặc bảng số do JavaScript
+          dựng. Phần đó phải nhập tay kèm đường dẫn nguồn — là giới hạn của
+          nguồn, không phải việc chưa làm.
+        </p>
       </section>
 
       <section className="mt-8 rounded-xl border border-hairline bg-surface-inset p-4">

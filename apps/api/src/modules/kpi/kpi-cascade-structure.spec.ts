@@ -117,6 +117,16 @@ describe("Cây mục tiêu tuân thủ khung IBMC", () => {
     }
   });
 
+  it("mọi chỉ số đều khai mức phủ đối thủ của nguồn (bài 2.2)", () => {
+    // Thị phần cần mẫu số: một con số tính trên 2 trong 6 trường trông y hệt một con số
+    // tính trên cả 6. Không khai mức phủ thì bảng đầu vào có ô trống im lặng, và người
+    // đọc mặc định là đã so được với đối thủ.
+    const thieu = cascade.kpis
+      .filter((k) => k.provenance.benchmark === undefined)
+      .map((k) => `${k.key} (${k.provenance.label})`);
+    expect(thieu).toEqual([]);
+  });
+
   it("chỉ số chưa có nguồn dữ liệu thì KHÔNG được có giá trị", () => {
     // Lỗi nguy hiểm nhất của một dashboard là một con số trông như thật nhưng do người
     // ta điền vào cho đỡ trống.

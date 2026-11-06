@@ -67,21 +67,37 @@ const BASE_INTEREST: Record<string, number> = {
 const SOURCE_PUBLIC_DISCLOSURE: DataProvenance = {
   label: "Biểu mẫu công khai của cơ sở giáo dục đại học (Biểu 18)",
   legalBasis: "Thông tư 09/2024/TT-BGDĐT",
+  benchmark: {
+    coverage: "partial",
+    note: "Biểu 18 là tài liệu buộc công khai của cả 6 trường, nhưng mới bóc được số của 2 trường (Bách khoa Hà Nội 5 năm, Học viện 3 năm). Trường ĐH Công nghệ ra 4 dòng mà không dòng nào có sản lượng; UIT, FPT, Mật mã chưa có dòng nào. Mẫu số chưa đủ nên mọi con số thị phần tính lúc này đều sai.",
+  },
 };
 
 const SOURCE_ADMISSION_SCHEME: DataProvenance = {
   label: "Đề án tuyển sinh công bố hằng năm của Học viện và nhóm đối sánh",
   legalBasis: "Thông tư 08/2022/TT-BGDĐT, Điều 11",
+  benchmark: {
+    coverage: "partial",
+    note: "Đề án tuyển sinh chứa cả ba chiều cần để giành thị phần — sản lượng, điểm chuẩn, học phí — nên là nguồn đáng ưu tiên nhất. Nhưng có một ranh giới kỹ thuật dứt khoát: bóc tự động được đề án dạng văn bản, KHÔNG bóc được khi đề án là ảnh scan hoặc khi bảng số do JavaScript dựng. Phần không bóc được phải nhập tay kèm đường dẫn nguồn đã xác minh.",
+  },
 };
 
 const SOURCE_ACADEMY_ANNOUNCEMENT: DataProvenance = {
   label: "Thông báo tuyển sinh đại học chính quy của Học viện",
   url: "https://tuyensinh.ptit.edu.vn/",
+  benchmark: {
+    coverage: "us_only",
+    note: "Thông báo tuyển sinh của riêng Học viện. Trường khác có thông báo riêng, định dạng khác nhau, chưa bóc.",
+  },
 };
 
 const SOURCE_TRENDS: DataProvenance = {
   label: "Google Trends — chỉ số quan tâm tìm kiếm, công khai và miễn phí",
   url: "https://trends.google.com/",
+  benchmark: {
+    coverage: "full",
+    note: "Google Trends cho tỷ trọng của cả 6 thương hiệu trong một lần truy vấn — về nguyên tắc đây là nguồn so sánh tốt nhất. Hiện Google chặn truy cập nên chỉ số này không có số liệu.",
+  },
 };
 
 /**
@@ -99,10 +115,18 @@ const SOURCE_WIKIPEDIA: DataProvenance = {
   label:
     "Wikimedia Pageviews API — lượt xem trang của 6 trường trên Wikipedia tiếng Việt, agent=user (đã loại bot)",
   url: "https://wikimedia.org/api/rest_v1/",
+  benchmark: {
+    coverage: "full",
+    note: "Lượt xem trang của cả 6 trường đều công khai qua API, cùng một cách tính. Đây là nguồn đối sánh duy nhất đang chảy đều.",
+  },
 };
 
 const SOURCE_NEWS_CRAWLER: DataProvenance = {
   label: "Kho tin bài do worker thu thập, chấm sắc thái bằng PhoBERT",
+  benchmark: {
+    coverage: "full",
+    note: "Crawler quét tin bài nhắc cả 6 trường, nên thị phần thảo luận tính được trên đủ mẫu số. Giới hạn nằm ở chỗ khác: báo chí dồn theo mùa tuyển sinh.",
+  },
 };
 
 /**
@@ -119,11 +143,19 @@ const SOURCE_SOCIAL_LISTENING: DataProvenance = {
     "YouTube Data API v3 (bình luận công khai) và Reddit search feed, chấm sắc thái bằng ViSoBERT",
   legalBasis:
     "API chính thức của nền tảng cho dữ liệu công khai. Tài khoản người bình luận lưu dưới dạng mã băm, không lưu tên hiển thị.",
+  benchmark: {
+    coverage: "partial",
+    note: "Chỉ YouTube và Reddit; Facebook và TikTok không có đường hợp pháp. Mẫu còn mỏng nên tỷ lệ của từng trường chưa đọc riêng được.",
+  },
 };
 
 const SOURCE_PLATFORM_RESEARCH_API: DataProvenance = {
   label:
     "Cần quyền truy cập nghiên cứu của nền tảng (Meta Content Library, TikTok Research API) — chưa đăng ký",
+  benchmark: {
+    coverage: "us_only",
+    note: "Cần quyền truy cập nghiên cứu của nền tảng, và quyền đó chỉ cấp cho tài khoản của chính chủ sở hữu nội dung.",
+  },
 };
 
 /**
@@ -135,12 +167,20 @@ const SOURCE_GA4: DataProvenance = {
     "Google Analytics 4 — Data API, property “Portal chính” (ID 464491273), phủ toàn bộ multisite ptit.edu.vn",
   legalBasis:
     "Dữ liệu đo trên hệ thống của Học viện, truy cập bằng tài khoản được cấp quyền xem.",
+  benchmark: {
+    coverage: "us_only",
+    note: "Dữ liệu hành vi trên website của Học viện. Không trường nào mở analytics của mình, nên đây mãi mãi là nguồn chỉ đo được bản thân — dùng cho mục tiêu hành vi, không dùng cho thị phần.",
+  },
 };
 
 const SOURCE_MINISTRY_STATS: DataProvenance = {
   label:
     "Thống kê nguyện vọng đăng ký xét tuyển theo lĩnh vực do Bộ Giáo dục và Đào tạo công bố hằng năm",
   url: "https://moet.gov.vn/",
+  benchmark: {
+    coverage: "full",
+    note: "Số liệu Bộ công bố là của toàn lĩnh vực, tức là MẪU SỐ của mọi phép tính thị phần và là mốc tăng trưởng ngành. Chưa có bước thu thập nào.",
+  },
 };
 
 /**
@@ -151,6 +191,10 @@ const SOURCE_MINISTRY_STATS: DataProvenance = {
  */
 const SOURCE_INTERNAL_BUDGET: DataProvenance = {
   label: "Dự toán và quyết toán kinh phí truyền thông tuyển sinh của Học viện",
+  benchmark: {
+    coverage: "not_applicable",
+    note: "Dự toán nội bộ. Không biết và không nên đoán ngân sách truyền thông của trường khác — đây là lý do nửa share of spend trong cặp chỉ số của bài 5.2 không đo được.",
+  },
 };
 
 /** Danh sách mục tiêu. Thứ tự trong mảng là thứ tự hiển thị trong mỗi tầng. */
@@ -160,6 +204,7 @@ const OBJECTIVES: readonly Objective[] = [
   // liệu của Học viện, không phải hành vi của người học — hành vi nằm ở tầng dưới.
   {
     key: "biz_sale",
+    shortName: "Doanh số",
     tier: "business",
     statement:
       "Lấp đầy chỉ tiêu tuyển sinh và nâng giá trị thu được trên mỗi khoá",
@@ -180,6 +225,7 @@ const OBJECTIVES: readonly Objective[] = [
   },
   {
     key: "biz_share",
+    shortName: "Thị phần",
     tier: "business",
     statement:
       "Tăng thị phần nhập học trong nhóm trường kỹ thuật – công nghệ đối sánh",
@@ -201,6 +247,7 @@ const OBJECTIVES: readonly Objective[] = [
   },
   {
     key: "biz_growth",
+    shortName: "Tăng trưởng",
     tier: "business",
     statement:
       "Tăng trưởng nhanh hơn tốc độ tăng của lĩnh vực máy tính và công nghệ thông tin",
@@ -221,6 +268,7 @@ const OBJECTIVES: readonly Objective[] = [
   },
   {
     key: "biz_profit",
+    shortName: "Lợi nhuận",
     tier: "business",
     statement:
       "Chứng minh được hiệu quả của mỗi đồng chi cho truyền thông tuyển sinh",
@@ -246,6 +294,7 @@ const OBJECTIVES: readonly Objective[] = [
   // của người học. `parentKey` trỏ về con số kinh doanh mà nó tác động chính.
   {
     key: "mkt_penetration",
+    shortName: "Thâm nhập",
     tier: "marketing",
     statement:
       "Mở rộng tập thí sinh cân nhắc Học viện ra ngoài lõi Hà Nội – TP. Hồ Chí Minh",
@@ -266,6 +315,7 @@ const OBJECTIVES: readonly Objective[] = [
   },
   {
     key: "mkt_choice",
+    shortName: "Lựa chọn",
     tier: "marketing",
     statement: "Trở thành lựa chọn ưu tiên, không phải phương án dự phòng",
     rationale:
@@ -286,6 +336,7 @@ const OBJECTIVES: readonly Objective[] = [
   },
   {
     key: "mkt_consumption",
+    shortName: "Lượng tiêu dùng",
     tier: "marketing",
     statement: "Nâng tỷ trọng tuyển sinh các hệ đào tạo giá trị cao",
     rationale:
@@ -306,6 +357,7 @@ const OBJECTIVES: readonly Objective[] = [
   },
   {
     key: "mkt_frequency",
+    shortName: "Tần suất",
     tier: "marketing",
     statement:
       "Xây đường ống học tiếp: đại học → sau đại học → đào tạo ngắn hạn",
@@ -327,6 +379,7 @@ const OBJECTIVES: readonly Objective[] = [
   },
   {
     key: "mkt_loyalty",
+    shortName: "Trung thành",
     tier: "marketing",
     statement: "Giữ chân người học và biến cựu người học thành kênh tuyển sinh",
     rationale:
@@ -350,6 +403,7 @@ const OBJECTIVES: readonly Objective[] = [
   // nhánh chịu ảnh hưởng chính, KHÔNG phải phạm vi áp dụng duy nhất.
   {
     key: "com_awareness",
+    shortName: "Nhận biết",
     tier: "communication",
     statement:
       "Nâng mức độ nhận biết chủ động khi thí sinh nghĩ tới việc học công nghệ thông tin",
@@ -371,6 +425,7 @@ const OBJECTIVES: readonly Objective[] = [
   },
   {
     key: "com_attributes",
+    shortName: "Thuộc tính thương hiệu",
     tier: "communication",
     statement:
       "Gắn Học viện với ba thuộc tính: trọng điểm quốc gia, gắn với doanh nghiệp, ra trường có việc làm",
@@ -392,6 +447,7 @@ const OBJECTIVES: readonly Objective[] = [
   },
   {
     key: "com_effectiveness",
+    shortName: "Hiệu quả kênh",
     tier: "communication",
     statement:
       "Mở rộng độ phủ thông điệp sang đầu báo và nhóm ngành ngoài nhóm quen thuộc",
@@ -412,6 +468,7 @@ const OBJECTIVES: readonly Objective[] = [
   },
   {
     key: "com_creative",
+    shortName: "Chất lượng sáng tạo",
     tier: "communication",
     statement: "Nội dung tự giữ được người xem mà không cần chi tiền phân phối",
     rationale:
@@ -539,6 +596,10 @@ const KPI_SPECS: readonly KpiSpec[] = [
       label:
         "Ước tính từ chỉ tiêu và học phí công bố; sẽ thay bằng số quyết toán khi bóc được tài liệu Ba công khai",
       legalBasis: "Thông tư 09/2024/TT-BGDĐT",
+      benchmark: {
+        coverage: "us_only",
+        note: "Học phí mới có số ở 3 trên 7 dòng đối sánh. Bốn dòng còn lại KHÔNG phải chưa làm mà là nguồn không cho máy đọc: đề án hệ chính quy của Học viện là ảnh scan, còn bảng học phí của Bách khoa Hà Nội, Trường ĐH Công nghệ và FPT do JavaScript dựng nên HTML tĩnh không có con số nào. Phải nhập tay kèm đường dẫn nguồn. Vì vậy chưa có thị phần GIÁ TRỊ, mới chỉ có thị phần sản lượng.",
+      },
     },
     hint: "Doanh số giá trị. Đây là con số ƯỚC TÍNH theo mô hình khoá học, chưa phải số quyết toán.",
   },
@@ -722,6 +783,10 @@ const KPI_SPECS: readonly KpiSpec[] = [
     provenance: {
       label:
         "Bình luận công khai trên báo và diễn đàn — cần mở rộng crawler sang nguồn diễn đàn",
+      benchmark: {
+        coverage: "partial",
+        note: "Crawler quét tin bài nhắc cả 6 trường, nhưng nguồn diễn đàn chưa mở và lượt nhắc từ cộng đồng người học của trường khác chưa tách riêng được.",
+      },
     },
   },
 

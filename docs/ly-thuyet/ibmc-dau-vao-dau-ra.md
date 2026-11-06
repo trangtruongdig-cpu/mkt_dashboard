@@ -131,9 +131,22 @@ có số trong thời gian tới **không phải vì thiếu mã, mà vì thiế
 6 trường có sản lượng, mọi con số thị phần tính ra lúc này đều sai mẫu số.
 
 *Đường lấy:* Biểu 18 và đề án tuyển sinh của cả 6 trường đều là tài liệu **buộc công khai**
-— nên đây là việc lập trình, không cần xin phép. Khó ở chỗ mỗi trường đăng một định dạng
-khác nhau (có trường dựng bảng bằng JavaScript, có trường chỉ đăng danh sách trúng tuyển,
-có trường xét học bạ nên không có thang điểm 30).
+— không phải xin phép ai. Nhưng **công khai không đồng nghĩa với máy đọc được**, và đây là
+ranh giới kỹ thuật đã đo được (06/11/2026) chứ không phải phỏng đoán:
+
+| | Học phí |
+|---|---|
+| Bóc tự động được | Học viện Kỹ thuật Mật mã (525.000 đ/tín chỉ) · Học viện hệ vừa làm vừa học (29–32 triệu/năm) · Học viện hệ từ xa (18–22 triệu/năm) |
+| **Không** bóc được | Học viện hệ chính quy — đề án là **ảnh scan** · UIT — học phí nằm trong bảng nhiều năm × nhiều lần đóng · Bách khoa Hà Nội, Trường ĐH Công nghệ, FPT — bảng học phí **do JavaScript dựng**, HTML tĩnh không có thẻ bảng nào và không có con số tiền nào |
+
+Kết quả: **học phí mới có số ở 3 trên 7 dòng đối sánh**. Bốn dòng còn lại thiếu vì *nguồn
+không cho máy đọc*, không phải vì chưa viết mã. Cách xử lý đã chọn: seed nhập tay kèm
+`nguon_url` bắt buộc, gộp vào `mart__value_benchmark` với cột `cach_lay` (tự động / nhập
+tay) để người đọc luôn phân biệt được số nào do máy lấy.
+
+Không dựng trình duyệt không đầu cho việc này: đó là sáu con số đổi một lần mỗi năm, nên
+thêm Playwright vào worker vừa không tương xứng, vừa là thay đổi ngăn xếp phải hỏi người
+dùng trước.
 
 ### 4.5 Khảo sát thí sinh
 
@@ -175,9 +188,10 @@ truyền thông là tầng xa quyết định kinh doanh nhất.
 | 1 | Bóc bảng kết quả tuyển sinh trong đề án của **cả 6 trường** | mẫu số của `enrolment_share`, và số thật cho `enrolment_growth`. Hiện chỉ 2/6 trường có sản lượng nên mọi con số thị phần đều sai mẫu số | chỉ cần lập trình |
 | 2 | Bóc thống kê nguyện vọng theo lĩnh vực của Bộ GD&ĐT | mốc ngành cho cả tầng `biz_growth` — quy tắc chịu lực nhất của khung | chỉ cần lập trình |
 | 3 | Bước trích thuộc tính trong `apps/worker/nlp` | ba chuỗi `attribute_*`, tức quy tắc cặp tăng–giữ | chỉ cần lập trình |
-| 4 | Bóc học phí công bố của 6 trường | value share và các chỉ số giá trị; hiện repo không có bước nào đọc học phí | chỉ cần lập trình |
+| 4 | Điền nốt học phí 4 dòng còn thiếu | value share và các chỉ số giá trị. Phần bóc tự động đã hết dư địa — 4 dòng này nguồn không cho máy đọc, chỉ còn nhập tay kèm đường dẫn | **người nhập**, mỗi dòng một con số |
 | 5 | Xin dự toán truyền thông tuyển sinh | cả tầng `biz_profit` | **Học viện quyết** |
 | 6 | Gắn khảo sát thí sinh vào khâu nhập học | ba mức nhận biết thật, thay cho proxy | **Học viện quyết** |
 
-Bốn việc đầu không cần xin phép ai — tài liệu nguồn đều là tài liệu buộc công khai. Hai việc
+Bốn việc đầu không cần xin phép ai — tài liệu nguồn đều buộc công khai. Nhưng việc số 4 đã
+chạm trần của công cụ: phần còn thiếu cần **người ngồi điền**, không cần thêm mã. Hai việc
 cuối cần Học viện quyết, và đó là lý do chúng nằm cuối danh sách chứ không phải vì ít giá trị.
