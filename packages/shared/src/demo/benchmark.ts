@@ -38,6 +38,14 @@ const SOURCE_NEWS: DataProvenance = {
   },
 };
 
+const SOURCE_TUITION: DataProvenance = {
+  label: "Đề án tuyển sinh và trang học phí của từng trường",
+  benchmark: {
+    coverage: "partial",
+    note: "Học phí mới có số ở 3 trên 7 dòng, và ba dòng đó khác đơn vị nhau.",
+  },
+};
+
 const SOURCE_SCORES: DataProvenance = {
   label: "Trang công bố điểm chuẩn của từng trường",
   benchmark: {
@@ -140,6 +148,30 @@ export function buildDemoBenchmark(
       ),
     },
   ];
+
+  // Chiều GIÁ TRỊ — cố ý để trống toàn bộ, và đó là nội dung chính của nó.
+  //
+  // Bài 2.1 và 2.2 đòi đọc doanh số và thị phần ở CẢ HAI mặt sản lượng và giá trị, vì
+  // dẫn đầu mặt này không kéo theo mặt kia. Mặt giá trị hiện chưa so được, và lý do
+  // không phải "chưa viết mã": ba dòng có số thì một tính theo tín chỉ, hai tính theo
+  // năm, và cả hai dòng theo năm đều KHÔNG phải hệ chính quy — hệ chính quy của Học
+  // viện nằm trong một đề án dạng ảnh scan.
+  //
+  // Để chiều này hiện ra với toàn ô trống là có chủ ý: một mặt của mục tiêu kinh doanh
+  // đang không đo được thì phải nhìn thấy trên bảng điều khiển, chứ không nằm trong
+  // một tài liệu không ai mở.
+  dimensions.push({
+    key: "value",
+    label: "Học phí mỗi năm",
+    objectiveKey: "mkt_consumption",
+    unit: "currency",
+    higherIsBetter: true,
+    periodLabel: "Mùa tuyển sinh gần nhất",
+    provenance: SOURCE_TUITION,
+    coverage: "partial",
+    note: "Chưa so sánh được: ba dòng có số thì khác đơn vị nhau (một theo tín chỉ, hai theo năm), và hai dòng theo năm đều không phải hệ chính quy. Mở khoá bằng cách điền học phí mỗi năm của hệ chính quy cho từng trường — bốn trường phải nhập tay vì nguồn không cho máy đọc.",
+    rows: rankRows(BENCHMARK_BRANDS.map((brand) => ({ brand, value: null }))),
+  });
 
   return {
     period: {

@@ -1,0 +1,67 @@
+{
+  "_ghi_chu": [
+    "BA THUỘC TÍNH THƯƠNG HIỆU Học viện tuyên bố nhắm tới, khai ở mục tiêu com_attributes.",
+    "",
+    "Vì sao đo theo TỪNG thuộc tính chứ không gộp một tỷ lệ: bài 5.1 của khung IBMC đặt",
+    "mục tiêu thuộc tính dạng cặp tăng–giữ, tức tăng thuộc tính đang nhắm TRONG KHI không",
+    "giảm thuộc tính đang mạnh. Một tỷ lệ gộp giữ nguyên 45% trong khi toàn bộ tin bài",
+    "chuyển từ 'trọng điểm quốc gia' sang 'việc làm' sẽ đọc ra là đạt mục tiêu, còn thực",
+    "tế thương hiệu vừa đánh đổi một thuộc tính lấy một thuộc tính khác.",
+    "",
+    "mode='token' cho từ ngắn dễ khớp nhầm; 'substring' cho cụm dài đã đủ đặc trưng.",
+    "",
+    "Đây là đối chiếu từ khoá, KHÔNG phải mô hình ngôn ngữ. Nó trả lời 'bài này có nói về",
+    "thuộc tính đó không', không trả lời 'nói tốt hay xấu' — phần sắc thái đã có PhoBERT",
+    "lo ở bảng riêng. Giữ đơn giản có chủ đích: từ khoá tra lại được bằng mắt, còn một mô",
+    "hình phân loại thì cần tập gán nhãn mà hiện chưa ai gán."
+  ],
+  "attributes": [
+    {
+      "key": "national_key",
+      "label": "Trọng điểm quốc gia",
+      "note": "Vị thế trong hệ thống: trường trọng điểm, trực thuộc Bộ, nhiệm vụ quốc gia.",
+      "keywords": [
+        { "text": "trọng điểm quốc gia", "mode": "substring" },
+        { "text": "trường trọng điểm", "mode": "substring" },
+        { "text": "đại học trọng điểm", "mode": "substring" },
+        { "text": "trực thuộc Bộ Thông tin và Truyền thông", "mode": "substring" },
+        { "text": "trực thuộc Bộ Khoa học và Công nghệ", "mode": "substring" },
+        { "text": "nhiệm vụ quốc gia", "mode": "substring" },
+        { "text": "chuyển đổi số quốc gia", "mode": "substring" },
+        { "text": "hạ tầng số quốc gia", "mode": "substring" }
+      ]
+    },
+    {
+      "key": "industry_link",
+      "label": "Gắn với doanh nghiệp",
+      "note": "Hợp tác doanh nghiệp, thực tập, tài trợ, phòng thí nghiệm chung.",
+      "keywords": [
+        { "text": "hợp tác doanh nghiệp", "mode": "substring" },
+        { "text": "hợp tác với doanh nghiệp", "mode": "substring" },
+        { "text": "ký kết hợp tác", "mode": "substring" },
+        { "text": "biên bản ghi nhớ", "mode": "substring" },
+        { "text": "thực tập sinh", "mode": "substring" },
+        { "text": "kỳ thực tập", "mode": "substring" },
+        { "text": "phòng thí nghiệm chung", "mode": "substring" },
+        { "text": "tài trợ học bổng", "mode": "substring" },
+        { "text": "doanh nghiệp đồng hành", "mode": "substring" },
+        { "text": "đặt hàng đào tạo", "mode": "substring" }
+      ]
+    },
+    {
+      "key": "employability",
+      "label": "Ra trường có việc làm",
+      "note": "Việc làm sau tốt nghiệp, mức lương khởi điểm, tỷ lệ có việc làm.",
+      "keywords": [
+        { "text": "tỷ lệ có việc làm", "mode": "substring" },
+        { "text": "có việc làm sau tốt nghiệp", "mode": "substring" },
+        { "text": "việc làm sau khi ra trường", "mode": "substring" },
+        { "text": "mức lương khởi điểm", "mode": "substring" },
+        { "text": "lương khởi điểm", "mode": "substring" },
+        { "text": "tuyển dụng ngay", "mode": "substring" },
+        { "text": "cơ hội việc làm", "mode": "substring" },
+        { "text": "ngày hội việc làm", "mode": "substring" }
+      ]
+    }
+  ]
+}

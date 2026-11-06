@@ -65,13 +65,13 @@ export function BenchmarkRankChart({ dimension }: BenchmarkRankChartProps) {
     },
     yAxis: {
       type: "category",
-      data: theoThuTu.map((r) => r.brand.label),
+      data: theoThuTu.map((r) => r.brand.shortLabel),
       axisLine: { lineStyle: { color: tokens["--baseline"], width: 1 } },
       axisTick: { show: false },
       axisLabel: {
         color: tokens["--ink-secondary"],
         fontSize: 11,
-        width: 180,
+        width: 150,
         overflow: "truncate",
       },
     },
@@ -116,7 +116,7 @@ export function BenchmarkRankChart({ dimension }: BenchmarkRankChartProps) {
       />
       {chuaCoSo.length > 0 ? (
         <p className="mt-1 text-[11px] leading-snug text-ink-muted">
-          Chưa có số: {chuaCoSo.map((r) => r.brand.label).join(" · ")}. Các
+          Chưa có số: {chuaCoSo.map((r) => r.brand.shortLabel).join(" · ")}. Các
           trường này không xuất hiện trên biểu đồ vì chưa đo được, không phải vì
           bằng 0.
         </p>

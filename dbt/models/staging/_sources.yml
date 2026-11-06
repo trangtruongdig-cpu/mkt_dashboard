@@ -38,6 +38,14 @@ sources:
           Cột `hoc_phi_don_vi` bắt buộc đọc kèm `hoc_phi`: các trường công bố theo
           đồng/tín chỉ, đồng/năm hoặc đồng/tháng, so thẳng trị số giữa hai đơn vị khác
           nhau sai lệch hàng chục lần.
+      - name: news_attribute
+        description: >
+          Thuộc tính thương hiệu gán cho tin bài bằng đối chiếu từ khoá
+          (`apps/worker/nlp/attributes.py`). Một bài có thể có nhiều dòng — ba thuộc
+          tính không loại trừ nhau. Cột `matched` giữ ĐÚNG những cụm đã làm nó khớp,
+          để khi có người hỏi "vì sao bài này được tính" thì chỉ ra được chữ.
+          CHỈ gán cho bài có toàn văn: ba thuộc tính này hầu như không xuất hiện
+          nguyên cụm trong tiêu đề, nên mẫu số là số bài có toàn văn, không phải cả kho.
       - name: raw_admission_score
         description: >
           Điểm chuẩn trúng tuyển từng ngành, bóc từ trang công bố của mỗi trường. Chỉ

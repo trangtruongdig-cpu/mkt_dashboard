@@ -39,3 +39,29 @@ models:
       - name: boc_sach
         description: Không có cảnh báo nào trong lúc bóc. False thì phải đọc `canh_bao` trước khi dùng.
         tests: [not_null]
+
+  - name: stg__news__attribute
+    description: >
+      Thuộc tính thương hiệu gán cho tin bài. Một bài nhiều dòng — ba thuộc tính không
+      loại trừ nhau, một bài ký kết hợp tác có thể nói cả việc làm.
+    columns:
+      - name: mention_key
+        description: Khoá bài báo, đối chiếu với raw_news_mention.
+        tests: [not_null]
+      - name: ma_thuoc_tinh
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [national_key, industry_link, employability]
+      - name: cum_da_khop
+        description: >
+          Đúng những cụm từ đã làm thuộc tính này khớp, ngăn bằng " | ". Giữ lại để
+          khi có người hỏi "vì sao bài này được tính" thì chỉ ra được chữ, không phải
+          chỉ ra một cờ boolean.
+        tests: [not_null]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [mention_key, ma_thuoc_tinh]
+

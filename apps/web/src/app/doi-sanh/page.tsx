@@ -161,7 +161,19 @@ function DimensionCard({ dimension }: { dimension: BenchmarkDimension }) {
       </header>
 
       <div className="px-4 py-3">
-        <BenchmarkRankChart dimension={dimension} />
+        {/*
+          Không vẽ biểu đồ khi chưa trường nào có số. Một khung biểu đồ trống đọc ra là
+          "mọi trường đều bằng 0", trong khi sự thật là chưa đo được trường nào — hai
+          điều đó ngược hẳn nhau. Khi ấy chỉ còn danh sách trường và câu giải thích.
+        */}
+        {soTruong === 0 ? (
+          <p className="text-[11px] leading-snug text-ink-muted">
+            Chưa trường nào có số ở chiều này:{" "}
+            {dimension.rows.map((r) => r.brand.shortLabel).join(" · ")}.
+          </p>
+        ) : (
+          <BenchmarkRankChart dimension={dimension} />
+        )}
       </div>
     </section>
   );

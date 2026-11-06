@@ -41,17 +41,39 @@ export const BENCHMARK_BRANDS: readonly Brand[] = [
   {
     key: "ptit",
     label: "Học viện Công nghệ Bưu chính Viễn thông",
+    shortLabel: "Học viện (PTIT)",
     isUs: true,
   },
-  { key: "hust", label: "Đại học Bách khoa Hà Nội", isUs: false },
-  { key: "uet", label: "Trường ĐH Công nghệ (ĐHQGHN)", isUs: false },
+  {
+    key: "hust",
+    label: "Đại học Bách khoa Hà Nội",
+    shortLabel: "Bách khoa Hà Nội",
+    isUs: false,
+  },
+  {
+    key: "uet",
+    label: "Trường ĐH Công nghệ (ĐHQGHN)",
+    shortLabel: "ĐH Công nghệ (ĐHQGHN)",
+    isUs: false,
+  },
   {
     key: "uit",
     label: "Trường ĐH Công nghệ Thông tin (ĐHQG-HCM)",
+    shortLabel: "ĐH CNTT (ĐHQG-HCM)",
     isUs: false,
   },
-  { key: "fpt", label: "Trường Đại học FPT", isUs: false },
-  { key: "actvn", label: "Học viện Kỹ thuật Mật mã", isUs: false },
+  {
+    key: "fpt",
+    label: "Trường Đại học FPT",
+    shortLabel: "ĐH FPT",
+    isUs: false,
+  },
+  {
+    key: "actvn",
+    label: "Học viện Kỹ thuật Mật mã",
+    shortLabel: "Mật mã",
+    isUs: false,
+  },
 ] as const;
 
 /** Mức quan tâm nền của từng thương hiệu, dùng để sinh chuỗi giả lập. */

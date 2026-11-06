@@ -17,6 +17,16 @@ import { DataProvenanceSchema } from "./kpi-cascade";
 export const BrandSchema = z.object({
   key: z.string().min(1),
   label: z.string().min(1),
+  /**
+   * Tên ngắn cho trục biểu đồ và ô bảng hẹp.
+   *
+   * Bắt buộc vì tên đầy đủ gây va nhãn thật: trên trục ngang, "Trường ĐH Công nghệ
+   * (ĐHQGHN)" và "Trường ĐH Công nghệ Thông tin (ĐHQG-HCM)" bị cắt cụt thành hai chuỗi
+   * gần như giống hệt, và người đọc không còn phân biệt được hai trường khác nhau.
+   * Rút gọn bằng cách cắt chuỗi thì luôn hỏng đúng ở cặp này, nên tên ngắn phải do
+   * người đặt.
+   */
+  shortLabel: z.string().min(1),
   /** Đúng một thương hiệu được đánh dấu — Học viện. Giao diện chỉ làm nổi đường này. */
   isUs: z.boolean(),
 });

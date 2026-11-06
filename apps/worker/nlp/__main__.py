@@ -139,6 +139,11 @@ def main(argv: list[str] | None = None) -> int:
         help="Chỉ chấm tối đa N bản ghi mỗi kho. Dùng để chạy thử.",
     )
 
+    sub.add_parser(
+        "thuoc-tinh",
+        help="Gán ba thuộc tính thương hiệu cho tin bài có toàn văn",
+    )
+
     p_thu = sub.add_parser("thu", help="Chấm một câu, in đủ ba điểm, không ghi kho")
     p_thu.add_argument("--text", required=True, help="Câu cần chấm")
 
@@ -153,6 +158,10 @@ def main(argv: list[str] | None = None) -> int:
             # Chấm thử một câu thì phải biết dùng model nào. Không đoán: mặc định là kho
             # mạng xã hội vì đó là loại văn bản người dùng hay dán vào để thử.
             _thu_mot_cau(args.kho or "social", args.text)
+        elif args.lenh == "thuoc-tinh":
+            from . import attributes_job
+
+            attributes_job.in_ket_qua(attributes_job.run())
         elif args.lenh == "cham":
             from . import score
 

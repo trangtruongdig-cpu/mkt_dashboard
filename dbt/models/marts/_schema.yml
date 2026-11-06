@@ -449,3 +449,40 @@ seeds:
           arguments:
             combination_of_columns: [ma_truong, nam, he_dao_tao]
 
+  - name: mart__brand_attribute
+    description: >
+      Tỷ lệ tin bài gắn từng thuộc tính thương hiệu, theo tháng. Hợp đồng dữ liệu cho
+      mục tiêu truyền thông `com_attributes`.
+
+      Mỗi thuộc tính một dòng riêng, KHÔNG gộp: mục tiêu thuộc tính là cặp tăng–giữ,
+      và một tỷ lệ gộp che mất đúng lúc thương hiệu đánh đổi thuộc tính này lấy
+      thuộc tính kia.
+    columns:
+      - name: thang
+        description: Tháng đăng bài, cắt về ngày đầu tháng.
+        tests: [not_null]
+      - name: ma_thuoc_tinh
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [national_key, industry_link, employability]
+      - name: so_bai_gan
+        description: Số bài có gắn thuộc tính này. 0 là giá trị hợp lệ, không phải thiếu dữ liệu.
+        tests: [not_null]
+      - name: so_bai_xet
+        description: >
+          MẪU SỐ — số bài CÓ TOÀN VĂN trong tháng, không phải toàn bộ kho. 87% tin bài
+          không có URL lấy lại được nên không bao giờ có toàn văn. Giao diện bắt buộc
+          hiện cột này cạnh tỷ lệ.
+        tests: [not_null]
+      - name: ty_le_pct
+        tests: [not_null]
+      - name: du_mau
+        description: Từ 10 bài trở lên. Dưới ngưỡng thì tỷ lệ không nói xu hướng nào.
+        tests: [not_null]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [thang, ma_thuoc_tinh]
+

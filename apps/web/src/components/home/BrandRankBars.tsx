@@ -49,7 +49,11 @@ export function BrandRankBars({ rows }: BrandRankBarsProps) {
                 }`}
                 title={row.brand.label}
               >
-                {row.brand.label}
+                {/* Tên NGẮN do người đặt, không phải chuỗi bị CSS cắt: "Trường ĐH Công
+                    nghệ (ĐHQGHN)" và "Trường ĐH Công nghệ Thông tin (ĐHQG-HCM)" cắt tự
+                    động ra hai chuỗi gần như giống hệt — hai trường khác nhau trông
+                    như một. Tên đầy đủ vẫn còn ở `title` khi di chuột. */}
+                {row.brand.shortLabel}
               </p>
               <span
                 aria-hidden="true"

@@ -62,7 +62,7 @@ export function ShareOfSearchChart({ data }: ShareOfSearchChartProps) {
     series: [
       // Vẽ nhóm bối cảnh trước để đường của Học viện luôn nằm trên cùng.
       ...others.map((s) => ({
-        name: s.brand.label,
+        name: s.brand.shortLabel,
         type: "line" as const,
         data: s.values,
         smooth: false,
@@ -74,7 +74,7 @@ export function ShareOfSearchChart({ data }: ShareOfSearchChartProps) {
       ...(us
         ? [
             {
-              name: us.brand.label,
+              name: us.brand.shortLabel,
               type: "line" as const,
               data: us.values,
               smooth: false,

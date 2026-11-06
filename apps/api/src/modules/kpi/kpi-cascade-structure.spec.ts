@@ -180,7 +180,12 @@ describe("Bảng đối sánh với nhóm trường cạnh tranh", () => {
   });
 
   it("rankRows xếp giảm dần và đẩy trường chưa có số xuống cuối", () => {
-    const brand = (key: string, isUs = false) => ({ key, label: key, isUs });
+    const brand = (key: string, isUs = false) => ({
+      key,
+      label: key,
+      shortLabel: key,
+      isUs,
+    });
     const rows = rankRows([
       { brand: brand("a"), value: 10 },
       { brand: brand("b", true), value: 30 },
