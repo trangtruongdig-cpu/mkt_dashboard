@@ -10,7 +10,8 @@ import { loadEnv } from "./config/env";
 import { runMigrations } from "./db/migrate";
 
 /**
- * Dựng ứng dụng Nest. Chỉ có một nơi cấu hình, dùng chung cho `main.ts` và cho test.
+ * Dựng ứng dụng Nest dùng chung cho cả hai cách chạy: máy chủ thường (`main.ts`)
+ * và hàm serverless trên Vercel (`vercel.ts`). Chỉ có một nơi cấu hình.
  */
 export async function createApp(): Promise<NestFastifyApplication> {
   // Migration chạy TRƯỚC khi Nest dựng module. Không có nó thì bảng cấu hình crawler
