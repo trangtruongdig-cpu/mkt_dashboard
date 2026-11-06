@@ -58,16 +58,20 @@ seeds:
       không bao giờ có số, và bảng điều khiển có thể xanh toàn bộ trong khi Học viện
       đang mất thị phần.
 
-      Để trống có chủ ý: con số 154.016 đang được trích trong rationale của mục tiêu
-      biz_choice nhưng tôi KHÔNG xác minh được tại nguồn báo chí được dẫn — trang tải
-      về không chứa con số nào. Ghi số chưa kiểm vào kho còn tệ hơn để trống, vì nó
-      trông y hệt số đã kiểm.
+      Mùa 2026 ĐÃ XÁC MINH: con số nằm nguyên văn trong trang tải về, dẫn thống kê
+      Bộ GD&ĐT công bố 15/07/2026. Lần tra đầu thất bại vì tôi kiểm nhầm nguồn — bài
+      trên nhandan.vn được dẫn không chứa con số nào; đó là NGUỒN sai, không phải SỐ
+      sai. Giữ lại ghi chú này vì nó là lý do cột `nguon_url` bắt buộc: dẫn sai nguồn
+      thì không phân biệt được với bịa số.
+
+      Mùa gốc để so vẫn trống, và đó là thứ duy nhất còn chặn cả tầng biz_growth.
     config:
       column_types:
         ma_chi_so: varchar
         nam: integer
         gia_tri: bigint
         don_vi: varchar
+        cach_do: varchar
         nguon_url: varchar
         ngay_kiem_nguon: date
         ghi_chu: varchar
@@ -77,7 +81,28 @@ seeds:
           - not_null
           - accepted_values:
               arguments:
-                values: [category_registrations, category_admissions]
+                values:
+                  - category_registrations
+                  - category_applications
+                  - total_registrations
+                  - category_admissions
+      - name: don_vi
+        description: >
+          `thi_sinh` hay `nguyen_vong` — KHÔNG được lẫn. 154.016 là thí sinh còn
+          415.000 là nguyện vọng; thị phần nhập học đếm NGƯỜI nên mẫu số phải là thí
+          sinh. Bình quân 8,2 nguyện vọng mỗi thí sinh, nên lẫn hai đơn vị sai gấp tám.
+        tests: [not_null]
+      - name: cach_do
+        description: >
+          `dang_ky` hay `nhap_hoc`. Bộ đổi cách công bố giữa hai mùa: 2024 theo tỷ
+          trọng NHẬP HỌC (hơn 10%), 2026 theo tỷ trọng ĐĂNG KÝ (gần 18%). Đọc 10% lên
+          18% thành tăng trưởng là kết luận sai. Chỉ được so hai dòng cùng `cach_do`.
+        tests:
+          - accepted_values:
+              arguments:
+                values: [dang_ky, nhap_hoc]
+              config:
+                where: "cach_do is not null"
       - name: nam
         tests: [not_null]
       - name: ghi_chu
